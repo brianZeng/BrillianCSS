@@ -1,0 +1,153 @@
+%lex
+%option case-insensitive
+nonascii	    [\200-\377]
+unicode		    \\{h}{1,6}(\r\n|[ \t\r\n\f])?
+escape		    {unicode}|\\[ -~\200-\377]
+nmstart		    [_a-z]|{nonascii}|{escape}
+nmchar		    [_a-zA-Z0-9-]|{nonascii}|{escape}
+hexchar         [0-9a-f]
+key             {nmstart}{nmchar}*
+namestart       [_a-zA-Z]|{nonascii}|{escape}
+namechar        [_a-zA-Z0-9]|{nonascii}|{escape}
+name            {namestart}{namechar}*
+Ident           "-"?{key}
+num             (\d+(\.\d+)?)|(\.\d+)
+var             "$"{name}
+string          (\"|\')[\s\S]*?(\1)
+sltstart        {nmchar}|[\.#]
+sltchar         {sltstart}|[\s>\+\~\*@\^\$\|\=\:\[\]\'\"\(\)\r\n\t\f]
+selector        {sltstart}{sltchar}*?(?=(\({var}\:)|\{|\,)
+breaker         \={4,}|\-{4,}
+comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
+s               [\s\r\n\t\f]
+%s INITIAL EXPRESSION EXT
+%%
+<*>{breaker}                           return 'BREAKER';
+<*>{comment}                           /* ignore*/;
+<*>"@"mixin                              return 'MIXIN';
+<*>"@"include                            return 'INCLUDE';
+<*>"@"namespace                          this.begin("EXPRESSION");return 'NAMESPACE';
+<INITIAL>"@"extends{s}*                  this.begin('EXT');return 'EXTENDS';
+<EXT>{sltstart}{sltchar}*?(?=\;)         this.popState();return 'SELECTOR';
+<*>{var}                                 return 'VAR';
+<INITIAL>{selector}                      return 'SELECTOR';
+<*>{s}                                  /* ignore*/;
+<INITIAL>':'                           this.begin("EXPRESSION");return ':';
+<INITIAL>\;+                           return ';';
+<*>'{'                                 this.popState();return '{';
+<*>'}'                                 this.popState();return '}';
+<*>'('                                 return '(';
+<*>')'                                 return ')';
+<*>':'                                 return ':';
+<*>','                                 return ',';
+<*>'&'\:*{selector}                       return '&';
+<*>{num}(px|pc|px|in|cm|mm|deg|em|ex|\%)? return 'NUMBER';
+<EXPRESSION>\;+                           this.popState();return ';';
+<EXPRESSION>(\"|\')[\s\S]*?(\1)           return "STRING";
+<EXPRESSION>(url\(.*?\)|url\({string}\))  return "URL";
+<EXPRESSION>'+'                           return '+';
+<EXPRESSION>'-'                           return '-';
+<EXPRESSION>'*'                           return '*';
+<EXPRESSION>'/'                           return '/';
+<EXPRESSION>'#'{hexchar}+                 return 'LITERAL';
+<EXPRESSION>{key}(?=\()                   return 'FUNCNAME';
+<EXPRESSION>{key}                         return 'LITERAL';
+<*>{Ident}                                return 'IDENT';
+<*><<EOF>>                                return "EOF";
+/lex
+%left COMBINE
+%left ':'
+%left list
+%left '+' '-'
+%left '*' '/'
+%left UMINUS
+%left GROUP
+%start sheet
+%%
+exp:
+    NUMBER          {$$=new Exp(new Length($1));}
+    | VAR           {$$=new Exp($1);}
+    | exp '+' exp   {$$= new Exp($1,$2,$3).reduce();}
+    | exp '-' exp   {$$= new Exp($1,$2,$3).reduce();}
+    | exp '*' exp   {$$= new Exp($1,$2,$3).reduce();}
+    | exp '/' exp   {$$= new Exp($1,$2,$3).reduce();}
+    | '-' exp %prec UMINUS {$$=new Exp(new Length('0'),'-',$2).reduce();}
+    | '(' exp ')'   {$$=$2.reduce();}
+    ;
+inlineFunc:
+      FUNCNAME '(' ')'           {$$=new InlineFunc($1);}
+     |FUNCNAME '(' funcParam ')' {$$=new InlineFunc($1,$3.reduce());}
+    ;
+funcParam:
+          property               {$$=new List($1.resolve());}
+         |funcParam ',' property {$1.push($3.resolve());}
+         ;
+property:
+      exp      %prec COMBINE      {$$=$1.reduce();}
+      |STRING
+      |URL
+      |inlineFunc                  {$$=$1.reduce();}
+      |LITERAL
+      ;
+list:
+      property         {$$=new List($1);}
+     |list property    {$1.push($2);}
+     ;
+assignPair:
+      VAR ':' list    {$$={name:$1,value:$3.reduce()};}
+     ;
+assignList:
+       assignPair     {$$={};$$[$1.name]=$1.value}
+      |assignList ',' assignPair {$1[$3.name]=$3.value}
+      ;
+defParamList:
+      '(' ')'                       {$$={};}
+     |'(' assignList ')'            {$$=$2;}
+     ;
+includeCall:
+     INCLUDE VAR defParamList       {$$={name:$2,value:$3};}
+    |INCLUDE VAR                    {$$={name:$2,value:{}};}
+    ;
+scopeBodyPart:
+    IDENT ':' list               {$$={name:$1,value:$3.resolve(),type:'rule'};console.log($3);}
+   |nestedStyle                  {$$={type:'style',value:$1};}
+   |includeCall                  {$1.type='include';}
+   |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
+   |scopeBodyPart ';'
+   ;
+scopeBody:
+     scopeBodyPart                         {$$=new Scope().add($1)}
+    |scopeBody scopeBodyPart               {$$=$1.add($2);}
+    ;
+scope:
+    '{' scopeBody '}'               {$$=$2;}
+    |defParamList '{' scopeBody '}' {$$=$3.addDefValues($1);}
+    |defParamList '{' '}'           {$$=new Scope().addDefValues($1);}
+    | '{' '}'
+    ;
+nestedStyle:
+    '&' scope                    {$$=new Style($1,$2);}
+    |style
+    ;
+mixScope:
+    MIXIN VAR scope              {$$=$3;$3.name=$2;}
+    ;
+selectors:
+       SELECTOR                  {$$=new List($1);}
+      |selectors ',' SELECTOR    {$1.add($3);}
+      ;
+style:
+      selectors scope              {$$=new Style($1,$2);}
+    ;
+sheetPart:
+     style          {$$={type:'style',value:$1}}
+    |mixScope       {$$={type:'mix',value:$1};}
+    |assignPair     {$1.type='def';}
+    |sheetPart ';'
+    ;
+sheet:
+     sheetPart        {$$=new Sheet().add($1)}
+    |sheet sheetPart  {$1.add($2);}
+    |sheet "EOF"      {return $1;}
+    ;
+%%
