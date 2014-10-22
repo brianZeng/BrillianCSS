@@ -14,8 +14,8 @@ Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{name}
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#]
-sltchar         {sltstart}|[\s>\+\~\*@\^\$\|\=\:\[\]\'\"\(\)\r\n\t\f]
+sltstart        {nmchar}|[\.#\*\>]
+sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\:\[\]\'\"\(\)\r\n\t\f]
 selector        {sltstart}{sltchar}*?(?=(\({var}\:)|\{|\,)
 breaker         \={4,}|\-{4,}
 comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
@@ -109,7 +109,7 @@ includeCall:
     |INCLUDE VAR                    {$$={name:$2,value:{}};}
     ;
 scopeBodyPart:
-    IDENT ':' list               {$$={name:$1,value:$3.resolve(),type:'rule'};console.log($3);}
+    IDENT ':' list               {$$={name:$1,value:$3.resolve(),type:'rule'};}
    |nestedStyle                  {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}

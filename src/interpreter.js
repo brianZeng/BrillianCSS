@@ -1,9 +1,6 @@
 /**
  * Created by 柏然 on 2014/10/21.
  */
-/**
- * Created by 柏然 on 2014/10/10.
- */
 function Exp(left, optor, right) {
   if (!(this instanceof Exp))return new Exp(left, right, optor);
   this.left = left;
@@ -281,7 +278,7 @@ Length.prototype = {
     return this.num;
   },
   toString: function () {
-    return this.num ? this.num + this.unit : '';
+    return isNaN(this.num) ? 'NaN' : (this.num + this.unit);
   },
   reduce: function () {
     return this;
@@ -652,7 +649,7 @@ Scope.prototype = {
     function getObjString(obj, separator) {
       for (var r = Object.getOwnPropertyNames(obj), i = 0, key = r[0]; key; key = r[++i])
         r[i] = key + ':' + obj[key] + ';';
-      return '{\n' + r.join(separator || '\n') + (r.length ? '\n}' : '}');
+      return '{\n' + r.join(separator || '\r\n') + (r.length ? '\n}' : '}');
     }
 
     return function ($vars, arg) {
