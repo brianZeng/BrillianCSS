@@ -245,9 +245,10 @@ Exp.prototype = {
     return left;
   }
 };
-Length.parse = function (str) {
+Length.parse = function (str, unit) {
   if (str instanceof Length) return str.clone();
   var l = new Length(str);
+  if (unit !== undefined) l.unit = unit;
   return isNaN(l.num) ? undefined : l;
 };
 Length.prototype = {
@@ -288,6 +289,16 @@ Length.prototype = {
   },
   get value() {
     return this.toString();
+  },
+  get mathValue() {
+    switch ((this.unit || '').toLowerCase()) {
+      case 'pi':
+        return Math.PI * this.num;
+      case 'deg':
+        return this.num / 180 * Math.PI;
+      default:
+        return this.num;
+    }
   }
 };
 List.fromObject = function (combiner, objArray) {
@@ -377,10 +388,30 @@ List.prototype = (function (proto) {
   };
   return proto;
 })(Object.create([]));
+objForEach(Math, function (key, fun, units) {
+  if (typeof fun == "function") {
+    var unit = units[units.indexOf(key) + 1];
+    this[key] = function (mathArg, firstUnit) {
+      var v = fun.apply(Math, mathArg);
+      return Length.parse(v, unit == undefined ? firstUnit : unit);
+    }
+  }
+}, InlineFunc.Func = {}, [undefined, 'sin', '', 'cos', '', 'tan', '', 'asin', 'rad', 'acos', 'rad', 'atan', 'rad']);
 InlineFunc.prototype = {
+  getVarNames: function (array) {
+    return this.param.getVarNames(array);
+  },
   resolve: function ($vars, info) {
-    var v = this.param.resolve($vars, info);
-    return typeof v == "string" ? this.name + '(' + v.replace(/\s+/gi, ',') + ')' : this;
+    var v = this.param.resolve($vars, info), func, name = this.name, arg;
+    func = InlineFunc.Func[name];
+    if (func && (arg = this.param).canResolve($vars)) {
+      var mathValue = func(arg.map(function (p) {
+        var value = Length.parse(p.resolve ? p.resolve($vars) : p), mathValue = value.mathValue;
+        return isNaN(mathValue) ? value : mathValue;
+      }), Length.parse(arg[0]).unit);
+      return mathValue.resolve();
+    }
+    return typeof v == "string" ? name + '(' + v.replace(/\s+/gi, ',') + ')' : this;
   },
   get value() {
     var v = this.paramValue;

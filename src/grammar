@@ -5,7 +5,7 @@ unicode		    \\{h}{1,6}(\r\n|[ \t\r\n\f])?
 escape		    {unicode}|\\[ -~\200-\377]
 nmstart		    [_a-z]|{nonascii}|{escape}
 nmchar		    [_a-zA-Z0-9-]|{nonascii}|{escape}
-hexchar         [0-9a-f]
+hexchar         [0-9a-fA-F]
 key             {nmstart}{nmchar}*
 namestart       [_a-zA-Z]|{nonascii}|{escape}
 namechar        [_a-zA-Z0-9]|{nonascii}|{escape}
@@ -15,8 +15,9 @@ num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{name}
 string          (\"|\')[\s\S]*?(\1)
 sltstart        {nmchar}|[\.#\*\>]
-sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\:\[\]\'\"\(\)\r\n\t\f]
-selector        {sltstart}{sltchar}*?(?=(\({var}\:)|\{|\,)
+sltclass        \:(\:+|\w+\-|"hover"|"visited"|"focus"|"active"|"after"|"before"|"link"|"not"|"optional"|"required"|"root"|"target"|"valid"|"invalid")
+sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
+selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
 breaker         \={4,}|\-{4,}
 comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
 s               [\s\r\n\t\f]
@@ -41,7 +42,7 @@ s               [\s\r\n\t\f]
 <*>':'                                 return ':';
 <*>','                                 return ',';
 <*>'&'\:*{selector}                       return '&';
-<*>{num}(px|pc|px|in|cm|mm|deg|em|ex|\%)? return 'NUMBER';
+<*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|\%)? return 'NUMBER';
 <EXPRESSION>\;+                           this.popState();return ';';
 <EXPRESSION>(\"|\')[\s\S]*?(\1)           return "STRING";
 <EXPRESSION>(url\(.*?\)|url\({string}\))  return "URL";
