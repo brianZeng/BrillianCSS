@@ -28,7 +28,7 @@ s               [\s\r\n\t\f]
 <*>"@"mixin                              return 'MIXIN';
 <*>"@"include                            return 'INCLUDE';
 <*>"@"namespace                          this.begin("EXPRESSION");return 'NAMESPACE';
-<INITIAL>"@"extends{s}*                  this.begin('EXT');return 'EXTENDS';
+<INITIAL>"@"extend                       this.begin('EXT');return 'EXTENDS';
 <EXT>{sltstart}{sltchar}*?(?=\;)         this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
 <INITIAL>{selector}                      return 'SELECTOR';
@@ -42,7 +42,7 @@ s               [\s\r\n\t\f]
 <*>':'                                 return ':';
 <*>','                                 return ',';
 <*>'&'\:*{selector}                       return '&';
-<*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|\%)? return 'NUMBER';
+<*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|s|\%)? return 'NUMBER';
 <EXPRESSION>\;+                           this.popState();return ';';
 <EXPRESSION>(\"|\')[\s\S]*?(\1)           return "STRING";
 <EXPRESSION>(url\(.*?\)|url\({string}\))  return "URL";
@@ -68,6 +68,7 @@ s               [\s\r\n\t\f]
 exp:
     NUMBER          {$$=new Exp(new Length($1));}
     | VAR           {$$=new Exp($1);}
+    |inlineFunc     {$$=new Exp($1.reduce());}
     | exp '+' exp   {$$= new Exp($1,$2,$3).reduce();}
     | exp '-' exp   {$$= new Exp($1,$2,$3).reduce();}
     | exp '*' exp   {$$= new Exp($1,$2,$3).reduce();}
@@ -87,7 +88,6 @@ property:
       exp      %prec COMBINE      {$$=$1.reduce();}
       |STRING
       |URL
-      |inlineFunc                  {$$=$1.reduce();}
       |LITERAL
       ;
 list:

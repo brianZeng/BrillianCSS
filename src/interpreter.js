@@ -60,6 +60,7 @@ Exp.getType = function (side) {
   else if (side instanceof Length)return Exp.TYPE.LENGTH;
   else if (side instanceof Exp)return Exp.TYPE.EXP;
   else if (side instanceof InlineFunc)return Exp.TYPE.FUNC;
+  else if (side instanceof List) return Exp.TYPE.LIST;
   else if (typeof side == "string") return Exp.TYPE.KEYWORD;
   else throw  Error('unknown type');
 };
@@ -69,7 +70,8 @@ Exp.TYPE = {
   VAR: 'var',
   LENGTH: 'len',
   FUNC: 'fun',
-  KEYWORD: 'lit'
+  KEYWORD: 'keyword',
+  LIST: 'list'
 };
 List.arrayAdd = function arrayAdd(array, item) {
   if (item instanceof Array)
@@ -84,7 +86,6 @@ List.uniquePush = function (a) {
   for (var i = 1, change = false, arr = arguments[1], add = List.arrayAdd; arr; arr = arguments[++i])
     for (var j = 0, len = arr.length; j < len; j++)
       if (add(a, arr[j]))change = true;
-
   return change;
 };
 Exp.prototype = {
@@ -107,6 +108,9 @@ Exp.prototype = {
       case Exp.TYPE.KEYWORD:
       case Exp.TYPE.LENGTH:
         return this.left;
+      case Exp.TYPE.FUNC:
+      case Exp.TYPE.LIST:
+        return this.left.value;
       default:
         return this.left.opt(this.optor, this.right);
     }
@@ -174,6 +178,14 @@ Exp.prototype = {
         case Exp.TYPE.FUNC:
           exp.left = left.resolve($vars);
           return exp.clearVarNames();
+        case Exp.TYPE.LIST:
+          if (rtype == Exp.TYPE.LIST)
+            left.push.apply(left, right);
+          else if (rtype !== Exp.TYPE.NONE)
+            left.push(right);
+          rtype = Exp.TYPE.NONE;
+          ret = exp.left = left.resolve($vars);
+          break;
         case Exp.TYPE.NONE:
           throw Error('invalid type');
       }
@@ -208,6 +220,7 @@ Exp.prototype = {
       var v = this.clone();
       while (v.hasVars && v.canResolve($vars))
         resolveExp(v, $vars);
+      resolveExp(v, $vars);
       return v.hasVars ? v : v.value;
     }
   })(),
@@ -217,9 +230,10 @@ Exp.prototype = {
       var left = this.left, right = this.right;
       vars = this.variables = [];
       if (Exp.isVar(left)) List.arrayAdd(vars, left);
-      else if (left instanceof Exp) left.getVarNames(vars);
-      if (Exp.isVar(right))List.arrayAdd(vars, right);
-      else if (right instanceof Exp) right.getVarNames(vars);
+      else if (left.getVarNames) left.getVarNames(vars);
+      if (right)
+        if (Exp.isVar(right))List.arrayAdd(vars, right);
+        else if (right.getVarNames) right.getVarNames(vars);
     }
     array = array || [];
     vars.forEach(function (key) {
@@ -248,8 +262,39 @@ Exp.prototype = {
 Length.parse = function (str, unit) {
   if (str instanceof Length) return str.clone();
   var l = new Length(str);
-  if (unit !== undefined) l.unit = unit;
+  if (unit !== undefined) l.unit = unit.trim();
   return isNaN(l.num) ? undefined : l;
+};
+Length.toFixed = function (num, fractionalDititals) {
+  var m = Number(num).toFixed(fractionalDititals || Length.fractionalDigitals).match(/^\-?\d+(\.(0*[1-9])+)?/);
+  return m ? m[0] : NaN;
+};
+Length.fractionalDigitals = 4;
+Length.convertTable = {
+  rad: {
+    pi: function (n) {
+      return n / Math.PI;
+    },
+    deg: function (n) {
+      return n / Math.PI * 180;
+    }
+  },
+  deg: {
+    pi: function (n) {
+      return n / 180;
+    },
+    rad: function (n) {
+      return n / 180 * Math.PI;
+    }
+  },
+  pi: {
+    rad: function (n) {
+      return n * Math.PI;
+    },
+    deg: function (n) {
+      return n * 180;
+    }
+  }
 };
 Length.prototype = {
   clone: function () {
@@ -275,11 +320,13 @@ Length.prototype = {
         throw  'unkonwn optor:' + opt;
     }
   },
-  convert: function (OtherUnit, thisUnit) {
-    return this.num;
+  convert: function (otherUnit, thisUnit) {
+    var num = this.num, func = Length.convertTable[(thisUnit || this.unit).toLowerCase()];
+    if (func && (func = func[otherUnit.toLowerCase()]))return func(num);
+    return num;
   },
   toString: function () {
-    return isNaN(this.num) ? 'NaN' : (this.num + this.unit);
+    return isNaN(this.num) ? 'NaN' : (Length.toFixed(this.num) + this.unit);
   },
   reduce: function () {
     return this;
@@ -289,16 +336,6 @@ Length.prototype = {
   },
   get value() {
     return this.toString();
-  },
-  get mathValue() {
-    switch ((this.unit || '').toLowerCase()) {
-      case 'pi':
-        return Math.PI * this.num;
-      case 'deg':
-        return this.num / 180 * Math.PI;
-      default:
-        return this.num;
-    }
   }
 };
 List.fromObject = function (combiner, objArray) {
@@ -372,6 +409,12 @@ List.prototype = (function (proto) {
       })
     }
   });
+  Object.defineProperty(proto, 'hasVars', {
+    get: function () {
+      return this.some(function (o) {
+        return o.hasVars
+      })
+    }});
   proto.toString = function () {
     return this.join(' ').replace(/[\r\n\s\t\f]+/gi, ' ');
   };
@@ -388,15 +431,34 @@ List.prototype = (function (proto) {
   };
   return proto;
 })(Object.create([]));
-objForEach(Math, function (key, fun, units) {
+objForEach(Math, function (key, fun, def) {
   if (typeof fun == "function") {
-    var unit = units[units.indexOf(key) + 1];
-    this[key] = function (mathArg, firstUnit) {
-      var v = fun.apply(Math, mathArg);
-      return Length.parse(v, unit == undefined ? firstUnit : unit);
+    var convertArg = def.arg[key], convertRes = def.res[key];
+    this[key] = function (mathArg) {
+      var v = Length.parse(fun.apply(Math, mathArg.map(function (len) {
+        return convertArg ? convertArg(len) : len.num;
+      })), mathArg[0].unit);
+      return convertRes ? convertRes(v) : v;
     }
   }
-}, InlineFunc.Func = {}, [undefined, 'sin', '', 'cos', '', 'tan', '', 'asin', 'rad', 'acos', 'rad', 'atan', 'rad']);
+  }, InlineFunc.Func = {},
+  (function () {
+    var types = [function (len) {
+      return len.convert('rad')
+    },
+      function (len) {
+        len.convert(len.unit = 'deg', 'rad');
+        return len;
+      },
+      function (len) {
+        len.unit = '';
+        return len;
+      }];
+    return {
+      arg: {sin: types[0], cos: types[0], tan: types[0]},
+      res: {asin: types[1], acos: types[1], atan: types[1], sin: types[2], cos: types[2], tan: types[2]}
+    }
+  })());
 InlineFunc.prototype = {
   getVarNames: function (array) {
     return this.param.getVarNames(array);
@@ -406,9 +468,8 @@ InlineFunc.prototype = {
     func = InlineFunc.Func[name];
     if (func && (arg = this.param).canResolve($vars)) {
       var mathValue = func(arg.map(function (p) {
-        var value = Length.parse(p.resolve ? p.resolve($vars) : p), mathValue = value.mathValue;
-        return isNaN(mathValue) ? value : mathValue;
-      }), Length.parse(arg[0]).unit);
+        return Length.parse(p.resolve ? p.resolve($vars) : p)
+      }));
       return mathValue.resolve();
     }
     return typeof v == "string" ? name + '(' + v.replace(/\s+/gi, ',') + ')' : this;
@@ -418,7 +479,10 @@ InlineFunc.prototype = {
     return v == undefined ? undefined : this.name + v;
   },
   reduce: function () {
-    var p = this.param;
+    var p = this.param, len;
+    if (p.canResolve && p.canResolve())
+      if (len = Length.parse(this.resolve()))
+        return (this.param = new List(len))[0];
     this.param = p.reduce ? this.param.reduce() : p;
     return this;
   },
@@ -455,7 +519,6 @@ Scope.prototype = {
         });
       return a;
     }
-
     function inheritDefValues(assign, scope) {
       var o = cloneIfNotHas({}, assign), p = scope;
       while (p) {
@@ -465,8 +528,8 @@ Scope.prototype = {
       return o;
     }
 
-    return function (assign) {
-      return inheritDefValues(assign, this);
+    return function (assign, scope) {
+      return inheritDefValues(assign, scope || this);
     }
   })(),
   toString: function ($vars) {
@@ -575,8 +638,10 @@ Scope.prototype = {
     return rules;
   },
   resolveNested: function ($vars, arg) {
+    var parent = this;
     return this.nested.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($vars, arg));
+      var $know = scope.assignDefValues(scope.mixParam($vars, parent));
+      r.push.apply(r, scope.resolve($know, arg));
       return r;
     }, []);
   },
@@ -586,6 +651,20 @@ Scope.prototype = {
       if (knownNames.indexOf(v) == -1) List.arrayAdd(r, v);
     });
     return 'exp:|' + unresolved + '| unable to find var:' + r.join(' ');
+  },
+  assignDefValues: function ($known) {
+    var r = {};
+    objForEach(this.defValues, function (key, value) {
+      if (value.resolve && value.hasVars && value.canResolve($known))
+        r[key] = value.resolve($known);
+      else if (typeof value == "string")
+        r[key] = value;
+    });
+    objForEach($known, function (key, value) {
+      if (!r.hasOwnProperty(key) && !value.hasVars)
+        r[key] = value;
+    });
+    return r;
   },
   assign: function (assigns, info, unresolved) {
     var result = {}, unres = this.mixParam(assigns), con;
@@ -785,20 +864,17 @@ Sheet.prototype = (function (proto) {
   sheetProto.resolve = function ($vars, info) {
     var $unkonwn = {}, $param = this.assign($vars, info, $unkonwn), ctx = getContext(this, info), expMap = ctx.expMap, styles = this.styles, extArray;
     $param = mix($unkonwn, $param);
-    styles.forEach(function (s) {
-      ctx.setExtends(s);
-    });
     return styles.reduce(function (resultArr, style) {
-      style = style.clone();
-      extArray = expMap[style.selector];
-      if (extArray) {
-        extArray = getExts(expMap, extArray, style.selector);
-        if (extArray.length)
-          style.selector += ',' + extArray.join(',');
-      }
-      List.uniquePush(resultArr, style.resolve($param, ctx));
+      List.uniquePush(resultArr, style.clone().resolve($param, ctx));
       return resultArr;
-    }, []);
+    }, []).map(function (o) {
+      if (extArray = expMap[o.selector]) {
+        extArray = getExts(expMap, extArray, o.selector);
+        if (extArray.length)
+          o.selector += ',' + extArray.join(',');
+      }
+      return o;
+    });
   };
   function addExtends(map, baseSlt, extSlt) {
     var arr = map[baseSlt];
@@ -881,4 +957,3 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
-
