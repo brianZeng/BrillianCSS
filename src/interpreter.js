@@ -332,7 +332,7 @@ Length.prototype = {
     return this;
   },
   resolve: function () {
-    return this.toString();
+    return this.clone();
   },
   canResolve: function () {
     return true
