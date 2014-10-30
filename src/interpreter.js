@@ -334,6 +334,9 @@ Length.prototype = {
   resolve: function () {
     return this.toString();
   },
+  canResolve: function () {
+    return true
+  },
   get value() {
     return this.toString();
   }
@@ -527,7 +530,6 @@ Scope.prototype = {
       }
       return o;
     }
-
     return function (assign, scope) {
       return inheritDefValues(assign, scope || this);
     }
@@ -638,10 +640,8 @@ Scope.prototype = {
     return rules;
   },
   resolveNested: function ($vars, arg) {
-    var parent = this;
     return this.nested.reduce(function (r, scope) {
-      var $know = scope.assignDefValues(scope.mixParam($vars, parent));
-      r.push.apply(r, scope.resolve($know, arg));
+      r.push.apply(r, scope.resolve($vars, arg));
       return r;
     }, []);
   },
@@ -670,15 +670,12 @@ Scope.prototype = {
     var result = {}, unres = this.mixParam(assigns), con;
     do {
       con = false;
-      Object.getOwnPropertyNames(unres).forEach(function (key) {
-        var value = unres[key], len;
-        while (value.canResolve && value.canResolve(result))
-          value = value.resolve(result);
-        if ((value instanceof Length) || (value instanceof List && value.resolved))
-          len = value;
-        else if (typeof value == "string") len = Length.parse(value) || value;
-        if (len) {
-          result[key] = len;
+      objForEach(unres, function (key, value) {
+        if (value.canResolve && value.canResolve(result))
+          while (value.canResolve)
+            value = value.resolve(result);
+        if ((value instanceof Length) || (typeof value == "string") || (value instanceof List && value.resolved)) {
+          result[key] = Length.parse(value) || value;
           con = true;
           delete unres[key];
         }
@@ -716,14 +713,28 @@ Scope.prototype = {
   },
   resolve: (function () {
     function assignIncludeParam($param, $known) {
-      var r = {};
-      objForEach($param, function (key, value) {
-        if (value.resolve && value.canResolve($known))
-          r[key] = value.resolve($known);
-        else if (typeof value == "string")
-          r[key] = value;
-      });
-      for (var i in $known) if (!r.hasOwnProperty(i))r[i] = $known[i];
+      var r = {}, con;
+      do {
+        con = false;
+        objForEach($param, function (key, value) {
+          if (typeof value == "string") {
+            value = Length.parse(value) || value;
+            $known[key] = value;
+            r[key] = value;
+            delete $param[key];
+          }
+          else if (value.resolve && value.canResolve($known)) {
+            while (value.canResolve) value = value.resolve($known);
+            $param[key] = value
+          }
+          else return;
+          con = true;
+        });
+        if (!con)
+          con = Object.getOwnPropertyNames($param).some(function (key) {
+            $param[key].canResolve($known)
+          });
+      } while (con);
       return r;
     }
 
@@ -777,6 +788,7 @@ Scope.prototype = {
     }
   })()
 };
+
 Style.trimSelector = function (selector) {
   return selector.replace(/[\r\n\t\f\s]+/gi, ' ').trim();
 };

@@ -15,7 +15,7 @@ num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{name}
 string          (\"|\')[\s\S]*?(\1)
 sltstart        {nmchar}|[\.#\*\>]
-sltclass        \:(\:+|\w+\-|"hover"|"visited"|"focus"|"active"|"after"|"before"|"link"|"not"|"optional"|"required"|"root"|"target"|"valid"|"invalid")
+sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
 breaker         \={4,}|\-{4,}
