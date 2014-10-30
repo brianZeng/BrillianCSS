@@ -1,0 +1,58 @@
+<section>
+    <h3>优雅地应对css中的变化</h3>
+
+    <p>
+        ChangeCSS语法中变量使用<code>$</code>开头，变量分为两种类型:
+    </p>
+    <dl>
+        <dt>1.默认变量</dt>
+        <dd>一般位于Selector后的<code>()</code>中,多个变量用<code>,</code>分隔,例如</dd>
+        <dd><pre>SELECTOR($fontSize:120%,$color:white){
+...
+}</pre>
+        </dd>
+        <dt>2.覆盖变量</dt>
+        <dd>在style之间直接声明的变量，将覆盖同名的默认变量</dd>
+        <dd><pre class="code">
+ h2($color:red){
+  color:$color;
+ }
+ $color:blue;</pre>
+        </dd>
+        <dd>最终结果为:
+            <pre class="code">h2{
+ color:blue
+}</pre>
+        </dd>
+        <dd>对于多个同名的覆盖变量
+            <pre>$width:20px;
+...
+div{
+   width:$width;
+}
+$width:40px;</pre>
+            <br>最终结果为:<pre>div{
+ width:40px
+}</pre>
+        </dd>
+        <dt>3.变量或者数值之间可以使用运算符号进行运算</dt>
+        <dd>
+         <pre>{
+ margin-right:$floatWidth-20px;
+}</pre>
+        </dd>
+        <dt>4.对于css中的多值属性，例如:<code>border</code>,请使用<code>space</code>隔开</dt>
+        <dd><pre>{
+ border:$borderWidth solid $borderColor;
+}</pre>
+        </dd>
+    </dl>
+    <p>
+        尝试修改右边的变量使得.varTest元素产生改变
+    </p>
+
+    <div class="varTest">
+        <div></div>
+        <div></div>
+    </div>
+</section>

@@ -1,0 +1,39 @@
+<section>
+    <h3>结构化地组织CSS规则</h3>
+
+    <p>如果将HTML中的树状结构对应于CSS中，那么CSS的管理将会更加轻松</p>
+    <dl>
+        <dt>1.子元素嵌套</dt>
+        <dd>直接将子元素的选择器和规则写入父元素规则中</dd>
+        <dd><pre>div($width:100px){
+  width:$width;
+  >p{
+     margin-left:$width/5;
+    }
+ }
+</pre>
+        </dd>
+        <dd>这段规则会被解释为如下两段<pre>
+ div{
+    width:100px;
+ }
+ div>p{
+    margin-left:20px;
+ }
+</pre>
+        </dd>
+        <dt>2.父元素引用嵌套</dt>
+        <dd>对于<code>:hover</code>,<code>::after</code>这样的规则，请用<code>&</code>代替父元素的选择器</dd>
+        <dd><pre> div{
+  background:white;
+  &:hover{
+    background:gray;
+   }
+  &::before{
+    content:'!';
+   }
+ }</pre>
+        </dd>
+        <dt>3.默认参数继承</dt>
+    </dl>
+</section>

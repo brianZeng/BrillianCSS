@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <style id="bssStyle"></style>
+    <script src="codemirror/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <script src="codemirror/mode/css/css.js"></script>
+</head>
+<body>
+<header>
+    <div class="content">
+        <nav>
+            <% for(var i = 0, links = data.header, link = links[i];link;link = links[++i]){ %>
+            <a href="<%= link.name %>"> <%= link.text %> </a>
+            <% } %>
+        </nav>
+        <span class="logo">ChangeSS</span>
+    </div>
+</header>
+<div class="main">
+    <nav class="left">
+        <h3><%= data.feature %></h3>
+
+        <div class="items">
+            <% data.features.forEach(function(item){ %>
+            <div>
+                <p data-section=<%= item.name %>><%= item.text %></p>
+            </div>
+            <% }) %>
+        </div>
+    </nav>
+    <article>
+        <aside class="right">
+            <textarea id="parseSource"><%= bss %></textarea>
+
+            <p>
+                <button id="parseBtn">翻译</button>
+            <div class="test"></div>
+            </p>
+            <textarea id="parseResult"></textarea>
+        </aside>
+        <section id="featureSection">
+
+        </section>
+    </article>
+
+</div>
+
+<script src="/js/parser.js"></script>
+<script src="js/tool.js"></script>
+<script src="js/dom.js"></script>
+</body>
+</html>

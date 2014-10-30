@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <style id="bssStyle"></style>
+    <script src="codemirror/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <script src="codemirror/mode/css/css.js"></script>
+</head>
+<body>
+<div class="main">
+    <nav class="left">
+
+    </nav>
+    <article>
+        <aside class="right">
+            <textarea id="parseSource"><%= bss %></textarea>
+
+            <p>
+                <button id="parseBtn">翻译</button>
+            <div class="test"></div>
+            </p>
+            <textarea id="parseResult"></textarea>
+        </aside>
+    </article>
+
+</div>
+
+<script src="/js/parser.js"></script>
+<script src="js/dom.js"></script>
+</body>
+</html>
