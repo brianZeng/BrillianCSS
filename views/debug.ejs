@@ -7,6 +7,7 @@
     <script src="codemirror/lib/codemirror.js"></script>
     <link rel="stylesheet" href="codemirror/lib/codemirror.css">
     <script src="codemirror/mode/css/css.js"></script>
+    <style></style>
 </head>
 <body>
 <div class="main">
@@ -28,6 +29,39 @@
 </div>
 
 <script src="/js/parser.js"></script>
-<script src="js/dom.js"></script>
+<script>
+    var $ = function (s) {
+                return document.querySelector(s);
+            },
+            $$ = function (s) {
+                return Array.prototype.slice.apply(document.querySelectorAll(s))
+            };
+    var editor = CodeMirror.fromTextArea(document.querySelector('#parseSource'), {
+                mode: 'text/x-scss',
+                lineNumbers: true,
+                lineWrapping: true,
+                value: document.querySelector('#parseSource').value
+            }),
+            player = CodeMirror.fromTextArea(document.querySelector('#parseResult'), {
+                mode: 'text/css',
+                lineNumbers: true,
+                lineWrapping: true,
+                disableInput: true,
+                value: document.querySelector('#parseResult').value
+            });
+    var parse = $('#parseBtn').onclick = function (e) {
+        var r = ChangeSS(editor.getValue());
+        try {
+            onSheet(r, player);
+        }
+        catch (e) {
+            console.log(e.message, e.stack || e);
+            debugger;
+        }
+    };
+    function onSheet(sheet, editor) {
+        editor.setValue($('#bssStyle').innerHTML = sheet.toString());
+    }
+</script>
 </body>
 </html>

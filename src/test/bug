@@ -1,0 +1,8 @@
+code,.code{
+
+}
+pre{
+ @extend .code;//失效
+}
+
+Length.resolve应该return length
