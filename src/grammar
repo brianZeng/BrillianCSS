@@ -25,7 +25,7 @@ s               [\s\r\n\t\f]
 <*>{comment}                           /* ignore*/;
 <*>"@mixin"                              return 'MIXIN';
 <*>"@include"                            return 'INCLUDE';
-<*>"@sheet"                         this.begin("EXP");return 'SHEET';
+<*>"@sheet"                              this.begin("EXP");return 'SHEET';
 <INITIAL>"@"extend                       this.begin('EXT');return 'EXTENDS';
 <EXT>{sltstart}{sltchar}*?(?=\;)         this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
@@ -117,6 +117,7 @@ scopeBodyPart:
    |nestedStyle                  {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
+   |EXTENDS SELECTOR '->' LITERAL{$$={type:'ext',name:$2,sheetName:$4};}
    |scopeBodyPart ';'
    ;
 scopeBody:

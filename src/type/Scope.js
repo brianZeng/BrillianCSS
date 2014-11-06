@@ -14,32 +14,6 @@ Scope.trimSelector = function (selector) {
 };
 Scope.prototype = {
   selectors: [''],
-  mixParam: (function () {
-    function cloneIfNotHas(a, from) {
-      var v;
-      if (from)
-        Object.getOwnPropertyNames(from).forEach(function (key) {
-          if (!a.hasOwnProperty(key)) {
-            v = from[key];
-            a[key] = v.clone ? v.clone(true) : v;
-          }
-        });
-      return a;
-    }
-
-    function inheritDefValues(assign, scope) {
-      var o = cloneIfNotHas({}, assign), p = scope;
-      while (p) {
-        o = cloneIfNotHas(o, p.defValues);
-        p = p.parent;
-      }
-      return o;
-    }
-
-    return function (assign, scope) {
-      return inheritDefValues(assign, scope || this);
-    }
-  })(),
   toString: (function () {
     function mapResult(separator) {
       separator = separator || window ? '\r\n' : '';
@@ -47,13 +21,11 @@ Scope.prototype = {
         return r.selector + '{' + separator + rules(r).join(separator) + '}';
       }
     }
-
     function rules(ruleObj) {
       return objForEach(ruleObj, function (key, value) {
         this.push(key + ':' + value + ';');
       }, []);
     }
-
     return function ($vars, separator) {
       return this.resolve($vars).map(mapResult(separator));
     }
@@ -65,15 +37,9 @@ Scope.prototype = {
   get paramString() {
     var r = [];
     objForEach(this.defValues, function (key, value) {
-      r.push(key + ':' + value)
+      r.push(key + ':' + value);
     });
     return r.length ? '(' + r.join(',') + ')' : '';
-  },
-  getBodyString: function ($vars, unresolvedInclude, context) {
-
-  },
-  getFullString: function ($vars) {
-    return this.paramString + this.getBodyString($vars, true);
   },
   add: function (obj) {
     switch (obj.type.toLowerCase()) {
@@ -86,14 +52,16 @@ Scope.prototype = {
       case 'include':
         return this.addInclude(obj.name, obj.value);
       case 'ext':
-        return this.addExt(obj.name);
+        return this.addExt(obj.name, obj.sheetName);
       case 'mix':
         return this.addMix(obj.value);
     }
     return this;
   },
-  addExt: function (selector) {
-    List.arrayAdd(this.exts, Style.trimSelector(selector));
+  addExt: function (selector, sheetName) {
+    selector = Scope.trimSelector(selector);
+    if (sheetName)selector += '->' + sheetName;
+    List.arrayAdd(this.exts, selector);
     return this;
   },
   addRule: function (key, value) {
@@ -129,91 +97,50 @@ Scope.prototype = {
       return this[key].canResolve($vars);
     }, this.dynamicRules);
   },
+  validateSelector: (function () {
+    function second() {
+      return this.selectors;
+    }
+
+    return function (parentSelectors) {
+      var r, tss;
+      if (parentSelectors) {
+        r = [];
+        tss = this.selectors;
+        parentSelectors.forEach(function (ps) {
+          tss.forEach(function (ts) {
+            r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
+          })
+        });
+        this.selectors = r;
+      } else r = this.selectors;
+      this.nested.forEach(function (scope) {
+        scope.validateSelector(r)
+      });
+      this.validateSelector = second;
+      return r;
+    }
+  })(),
   clone: (function () {
     function onPair(key, value) {
       this[key] = value.clone ? value.clone(true) : value;
     }
 
     return function () {
-      var r = new Scope(), parent = this.parent;
+      var r = new Scope();
+      r.validateSelector();
       objForEach(this.staticRules, onPair, r.staticRules);
       objForEach(this.dynamicRules, onPair, r.dynamicRules);
       objForEach(this.defValues, onPair, r.defValues);
       objForEach(this.includes, onPair, r.includes);
-      if (parent) r.parent = parent;
       r.nested = this.nested.map(function (scope) {
         return scope.clone();
       });
       r.exts = this.exts.slice();
+      r.selectors = this.selectors.slice();
       return r;
     }
   })(),
-  resolveSelf: function ($vars, info) {
-    var $known = this.assign($vars, info), rules = mix(this.staticRules), knownNames = Object.getOwnPropertyNames($known);
-    objForEach(this.dynamicRules, function (key, value) {
-      if (value.canResolve($known))
-        rules[key] = value.clone().resolve($known);
-      else if (info)
-        info[key] = this.recordUnresolvedInfo(knownNames, value);
-    }, this);
-    return rules;
-  },
-  resolveNested: function ($vars, arg) {
-    return this.nested.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($vars, arg));
-      return r;
-    }, []);
-  },
-  recordUnresolvedInfo: function ($known, unresolved) {
-    var knownNames = $known instanceof Array ? $known : Object.getOwnPropertyNames($known), r = [];
-    unresolved.getVarNames().forEach(function (v) {
-      if (knownNames.indexOf(v) == -1) List.arrayAdd(r, v);
-    });
-    return 'exp:|' + unresolved + '| unable to find var:' + r.join(' ');
-  },
-  assignDefValues: function ($known) {
-    var r = {};
-    objForEach(this.defValues, function (key, value) {
-      if (value.resolve && value.hasVars && value.canResolve($known))
-        r[key] = value.resolve($known);
-      else if (typeof value == "string")
-        r[key] = value;
-    });
-    objForEach($known, function (key, value) {
-      if (!r.hasOwnProperty(key) && !value.hasVars)
-        r[key] = value;
-    });
-    return r;
-  },
-  assign: function (assigns, info, unresolved) {
-    var result = {}, unres = this.mixParam(assigns), con;
-    do {
-      con = false;
-      objForEach(unres, function (key, value) {
-        if (value.canResolve && value.canResolve(result))
-          while (value.canResolve)
-            value = value.resolve(result);
-        if ((value instanceof Length) || (typeof value == "string") || (value instanceof List && value.resolved)) {
-          result[key] = Length.parse(value) || value;
-          con = true;
-          delete unres[key];
-        }
-      });
-      if (!con)
-        con = Object.getOwnPropertyNames(unres).some(function (key) {
-          return unres[key].canResolve(result);
-        });
-    } while (con);
-    if (info) {
-      var known = Object.getOwnPropertyNames(result);
-      objForEach(unres, function (key, value) {
-        info[key] = this.recordUnresolvedInfo(known, value);
-      }, this);
-    }
-    if (unresolved && typeof unresolved == "object")
-      for (var i in unres) unresolved[i] = unres[i];
-    return result;
-  },
   reduce: function () {
     var staticRules = this.staticRules, v;
     objForEach(this.dynamicRules, function (key, value) {
@@ -239,12 +166,10 @@ Scope.prototype = {
   },
   resolve: (function () {
     var stack, $param;
-
     function log() {
       if (ChangeSS.traceLog)
         console.log.apply(console, arguments);
     }
-
     function findVars(scope) {
       return scope.getVarNames().reduce(function ($vars, varname) {
         if (!$vars[varname])
@@ -256,38 +181,19 @@ Scope.prototype = {
         return $vars;
       }, mix($param));
     }
-
-    function inheritSelectors(ps, cs) {
-      var r = [];
-      ps.forEach(function (pSelector) {
-        cs.forEach(function (cSelector) {
-          r.push(cSelector[0] == '&' ? cSelector.replace('&', pSelector) : pSelector + ' ' + cSelector);
-        })
-      });
-      return r.map(Scope.trimSelector);
-    }
-
-    function chainSelectors(scope) {
-      for (var i = 0, parent = stack[i], r = ['']; parent; parent = stack[++i])
-        r = inheritSelectors(r, parent.selectors);
-      return inheritSelectors(r, scope.selectors);
-    }
-
     function resolveScope(scope) {
       var $vars = ChangeSS.assign(findVars(scope)), ruleObj = mix(scope.staticRules), r = [];
       objForEach(scope.dynamicRules, function (key, rule) {
         if (rule.canResolve($vars))
           ruleObj[key] = rule.resolve($vars);
-        else log('cannot resolve rule:' + rule);
+        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
       });
-      return {rules: ruleObj, selector: chainSelectors(scope).join(',')};
+      return {rules: ruleObj, selector: scope.selectors.join(',')};
     }
-
     function getChild(parent, child) {
       if (parent === child || !parent)return 0;
       return parent.nested[parent.nested.indexOf(child) + 1] || 0;
     }
-
     function preVisit(scope) {
       var childScope = 0, results = [];
       do {
@@ -305,7 +211,6 @@ Scope.prototype = {
       if (scope)results.push(resolveScope(scope));
       return results;
     }
-
     return function ($vars) {
       stack = [];
       $param = $vars;

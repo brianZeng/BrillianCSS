@@ -40,6 +40,14 @@ List.prototype = (function (proto) {
     this.push(item);
     return true;
   };
+  proto.remove = function (item) {
+    var i = this.indexOf(item);
+    if (i > -1) {
+      this.splice(i, 1);
+      return true;
+    }
+    return false;
+  };
   proto.canResolve = function ($vars) {
     $vars = $vars || {};
     return this.every(function (obj) {

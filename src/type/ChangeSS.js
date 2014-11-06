@@ -4,14 +4,28 @@
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
 
-  function main(input) {
-    var results = input.split(/\={4,}/g).map(function (src) {
-      var sheet = parser.parse(src);
-      return getter.sheet(sheet.name).merge(sheet);
+  function main(input, keep) {
+    if (!keep)clear();
+    var results = main.parse(input).map(function (sheet) {
+      return merge(sheet);
     });
+    ChangeSS.validateMix_Ext(results);
     return results;
   }
 
+  main.validateMix_Ext = function (sheets) {
+
+  };
+  function clear() {
+    sheetMap = {};
+  }
+
+  function merge(obj) {
+    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
+    else throw 'not implement';
+  }
+
+  main.merge = merge;
   main.get = function (name) {
     name = name || main.defaultSheetName;
     if (name) {
@@ -42,7 +56,7 @@ ChangeSS = (function (parser) {
 
   main.parse = function (input) {
     return input.split(/\={4,}/g).map(function (src) {
-      return parser.parse(src);
+      return parser.parse(src).validate();
     })
   };
   main.add = function (something) {
@@ -61,11 +75,11 @@ ChangeSS = (function (parser) {
 })(parser);
 ChangeSS.defaultSheetName = 'default';
 ChangeSS.assign = function ($param) {
-  var $known = {}, con, typeEnum = Exp.TYPE;
+  var $known = {}, con, typeEnum = ChangeSS.TYPE;
   do {
     con = false;
     objForEach($param, function (key, value) {
-      switch (Exp.getType(value)) {
+      switch (ChangeSS.getType(value)) {
         case typeEnum.KEYWORD:
         case typeEnum.LENGTH:
           $known[key] = value;
@@ -75,7 +89,7 @@ ChangeSS.assign = function ($param) {
           throw 'unknown type';
         default :
           if (value.canResolve($known))
-            $param[value] = value.resolve($known);
+            $param[key] = value.resolve($known);
           else return;
       }
       con = true;
@@ -89,7 +103,8 @@ ChangeSS.assign = function ($param) {
 };
 ChangeSS.traceLog = true;
 function mix() {
-  for (var i = 0, o = {}, item = arguments[i]; item; item = arguments[++i])
+  for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
+    if (item = arguments[i])
     Object.getOwnPropertyNames(item).forEach(function (key) {
       o[key] = item[key];
     });
