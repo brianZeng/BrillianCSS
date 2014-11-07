@@ -101,7 +101,6 @@ Scope.prototype = {
     function second() {
       return this.selectors;
     }
-
     return function (parentSelectors) {
       var r, tss;
       if (parentSelectors) {
@@ -125,7 +124,6 @@ Scope.prototype = {
     function onPair(key, value) {
       this[key] = value.clone ? value.clone(true) : value;
     }
-
     return function () {
       var r = new Scope();
       r.validateSelector();
@@ -164,8 +162,11 @@ Scope.prototype = {
     });
     return array;
   },
+  getInclude: function (key, parentSheet) {
+    return ChangeSS.get(key, 'mixin') || (parentSheet.mixins[key]) || ChangeSS.error.notExist(key);
+  },
   resolve: (function () {
-    var stack, $param;
+    var stack, $param, parentSheet;
     function log() {
       if (ChangeSS.traceLog)
         console.log.apply(console, arguments);
@@ -181,14 +182,33 @@ Scope.prototype = {
         return $vars;
       }, mix($param));
     }
+
     function resolveScope(scope) {
-      var $vars = ChangeSS.assign(findVars(scope)), ruleObj = mix(scope.staticRules), r = [];
+      var $vars = ChangeSS.assign(findVars(scope)), ruleObj = mix(scope.staticRules), selector = scope.selector, r;
       objForEach(scope.dynamicRules, function (key, rule) {
-        if (rule.canResolve($vars))
+        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($vars))
           ruleObj[key] = rule.resolve($vars);
         else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
       });
-      return {rules: ruleObj, selector: scope.selectors.join(',')};
+      r = [
+        {rules: ruleObj, selector: scope.selectors.join(',')}
+      ];
+      objForEach(scope.includes, function (key, value) {
+        resolveInclude(new Style(selector, scope.getInclude(key, parentSheet)), ChangeSS.assign(value, $vars), r);
+      });
+      return r;
+    }
+
+    function mergeResult(a, b) {
+      a.rules = mix(b.rules, a.rules);
+      return a;
+    }
+
+    function resolveInclude(mixObj, $vars, results) {
+      mixObj.validateSelector();
+      return mixObj.resolve($vars, parentSheet).forEach(function (resObj) {
+        List.addOrMerge(results, resObj, 'selector', mergeResult);
+      });
     }
     function getChild(parent, child) {
       if (parent === child || !parent)return 0;
@@ -203,21 +223,23 @@ Scope.prototype = {
           childScope = 0;
         }
         else {
-          results.unshift(resolveScope(scope));
+          results.unshift.apply(results, resolveScope(scope));
           scope = getChild(stack[stack.length - 1], scope);
           if (!scope)childScope = scope = stack.pop();
         }
       } while (scope);
-      if (scope)results.push(resolveScope(scope));
       return results;
     }
-    return function ($vars) {
+
+    return function ($vars, sheet) {
       stack = [];
       $param = $vars;
+      parentSheet = sheet || ChangeSS.get('');
       return preVisit(this);
     }
   })()
 };
+ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
   Scope.apply(this);
   this.selector = selectors;
@@ -228,14 +250,16 @@ Style.prototype = (function (scopeProto) {
   proto = Object.create(scopeProto);
   Object.defineProperty(proto, 'selector', {
     get: function () {
-      return this.selectors.join(',')
+      return this._selector || (this._selector = this.selectors.join(','));
     },
     set: function (list) {
       if (typeof  list == "string") list = list.split(',');
-      if (list)
+      if (list) {
         if (list.map)
           this.selectors = list.map(Scope.trimSelector);
         else this.selectors = [Scope.trimSelector(list)];
+        this._selector = null;
+      }
     }
   });
   Object.defineProperty(proto, 'value', {

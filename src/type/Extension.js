@@ -35,7 +35,7 @@ Graph.prototype = {
     return this.vertexes.indexOf(data);
   },
   addEdge: function (from, to) {
-    if (from === to) Error('Do not support edge to self:' + from);
+    if (from === to)  ChangeSS.error.cyclicInherit([from, to]);
     this.addVertex(from, to).adjustList[this.vertexIndex(from)].add(this.vertexIndex(to));
     return this;
   },
@@ -169,52 +169,85 @@ Graph.prototype = {
 };
 ChangeSS.Graph = Graph;
 ChangeSS.validateMix_Ext = (function () {
-  function getScope(ext, scope, graph) {
-    var sheet, r, name, sheetName;
-    ext = ext.split('->');
-    name = ext[0];
-    sheet = ChangeSS.get((sheetName = ext[1] || ''));
-    if (sheet) r = sheet.scopes.filter(function (c) {
-      return c.selector == name
-    });
-    if (!r || !r.length)
-      throw Error('can not find:' + name + sheetName ? ('->' + sheetName) : '');
-    r.forEach(function (base) {
-      graph.addEdge(scope, base);
-    });
-    return r;
+  ChangeSS.error.cyclicInherit = function (path) {
+    debugger;
+    throw new Error('Cyclic inherits detected:' + path.map(function (scope) {
+      return '[' + scope.globalName || scope.selector || scope.symbol + ']';
+    }).join('->'));
+  };
+  function getScopeOrMixObj(name, sheetName) {
+    var names = name.split('->'), objName = names[0];
+    sheetName = names[1] || sheetName;
+    var sheet = ChangeSS.get(sheetName), o;
+    o = sheet[(objName[0] == '$' ? 'mixins' : 'scopes')][objName];
+    if (o) {
+      o.globalName = name + '->' + sheet.name;
+      return o;
+    }
+    ChangeSS.error.notExist(name + '->' + sheetName);
   }
 
-  function collectExt(scope, graph) {
-    scope.exts.map(function (ext) {
-      return getScope(ext, scope, graph);
+  function reportCircle(graph) {
+    var paths = graph.getPaths(info = []), info;
+    if (info.length) ChangeSS.error.cyclicInherit(info);
+    return paths;
+  }
+
+  function collectExt(scope, graph, sheetName) {
+    scope.exts.forEach(function (extName) {
+      graph.addEdge(scope, getScopeOrMixObj(extName, sheetName));
     });
     scope.nested.forEach(function (s) {
-      collectExt(s, graph)
+      collectExt(s, graph, sheetName)
     });
     return graph;
   }
-
   function handleExtPath(path) {
     for (var i = 0, superScope = path[i], base = path[i + 1]; base; superScope = path[++i], base = path[i + 1])
       List.arrayAdd(base.selectors, superScope.selector);
     return path;
   }
 
-  function handleExt(sheets) {
-    var graph = new Graph(), paths;
+  function validateExtCircle(sheets) {
+    var extGraph = new Graph(), sheetName;
     sheets.forEach(function (sheet) {
+      sheetName = sheet.name;
       sheet.scopes.forEach(function (s) {
-        collectExt(s, graph)
+        collectExt(s, extGraph, sheetName)
       });
     });
-    // debugger;
-    paths = graph.getPaths();
-    paths.forEach(handleExtPath);
+    reportCircle(extGraph).forEach(handleExtPath);
   }
 
+  function collectInclude(scope, graph, sheetName) {
+    objForEach(scope.includes, function (includeName) {
+      graph.addEdge(scope, getScopeOrMixObj(includeName, sheetName));
+    });
+    scope.nested.forEach(function (child) {
+      collectInclude(child, graph, sheetName);
+    });
+    return graph;
+  }
+
+  function validateMixCircle(sheets) {
+    var graph = new Graph(), sheetname;
+    sheets.forEach(function (sheet) {
+      sheetname = sheet.name;
+      sheet.scopes.forEach(function (s) {
+        collectInclude(s, graph, sheetname);
+      });
+      objForEach(sheet.mixins, function (key, mixObj) {
+        collectInclude(mixObj, graph, sheetname);
+      });
+    });
+    reportCircle(graph);
+  }
+
+
   return function (sheets) {
-    handleExt(sheets);
+
+    validateMixCircle(sheets);
+    validateExtCircle(sheets);
     return sheets;
   }
 })();

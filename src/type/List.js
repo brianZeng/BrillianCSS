@@ -6,14 +6,40 @@ function List() {
   for (var i = 0, len = arguments.length; i < len; i++)
     this.add(arguments[i]);
 }
+List.addOrMerge = (function () {
+  function merge(oriItem, newItem) {
+    return newItem;
+  }
+
+  function getCompareFunc(keyOrFunc) {
+    if (typeof keyOrFunc === 'string')return function (a, b) {
+      return a[keyOrFunc] === b[keyOrFunc]
+    };
+    return keyOrFunc || function (a, b) {
+      return a === b;
+    }
+  }
+
+  return function (arr, obj, keyOrFunc, mergeFunc) {
+    if (typeof mergeFunc !== "function")mergeFunc = merge;
+    for (var i = 0, len = arr.length, compare = getCompareFunc(keyOrFunc), merged; i < len; i++)
+      if (compare(obj, arr[i])) {
+        merged = mergeFunc(arr[i], obj);
+        if (merged !== undefined)arr[i] = merged;
+        break;
+      }
+    return arr;
+  }
+})();
 List.arrayAdd = function arrayAdd(array, item) {
+  var r = true;
   if (item instanceof Array)
-    for (var i = 0, len = item.length; i < len; i++) arguments.callee(array, item[i]);
+    for (var i = 0, len = item.length; i < len; i++) r &= arguments.callee(array, item[i]);
   else {
     if (array.indexOf(item) > -1)return false;
     else array.push(item);
   }
-  return true;
+  return r;
 };
 List.uniquePush = function (a) {
   for (var i = 1, change = false, arr = arguments[1], add = List.arrayAdd; arr; arr = arguments[++i])

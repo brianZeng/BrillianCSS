@@ -9,7 +9,8 @@ function Var(symbol, sheetName) {
 Var.prototype = {
   _type: ChangeSS.TYPE.VAR,
   toString: function () {
-    return this.symbol;
+    var sheetName = this.sheetName;
+    return sheetName ? this.symbol + '->' + sheetName : this.symbol;
   },
   get refSymbol() {
     var cur = this, chain = [], sheet, symbol;

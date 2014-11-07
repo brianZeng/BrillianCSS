@@ -10,38 +10,40 @@ function Sheet(name) {
 
 Sheet.prototype = (function (proto) {
   proto.add = function (sheetPart) {
-    var type = sheetPart.type;
+    var type = sheetPart.type, Var;
     if (type == 'var') {
-      var Var = sheetPart.name;
+      Var = sheetPart.name;
       if (!Var.sheetName || Var.sheetName == this.name) {
         this.vars[Var.symbol] = sheetPart.value;
         Var.sheetName = '';
       }
       else ChangeSS.add(Var);
     }
-    else if (type == 'style')
+    else if (type == 'style') {
       this.scopes.push(sheetPart.value);
-    else if (type == 'mix')
-      this.mixins[sheetPart.value.name] = sheetPart.value;
+    }
+    else if (type == 'mix') {
+      var mixObj;
+      Var = sheetPart.name;
+      mixObj = Var.sheetName ? ChangeSS.get(Var.sheetName).mixins : this.mixins;
+      mixObj[sheetPart.value.symbol = Var.symbol] = sheetPart.value;
+    }
     else throw 'unknown type';
     return this;
   };
   proto.resolve = function ($vars) {
-    var $param = ChangeSS.assign(mix(this.vars, $vars));
+    var $param = ChangeSS.assign(mix(this.vars, $vars)), sheet = this;
     return this.scopes.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($param));
+      r.push.apply(r, scope.resolve($param, sheet));
       return r;
     }, []);
   };
   proto.merge = function (sheet) {
-    var name = this.name;
-    objForEach(sheet.vars, function (key, value) {
-      this[key] = value;
-    }, this.vars);
-    console.warn('no mixin');
+    this.vars = mix(this.vars, sheet.vars);
     this.scopes = this.scopes.concat(sheet.scopes.map(function (s) {
       return s.clone();
     }));
+    this.mixins = mix(this.mixins, sheet.mixins);
     return this;
   };
   proto.validate = function () {

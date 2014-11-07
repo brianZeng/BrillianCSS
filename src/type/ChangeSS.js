@@ -3,7 +3,11 @@
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
-
+  main.error = {
+    notExist: function (name) {
+      throw Error('cannot get:' + name);
+    }
+  };
   function main(input, keep) {
     if (!keep)clear();
     var results = main.parse(input).map(function (sheet) {
@@ -26,20 +30,30 @@ ChangeSS = (function (parser) {
   }
 
   main.merge = merge;
-  main.get = function (name) {
+  main.get = function (name, type) {
     name = name || main.defaultSheetName;
-    if (name) {
-      if (name[0] == '$') {
-
-      }
-      else return getter.sheet(name);
+    type = (type || '').toLowerCase();
+    switch (type) {
+      case 'mixin':
+        return getter.fromFullName(name, 'mixins');
+      case 'scope':
+        return getter.fromFullName(name, 'scopes');
+      default :
+        return getter.sheet(name);
     }
+
   };
   getter = {
     sheet: function (name) {
       name = name || main.defaultSheetName;
       var sheet = sheetMap[name];
       return sheet || (sheetMap[name] = new Sheet(name));
+    },
+    fromFullName: function (name, sheetPro) {
+      var names = name.split('->'), sheetName = names[1], sheet;
+      if (!sheetName)return undefined;
+      if (!(sheet = sheetMap[name]))return ChangeSS.error.notExist(name);
+      return sheet[sheetPro][names[0]] || ChangeSS.error.notExist(name);
     }
   };
   setter = {
@@ -74,8 +88,9 @@ ChangeSS = (function (parser) {
   return main;
 })(parser);
 ChangeSS.defaultSheetName = 'default';
-ChangeSS.assign = function ($param) {
-  var $known = {}, con, typeEnum = ChangeSS.TYPE;
+ChangeSS.assign = function ($param, $known) {
+  var con, typeEnum = ChangeSS.TYPE;
+  $known = $known || {};
   do {
     con = false;
     objForEach($param, function (key, value) {

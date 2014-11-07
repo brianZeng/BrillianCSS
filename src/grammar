@@ -27,7 +27,7 @@ s               [\s\r\n\t\f]
 <*>"@include"                            return 'INCLUDE';
 <*>"@sheet"                              this.begin("EXP");return 'SHEET';
 <INITIAL>"@"extend                       this.begin('EXT');return 'EXTENDS';
-<EXT>{sltstart}{sltchar}*?(?=\;)         this.popState();return 'SELECTOR';
+<EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
 <INITIAL>{selector}                      return 'SELECTOR';
 <*>{s}                                  /* ignore*/;
@@ -109,8 +109,8 @@ defParamList:
      |'(' assignList ')'            {$$=$2;}
      ;
 includeCall:
-     INCLUDE var defParamList       {$$={name:$2,value:$3};}
-    |INCLUDE var                    {$$={name:$2,value:{}};}
+     INCLUDE var defParamList       {$$={name:$2.toString(),value:$3};}
+    |INCLUDE var                    {$$={name:$2.toString(),value:{}};}
     ;
 scopeBodyPart:
     IDENT ':' list               {$$={name:$1,value:$3.resolve(),type:'rule'};}
@@ -128,14 +128,14 @@ scope:
     '{' scopeBody '}'               {$$=$2;}
     |defParamList '{' scopeBody '}' {$$=$3.addDefValues($1);}
     |defParamList '{' '}'           {$$=new Scope().addDefValues($1);}
-    | '{' '}'
+    | '{' '}'                       {$$=new Scope();}
     ;
 nestedStyle:
     '&' scope                    {$$=new Style($1,$2);}
     |style
     ;
 mixScope:
-    MIXIN var scope              {$$=$3;$3.name=$2;}
+    MIXIN var scope              {$$={name:$2,value:$3}}
     ;
 selectors:
        SELECTOR                  {$$=new List($1);}
@@ -146,7 +146,7 @@ style:
     ;
 sheetPart:
      style          {$$={type:'style',value:$1}}
-    |mixScope       {$$={type:'mix',value:$1};}
+    |mixScope       {$1.type='mix';}
     |assignPair     {$1.type='var';}
     |sheetPart ';'
     ;
