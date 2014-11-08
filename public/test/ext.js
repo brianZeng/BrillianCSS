@@ -2,10 +2,11 @@
  * Created by 柏然 on 2014/11/6.
  */
 describe('extension behaviors:', function () {
-  var src, sheet;
+  var src, sheet, scope;
 
   function getFirstValidatedSheet(src) {
-    return sheet = ChangeSS(src)[0];
+    scope = (sheet = ChangeSS(src)[0]).scopes[0];
+    return sheet;
   }
 
   function getSheetSelectors(sheet, array) {
@@ -61,7 +62,6 @@ describe('extension behaviors:', function () {
     })
   });
   describe('2.mix obj', function () {
-    var scope;
     xit('mix obj in local sheet', function () {
       src = '@mixin $redBorder{border:1px solid red;&:hover{ border-color:yellow;}} div{@include $redBorder;}';
       getFirstValidatedSheet(src);
@@ -75,14 +75,26 @@ describe('extension behaviors:', function () {
       expect(sheet.mixins['$a']).toEqual(jasmine.any(ChangeSS.Scope));
       expect(sheet.mixins['$b']).toEqual(jasmine.any(ChangeSS.Scope));
     });
-
-    it('detect cyclic includes', function () {
+    xit('detect cyclic includes', function () {
       src = '@mixin $a{@include $b;} @mixin $b{@include $c;} @mixin $c{@include $a;} .circle{@include $a;}';
-
-      //var spy=spyOn(ChangeSS.error,'cyclicInherit');
+      expect(function () {
+        getFirstValidatedSheet(src);
+      }).toThrowError();
+      var spy = spyOn(ChangeSS.error, 'cyclicInherit');
       getFirstValidatedSheet(src);
-      // expect(spy).toHaveBeenCalled();
-    })
+      expect(spy).toHaveBeenCalled();
+    });
+    it('what the mixObj extends will also be include', function () {
+      src = '@mixin $a{@extend .base} .base{} .super{@include $a;}';
+      getFirstValidatedSheet(src);
+      expect(sheet.get('.super').exts).toContain('.base');
+      src = '@mixin $a{@extend .base} .base{@extend .error;} .super{@include $a;} .error{@include $a}';
+      var spy = spyOn(ChangeSS.error, 'cyclicInherit').and.callThrough();
+      expect(function () {
+        getFirstValidatedSheet(src);
+      }).toThrow();
+      expect(spy).toHaveBeenCalled();
+    });
 
   });
 

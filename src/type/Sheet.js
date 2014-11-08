@@ -52,6 +52,14 @@ Sheet.prototype = (function (proto) {
     });
     return this;
   };
-
+  proto.get = function (id, type) {
+    if (type == 'scope' || id[0] != '$') {
+      for (var i = 0, scopes = this.scopes, scope = scopes[0]; scope; scope = scopes[++i])
+        if (scope.selector == id) return scope;
+    } else if (type == 'mixin')
+      return this.mixins[id];
+    else if (type == 'var')return this.vars[id];
+    else return this.mixins[id] || this.vars[id];
+  };
   return proto;
 })({});

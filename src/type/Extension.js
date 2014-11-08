@@ -169,27 +169,26 @@ Graph.prototype = {
 };
 ChangeSS.Graph = Graph;
 ChangeSS.validateMix_Ext = (function () {
-  ChangeSS.error.cyclicInherit = function (path) {
-    debugger;
-    throw new Error('Cyclic inherits detected:' + path.map(function (scope) {
-      return '[' + scope.globalName || scope.selector || scope.symbol + ']';
-    }).join('->'));
+  ChangeSS.error.cyclicInherit = function (pathInfo, graph) {
+    throw new Error('Cyclic inherits detected:' + pathInfo);
   };
   function getScopeOrMixObj(name, sheetName) {
     var names = name.split('->'), objName = names[0];
     sheetName = names[1] || sheetName;
     var sheet = ChangeSS.get(sheetName), o;
-    o = sheet[(objName[0] == '$' ? 'mixins' : 'scopes')][objName];
+    o = sheet.get(objName);
     if (o) {
-      o.globalName = name + '->' + sheet.name;
+      o.globalName = o.globalName || name + '->' + sheet.name;
       return o;
     }
-    ChangeSS.error.notExist(name + '->' + sheetName);
+    throw ChangeSS.error.notExist(name + '->' + sheetName);
   }
 
   function reportCircle(graph) {
     var paths = graph.getPaths(info = []), info;
-    if (info.length) ChangeSS.error.cyclicInherit(info);
+    if (info.length) ChangeSS.error.cyclicInherit(info.map(function (scope) {
+      return '[' + (scope.globalName || scope.selector || scope.symbol) + ']';
+    }).join('->'), graph);
     return paths;
   }
 
@@ -240,12 +239,15 @@ ChangeSS.validateMix_Ext = (function () {
         collectInclude(mixObj, graph, sheetname);
       });
     });
-    reportCircle(graph);
+    reportCircle(graph).forEach(injectIncludeExt);
   }
 
-
+  function injectIncludeExt(path) {
+    var scope = path.shift(), includeObj, exts = scope.exts;
+    while (includeObj = path.shift())
+      List.arrayAdd(exts, includeObj.exts);
+  }
   return function (sheets) {
-
     validateMixCircle(sheets);
     validateExtCircle(sheets);
     return sheets;
