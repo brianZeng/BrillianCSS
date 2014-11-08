@@ -9,9 +9,10 @@ ChangeSS = (function (parser) {
     }
   };
   function main(input, keep) {
+    var results = List();
     if (!keep)clear();
-    var results = main.parse(input).map(function (sheet) {
-      return merge(sheet);
+    main.parse(input).forEach(function (sheet) {
+      results.add(merge(sheet));
     });
     ChangeSS.validateMix_Ext(results);
     return results;
@@ -57,9 +58,9 @@ ChangeSS = (function (parser) {
     }
   };
   setter = {
-    Var: function (Var) {
+    Var: function (Var, value) {
       var sheet = getter.sheet(Var.sheetName);
-      sheet.vars[Var.symbol] = Var;
+      sheet.vars[Var.symbol] = value;
       Var.sheetName = '';
     },
     sheet: function (sheet) {
@@ -69,13 +70,15 @@ ChangeSS = (function (parser) {
   };
 
   main.parse = function (input) {
-    return input.split(/\={4,}/g).map(function (src) {
+    return input.split(/\={4,}/g).filter(function (src) {
+      return src;
+    }).map(function (src) {
       return parser.parse(src).validate();
     })
   };
-  main.add = function (something) {
+  main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);
-    else if (something instanceof Var) setter.Var(something);
+    else if (something instanceof Var) setter.Var(something, value);
     return this;
   };
   main.getType = function (side) {

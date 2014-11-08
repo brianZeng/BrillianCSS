@@ -11,6 +11,10 @@ describe('Scope static behaviors', function () {
     return Object.getOwnPropertyNames(obj).length;
   }
 
+  function containAll(results) {
+    for (var i = 1, len = arguments.length; i < len; i++)
+      expect(results).toContain(arguments[i]);
+  }
   function getFirstSheet(src) {
     return ChangeSS.parse(src)[0];
   }
@@ -23,7 +27,7 @@ describe('Scope static behaviors', function () {
     return thisObj;
   }
 
-  describe('scope components', function () {
+  describe('1.scope components', function () {
     var rules = {
       padding: '10px',
       background: 'red',
@@ -68,7 +72,7 @@ describe('Scope static behaviors', function () {
       //expect(scope.clone()).toEqual(scope);
     });
   });
-  describe('nesting support', function () {
+  describe('2.nesting support', function () {
     it('a scope can nest many scopes', function () {
       var src = 'form{' +
         ' &:hover{}' +
@@ -104,7 +108,94 @@ describe('Scope static behaviors', function () {
       expect(scope.resolve()[1].selector).toBe('ul:hover,li:hover');
     });
   });
+  describe('3.multiple sheets(I call it namespace)', function () {
+    var sheets, src;
 
+    function getSheets() {
+      return sheets = ChangeSS(src);
+    }
+
+    it('can be separeted by ====,@sheetname must be the first line of the sheet', function () {
+      src = '@sheetname foo;$color:red;' +
+        '====' +
+        '@sheetname bar;$color:blue;' +
+        '====' +
+        '@sheetname bar_bar;$color:yellow;' +
+        '====';
+      expect(getSheets().length).toBe(3);
+      containAll(sheets.map(function (sheet) {
+        return sheet.name
+      }), 'foo', 'bar', 'bar_bar');
+      src = '@sheetname foo;' +
+        '$color:red;' +
+        '====' +
+        '$color:blue;' +
+        '@sheetname bar;';
+      expect(getSheets).toThrow();
+    });
+    it('the default sheet name is ChangeSS.defaultSheetName', function () {
+      src = '@sheetname default;$color:red;' +
+        '====' +
+        '@sheetname bar;$color:blue;' +
+        '====' +
+        '$color:yellow;' +
+        '====';
+      expect(getSheets().length).toBe(2);
+      expect(sheets.map(function (sheet) {
+        return sheet.name
+      })).toEqual(['default', 'bar']);
+      expect(sheets.map(function (sheet) {
+        return sheet.get('$color')
+      })).toEqual(['yellow', 'blue']);
+    });
+    it('can assign a value to another sheet var', function () {
+      src = '@sheetname foo;$color:red;' +
+        '====' +
+        '@sheetname bar;$color:blue;' +
+        '$color->foo:white;';
+      expect(getSheets().length).toBe(2);
+      expect(sheets.map(function (sheet) {
+        return sheet.get('$color')
+      })).toEqual(['white', 'blue']);
+      src = '@sheetname foo;$color:red;' +
+        '====' +
+        '@sheetname bar;$color:blue;' +
+        '$color->bar:#000;';
+      getSheets();
+      expect(sheets.map(function (sheet) {
+        return sheet.get('$color')
+      })).toEqual(['red', '#000']);
+    });
+    it('cannot assign a mixObj or scope to another sheet', function () {
+      src = '@sheetname bar' +
+        'div{}' +
+        '====' +
+        '@sheetname foo;' +
+        '@mixin $error -> bar{width:20px;}';
+      expect(getSheets).toThrow();
+      src = '@sheetname bar' +
+        'div{}' +
+        '====' +
+        '@sheetname foo;' +
+        '.error -> bar{width:20px;}';
+      expect(getSheets).toThrow();
+    });
+    it('but can include or extend from other sheets', function () {
+      src = '@sheetname lib;' +
+        '$color:red;' +
+        '@mixin $dash{border:1px dashed #123};' +
+        '.auto{width:100%}' +
+        '====' +
+        'div{' +
+        'background:$color ->lib;' +
+        '@include $dash  -> lib;' +
+        '@extend .auto ->  lib;' +
+        '}';
+      var lib = getSheets()[0], def = sheets[1];
+      containAll(lib.scopes[0].selectors, 'div', '.auto');
+      expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
+    });
+  })
 });
 describe('scope resolve behaviors', function () {
   function getFirstScope(src) {

@@ -25,15 +25,15 @@ s               [\s\r\n\t\f]
 <*>{comment}                           /* ignore*/;
 <*>"@mixin"                              return 'MIXIN';
 <*>"@include"                            return 'INCLUDE';
-<*>"@sheet"                              this.begin("EXP");return 'SHEET';
-<INITIAL>"@"extend                       this.begin('EXT');return 'EXTENDS';
+<*>"@sheetname"                          this.begin("EXP");return 'SHEET';
+<*>"@"extend                             this.begin('EXT');return 'EXTENDS';
+<*>'->'                                  this.begin("EXP");return '->';
 <EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
 <INITIAL>{selector}                      return 'SELECTOR';
 <*>{s}                                  /* ignore*/;
 <INITIAL>':'                           this.begin("EXP");return ':';
 <INITIAL>\;+                           return ';';
-<*>'->'                                this.begin("EXP");return '->';
 <*>'{'                                 this.popState();return '{';
 <*>'}'                                 this.popState();return '}';
 <*>'('                                 return '(';
@@ -65,7 +65,7 @@ s               [\s\r\n\t\f]
 %start sheet
 %%
 var:
-    VAR  '->' LITERAL  {$$=new Var($1,$3);yy.lexer.popState();}
+    VAR  '->' LITERAL  {$$=new Var($1,$3);}
    |VAR                {$$=new Var($1);}
    ;
 exp:
@@ -117,7 +117,7 @@ scopeBodyPart:
    |nestedStyle                  {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
-   |EXTENDS SELECTOR '->' LITERAL{$$={type:'ext',name:$2,sheetName:$4};}
+   |EXTENDS   SELECTOR '->' LITERAL{$$={type:'ext',name:$2,sheetName:$4};}
    |scopeBodyPart ';'
    ;
 scopeBody:

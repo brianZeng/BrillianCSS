@@ -170,17 +170,18 @@ Graph.prototype = {
 ChangeSS.Graph = Graph;
 ChangeSS.validateMix_Ext = (function () {
   ChangeSS.error.cyclicInherit = function (pathInfo, graph) {
-    throw new Error('Cyclic inherits detected:' + pathInfo);
+    throw Error('Cyclic inherits detected:' + pathInfo);
   };
   function getScopeOrMixObj(name, sheetName) {
     var names = name.split('->'), objName = names[0];
     sheetName = names[1] || sheetName;
     var sheet = ChangeSS.get(sheetName), o;
     o = sheet.get(objName);
-    if (o) {
-      o.globalName = o.globalName || name + '->' + sheet.name;
+    if (o && !o.globalName) {
+      o.globalName = names[1] ? name : (objName + sheet.name);
       return o;
     }
+    debugger;
     throw ChangeSS.error.notExist(name + '->' + sheetName);
   }
 
@@ -197,13 +198,15 @@ ChangeSS.validateMix_Ext = (function () {
       graph.addEdge(scope, getScopeOrMixObj(extName, sheetName));
     });
     scope.nested.forEach(function (s) {
-      collectExt(s, graph, sheetName)
+      collectExt(s, graph, sheetName);
     });
     return graph;
   }
   function handleExtPath(path) {
-    for (var i = 0, superScope = path[i], base = path[i + 1]; base; superScope = path[++i], base = path[i + 1])
+    for (var i = 0, superScope = path[i], base = path[i + 1]; base; superScope = path[++i], base = path[i + 1]) {
       List.arrayAdd(base.selectors, superScope.selector);
+      base._selector = null;
+    }
     return path;
   }
 
@@ -215,10 +218,12 @@ ChangeSS.validateMix_Ext = (function () {
         collectExt(s, extGraph, sheetName)
       });
     });
+
     reportCircle(extGraph).forEach(handleExtPath);
   }
 
   function collectInclude(scope, graph, sheetName) {
+
     objForEach(scope.includes, function (includeName) {
       graph.addEdge(scope, getScopeOrMixObj(includeName, sheetName));
     });
@@ -239,6 +244,7 @@ ChangeSS.validateMix_Ext = (function () {
         collectInclude(mixObj, graph, sheetname);
       });
     });
+
     reportCircle(graph).forEach(injectIncludeExt);
   }
 
@@ -247,7 +253,20 @@ ChangeSS.validateMix_Ext = (function () {
     while (includeObj = path.shift())
       List.arrayAdd(exts, includeObj.exts);
   }
+
+
+  function filterVar(key, value) {
+    var i;
+    if ((i = key.indexOf('->')) == -1)return;
+    ChangeSS.get(key.substr(i + 2)).vars[key.substr(0, i)] = value;
+    delete this[key];
+  }
+
+  function linkOtherSheet(sheet) {
+    objForEach(sheet.vars, filterVar, sheet.vars);
+  }
   return function (sheets) {
+    sheets.forEach(linkOtherSheet);
     validateMixCircle(sheets);
     validateExtCircle(sheets);
     return sheets;

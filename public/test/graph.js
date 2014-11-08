@@ -191,6 +191,10 @@ Graph.prototype = {
 describe('graph behaviors', function () {
   var g = new Graph();
 
+  function containAll(results) {
+    for (var i = 1, len = arguments.length; i < len; i++)
+      expect(results).toContain(arguments[i]);
+  }
   function sp(str) {
     return str.split(',');
   }
@@ -247,13 +251,13 @@ describe('graph behaviors', function () {
         [0]
       ])).toContain([0, 1], [0]);
       //debugger;
-      expect(g.getPaths()).toContain(['a', 'b']);
+      containAll(g.getPaths(), ['a', 'b']);
       g.addEdge('b', 'c');
       expect(g.getPaths()).toEqual([
         ['a', 'b', 'c']
       ]);
       g.addEdge('a', 'c');
-      expect(g.getPaths()).toContain(['a', 'b', 'c'], ['a', 'c']);
+      containAll(g.getPaths(), ['a', 'b', 'c'], ['a', 'c']);
       g.removeEdge('a', 'c');
     });
   });
@@ -270,10 +274,10 @@ describe('graph behaviors', function () {
        * d->e->f
        * */
       g.addEdge('a', 'f').addEdge('d', 'e').addEdge('b', 'c');
-      expect(g.getPaths()).toContain(sp('a,f'), sp('d,e'), sp('b,c'));
+      containAll(g.getPaths(), sp('a,f'), sp('d,e'), sp('b,c'));
       g.addEdge('c', 'e').addEdge('e', 'f');
       expect(g.getPaths().length).toBe(3);
-      expect(g.getPaths()).toContain(sp('a,f'), sp('b,c,e,f'), sp('d,e,f'));
+      containAll(g.getPaths(), sp('a,f'), sp('b,c,e,f'), sp('d,e,f'));
     });
     it('one source multiple destinations DAG', function () {
       getGraph();
@@ -289,7 +293,7 @@ describe('graph behaviors', function () {
        */
       g.addEdge('a', 'b').addEdge('b', 'c').addEdge('b', 'f').addEdge('a', 'd').addEdge('a', 'e').addEdge('e', 'd');
       expect(g.getPaths().length).toBe(4);
-      expect(g.getPaths()).toContain(['a', 'd'], sp('a,b,c'), sp('a,b,f'), sp('a,e,d'));
+      containAll(g.getPaths(), ['a', 'd'], sp('a,b,c'), sp('a,b,f'), sp('a,e,d'));
     });
     it('multiple des multiple src DAG', function () {
       getGraph();
@@ -303,7 +307,7 @@ describe('graph behaviors', function () {
        */
       g.addEdges(sp('a,c,b,c,c,d,d,f,c,e,e,f'));
       expect(g.getPaths().length).toBe(4);
-      expect(g.getPaths()).toContain(sp('a,c,e,f'), sp('b,c,e,f'), sp('a,c,d,f'), sp('b,c,d,f'));
+      containAll(g.getPaths(), sp('a,c,e,f'), sp('b,c,e,f'), sp('a,c,d,f'), sp('b,c,d,f'));
     });
     it('find the circle path', function () {
       var collector = [];
@@ -325,7 +329,7 @@ describe('graph behaviors', function () {
        a->b b->d
        */
       g.addEdges(sp('a,f,f,e,e,a,a,c,c,e,a,b,b,d'));
-      expect(g.getPaths(collector)).toContain(['b', 'd']);
+      containAll(g.getPaths(collector), ['b', 'd']);
       console.log(collector);
       expect(collector.length).toBe(4);
     });

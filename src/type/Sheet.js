@@ -10,14 +10,15 @@ function Sheet(name) {
 
 Sheet.prototype = (function (proto) {
   proto.add = function (sheetPart) {
-    var type = sheetPart.type, Var;
+    var type = sheetPart.type, Var, fullName;
     if (type == 'var') {
       Var = sheetPart.name;
       if (!Var.sheetName || Var.sheetName == this.name) {
-        this.vars[Var.symbol] = sheetPart.value;
+        fullName = Var.symbol;
         Var.sheetName = '';
       }
-      else ChangeSS.add(Var);
+      else fullName = Var.toString();
+      this.vars[fullName.trim()] = sheetPart.value;
     }
     else if (type == 'style') {
       this.scopes.push(sheetPart.value);

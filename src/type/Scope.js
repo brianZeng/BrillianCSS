@@ -9,9 +9,19 @@ function Scope() {
   this.nested = [];
   this.exts = [];
 }
-Scope.trimSelector = function (selector) {
-  return selector.replace(/[\r\n\t\f\s]+/gi, ' ').trim();
-};
+(function (def) {
+  function trimSelector(selector) {
+    return selector.replace(/[\r\n\t\f\s]+/gi, ' ').trim();
+  }
+
+  function splitGlobalName(name) {
+    return name.split('->').map(trimSelector);
+  }
+
+  def.trimSelector = trimSelector;
+  def.splitGlobalName = splitGlobalName;
+})(Scope);
+
 Scope.prototype = {
   selectors: [''],
   toString: (function () {
@@ -59,7 +69,9 @@ Scope.prototype = {
     return this;
   },
   addExt: function (selector, sheetName) {
-    selector = Scope.trimSelector(selector);
+    var names = selector.split('->').map(Scope.trimSelector);
+    selector = names[0];
+    sheetName = sheetName || names[1];
     if (sheetName)selector += '->' + sheetName;
     List.arrayAdd(this.exts, selector);
     return this;
