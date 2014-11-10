@@ -174,40 +174,31 @@ Scope.prototype = {
     });
     return array;
   },
-  getInclude: function (key, parentSheet) {
-    return ChangeSS.get(key, 'mixin') || (parentSheet.mixins[key]) || ChangeSS.error.notExist(key);
-  },
   resolve: (function () {
-    var stack, $param, parentSheet;
+    var stack, paramStack, $assign;
     function log() {
       if (ChangeSS.traceLog)
         console.log.apply(console, arguments);
     }
-    function findVars(scope) {
-      return scope.getVarNames().reduce(function ($vars, varname) {
-        if (!$vars[varname])
-          for (var s = scope, i = stack.length, value; s; s = stack[--i])
-            if (value = s.defValues[varname]) {
-              $vars[varname] = value;
-              break;
-            }
-        return $vars;
-      }, mix($param));
-    }
-
     function resolveScope(scope) {
-      var $vars = ChangeSS.assign(findVars(scope)), ruleObj = mix(scope.staticRules), selector = scope.selector, r;
+      var $vars = assignParam(scope, true), ruleObj = mix(scope.staticRules), selector = scope.selector, r,
+        $resolved = $vars.$resolved;
       objForEach(scope.dynamicRules, function (key, rule) {
-        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($vars))
-          ruleObj[key] = rule.resolve($vars);
+        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
+          ruleObj[key] = rule.resolve($resolved).toString();
         else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
       });
       r = [
         {rules: ruleObj, selector: scope.selectors.join(',')}
       ];
-      objForEach(scope.includes, function (key, value) {
-        resolveInclude(new Style(selector, scope.getInclude(key, parentSheet)), ChangeSS.assign(value, $vars), r);
+      objForEach(scope.includes, function (key, invokeParam) {
+        var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
+        objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (key, value) {
+          if (invokeParam[key])$param[key] = value;
+        });
+        resolveInclude(new Style(selector, mixin), $param, r);
       });
+      //paramStack.pop();
       return r;
     }
 
@@ -218,7 +209,7 @@ Scope.prototype = {
 
     function resolveInclude(mixObj, $vars, results) {
       mixObj.validateSelector();
-      return mixObj.resolve($vars, parentSheet).forEach(function (resObj) {
+      return mixObj.resolve($vars).forEach(function (resObj) {
         List.addOrMerge(results, resObj, 'selector', mergeResult);
       });
     }
@@ -228,25 +219,36 @@ Scope.prototype = {
     }
     function preVisit(scope) {
       var childScope = 0, results = [];
-      do {
+      while (scope)
         if (childScope = getChild(scope, childScope)) {
           stack.push(scope);
+          paramStack.push(assignParam(scope));
           scope = childScope;
           childScope = 0;
         }
         else {
           results.unshift.apply(results, resolveScope(scope));
           scope = getChild(stack[stack.length - 1], scope);
-          if (!scope)childScope = scope = stack.pop();
+          if (!scope) {
+            childScope = scope = stack.pop();
+            paramStack.pop();
+          }
         }
-      } while (scope);
       return results;
     }
 
-    return function ($vars, sheet) {
+    function assignParam(scope, resolve) {
+      var lastAssign = paramStack[paramStack.length - 1] || {},
+        $mix = mix(lastAssign, scope.defValues, $assign);
+      return resolve ? ChangeSS.assign($mix) : $mix;
+    }
+
+    return function ($vars) {
       stack = [];
-      $param = $vars;
-      parentSheet = sheet || ChangeSS.get('');
+      paramStack = [];
+      if (!$vars)$assign = {};
+      else if ($vars.$resolved)$assign = mix($vars.$unresolved, $vars.$resolved);
+      else $assign = $vars;
       return preVisit(this);
     }
   })()

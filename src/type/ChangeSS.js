@@ -36,13 +36,13 @@ ChangeSS = (function (parser) {
     type = (type || '').toLowerCase();
     switch (type) {
       case 'mixin':
-        return getter.fromFullName(name, 'mixins');
       case 'scope':
-        return getter.fromFullName(name, 'scopes');
+        return getter.fromFullName(name, type + 's');
+      case 'var':
+        return getter.variable(name);
       default :
         return getter.sheet(name);
     }
-
   };
   getter = {
     sheet: function (name) {
@@ -53,9 +53,15 @@ ChangeSS = (function (parser) {
     fromFullName: function (name, sheetPro) {
       var names = name.split('->'), sheetName = names[1], sheet;
       if (!sheetName)return undefined;
-      if (!(sheet = sheetMap[name]))return ChangeSS.error.notExist(name);
+      if (!(sheet = sheetMap[sheetName]))return ChangeSS.error.notExist(name);
       return sheet[sheetPro][names[0]] || ChangeSS.error.notExist(name);
+    },
+    variable: function (name) {
+      var i = name.indexOf('->'), sheetName = name.substr(i + 2), symbol = name.substr(0, i), sheet;
+      if (!sheetName || !(sheet = sheetMap[sheetName]) || !symbol)return undefined;
+      return sheet.vars[symbol];
     }
+
   };
   setter = {
     Var: function (Var, value) {
@@ -81,43 +87,51 @@ ChangeSS = (function (parser) {
     else if (something instanceof Var) setter.Var(something, value);
     return this;
   };
-  main.getType = function (side) {
+  main.getType = function (side, asNone) {
     var type;
     if (!side)return ChangeSS.TYPE.NONE;
     if (typeof side == "string") return ChangeSS.TYPE.KEYWORD;
     else if (type = side._type) return type;
-    else throw  Error('unknown type');
+    else if (asNone)return ChangeSS.TYPE.NONE;
+    throw  Error('unknown type');
   };
   return main;
 })(parser);
 ChangeSS.defaultSheetName = 'default';
 ChangeSS.assign = function ($param, $known) {
-  var con, typeEnum = ChangeSS.TYPE;
-  $known = $known || {};
+  var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
+  $known = mix($known);
   do {
     con = false;
-    objForEach($param, function (key, value) {
+    objForEach($unknown, function (key, value) {
       switch (ChangeSS.getType(value)) {
         case typeEnum.KEYWORD:
         case typeEnum.LENGTH:
           $known[key] = value;
-          delete $param[key];
+          delete $unknown[key];
+          break;
+        case typeEnum.LIST:
+          $unknown[key] = value = value.resolve($known);
+          if (!value.hasVars) {
+            $known[key] = value.toString();
+            delete  $unknown[key];
+          } else return;
           break;
         case typeEnum.NONE:
           throw 'unknown type';
         default :
           if (value.canResolve($known))
-            $param[key] = value.resolve($known);
+            $unknown[key] = value.resolve($known);
           else return;
       }
       con = true;
     });
     if (!con)
-      con = Object.getOwnPropertyNames($param).some(function (key) {
-        $param[key].canResolve($known)
+      con = Object.getOwnPropertyNames($unknown).some(function (key) {
+        $unknown[key].canResolve($known)
       });
   } while (con);
-  return $known;
+  return {$resolved: $known, $unresolved: $unknown};
 };
 ChangeSS.traceLog = true;
 function mix() {

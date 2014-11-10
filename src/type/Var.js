@@ -3,53 +3,64 @@
  */
 function Var(symbol, sheetName) {
   if (!(this instanceof Var))return new Var(symbol, sheetName);
-  this.symbol = symbol;
+  this.symbol = symbol.trim();
   this.sheetName = sheetName || '';
 }
-Var.prototype = {
-  _type: ChangeSS.TYPE.VAR,
-  toString: function () {
-    var sheetName = this.sheetName;
-    return sheetName ? this.symbol + '->' + sheetName : this.symbol;
-  },
-  get refSymbol() {
-    var cur = this, chain = [], sheet, symbol;
-    while (cur && (symbol = cur.symbol) && cur.sheetName) {
-      if (!List.arrayAdd(chain, cur.sheetName + ':' + cur.symbol)) Error('dependent conflict:' + chain.join('->'));
-      if (sheet = ChangeSS.get(cur.sheetName))
-        cur = sheet.vars[cur.symbol];
-      else return this.symbol;
-    }
-    return symbol;
-  },
-  get hasVars() {
-    return true;
-  },
-  clone: function () {
-    return new Var(this.symbol, this.sheetName);
-  },
-  assign: function ($vars) {
-    return $vars[this.symbol];
-  },
-  reduce: function () {
-    return this;
-  },
-  resolve: function ($vars) {
-    if (this.sheetName) Error('not implement yet');
-    return ($vars ? $vars[this.symbol] : 0) || this.clone();
-  },
-  getVarNames: function (array) {
-    array = array || [];
-    List.arrayAdd(array, this.symbol);
-    return array;
-  },
-  canResolve: (function (TYPE) {
-    var LEN = TYPE.LENGTH, KEYWORD = TYPE.KEYWORD;
-    return function ($param) {
-      if (this.sheetName) return false;
-      var t = ChangeSS.getType($param[this.symbol]);
+Var.prototype = (function (TYPE) {
+  var VAR = TYPE.VAR, getType = ChangeSS.getType, LEN = TYPE.LENGTH, KEYWORD = TYPE.KEYWORD;
+
+  function isVar(obj) {
+    return getType(obj, true) === VAR;
+  }
+
+  Var.isVar = isVar;
+  return{
+    _type: ChangeSS.TYPE.VAR,
+    toString: function () {
+      var sheetName = this.sheetName;
+      return sheetName ? this.symbol + '->' + sheetName : this.symbol;
+    },
+    get hasVars() {
+      return true;
+    },
+    clone: function () {
+      return new Var(this.symbol, this.sheetName);
+    },
+    reduce: function () {
+      return this;
+    },
+    findRef: function () {
+      var value = this, cycle = new Graph();
+      while (isVar(value) && value.sheetName) {
+        if (cycle.hasVertex(value))
+          ChangeSS.error.cyclicInherit(cycle.vertexes.map(function (v) {
+            return '[' + v + ']->'
+          }), cycle);
+        cycle.addVertex(value);
+        value = ChangeSS.get(value.toString(), 'var');
+      }
+      return value;
+    },
+    resolve: function ($vars) {
+      var value, real = this.findRef();
+      if (isVar(real) || real == undefined) {
+        if ($vars)value = $vars[this.symbol];
+      }
+      else value = real;
+      if (isVar(value))
+        if (isVar(real = value.findRef()))return this.clone();
+        else value = real;
+      return value || this.clone();
+    }, getVarNames: function (array) {
+      array = array || [];
+      List.arrayAdd(array, this.symbol);
+      return array;
+    },
+    canResolve: function ($param) {
+      var t = getType(this.resolve($param));
       return t == LEN || t == KEYWORD;
     }
-  })(ChangeSS.TYPE)
-};
+  }
+})(ChangeSS.TYPE);
+
 ChangeSS.Var = Var;

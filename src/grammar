@@ -42,7 +42,7 @@ s               [\s\r\n\t\f]
 <*>','                                 return ',';
 <*>'&'\:*{selector}                       return '&';
 <*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|s|\%)? return 'NUMBER';
-<EXP>\;+                           this.popState();return ';';
+<EXP>\;+                           popUntil(this,'INITIAL');return ';';
 <EXP>(\"|\')[\s\S]*?(\1)           return "STRING";
 <EXP>(url\(.*?\)|url\({string}\))  return "URL";
 <EXP>'+'                           return '+';
@@ -50,7 +50,7 @@ s               [\s\r\n\t\f]
 <EXP>'*'                           return '*';
 <EXP>'/'                           return '/';
 <EXP>'#'{hexchar}+                 return 'LITERAL';
-<EXP>{key}(?=\()                   return 'FUNCNAME';
+<EXP>{key}(?=\([^$])               return 'FUNCNAME';
 <EXP>{key}                         return 'LITERAL';
 <*>{Ident}                                return 'IDENT';
 <*><<EOF>>                                return "EOF";
@@ -157,3 +157,7 @@ sheet:
     |sheet "EOF"      {return $$=$1;}
     ;
 %%
+function popUntil(lexer,state){
+  while(lexer.topState()!==state)
+    lexer.popState();
+}

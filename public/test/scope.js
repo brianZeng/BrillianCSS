@@ -148,7 +148,7 @@ describe('Scope static behaviors', function () {
         return sheet.get('$color')
       })).toEqual(['yellow', 'blue']);
     });
-    it('can assign a value to another sheet var', function () {
+    it('can assign a value or mixin to another sheet var', function () {
       src = '@sheetname foo;$color:red;' +
         '====' +
         '@sheetname bar;$color:blue;' +
@@ -165,20 +165,21 @@ describe('Scope static behaviors', function () {
       expect(sheets.map(function (sheet) {
         return sheet.get('$color')
       })).toEqual(['red', '#000']);
-    });
-    it('cannot assign a mixObj or scope to another sheet', function () {
-      src = '@sheetname bar' +
+      src = '@sheetname bar;' +
         'div{}' +
         '====' +
         '@sheetname foo;' +
-        '@mixin $error -> bar{width:20px;}';
-      expect(getSheets).toThrow();
-      src = '@sheetname bar' +
+        '@mixin $error -> bar ($a:red){width:20px;}';
+      expect(getSheets()[0].get('$error', 'mixin').staticRules).toEqual({width: '20px'});
+      expect(getSheets()[0].get('$error', 'mixin').defValues).toEqual({'$a': 'red'});
+    });
+    it('cannot assign a scope to another sheet,because ....', function () {
+      src = '@sheetname bar;' +
         'div{}' +
         '====' +
         '@sheetname foo;' +
         '.error -> bar{width:20px;}';
-      expect(getSheets).toThrow();
+      expect(getSheets()[1].scopes[0].selector).toBe('.error -> bar');
     });
     it('but can include or extend from other sheets', function () {
       src = '@sheetname lib;' +
@@ -186,6 +187,7 @@ describe('Scope static behaviors', function () {
         '@mixin $dash{border:1px dashed #123};' +
         '.auto{width:100%}' +
         '====' +
+        '$colorRef:$color->lib;' +
         'div{' +
         'background:$color ->lib;' +
         '@include $dash  -> lib;' +
@@ -196,53 +198,4 @@ describe('Scope static behaviors', function () {
       expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
     });
   })
-});
-describe('scope resolve behaviors', function () {
-  function getFirstScope(src) {
-    return ChangeSS.parse(src)[0].validate().scopes[0];
-  }
-
-  function getObjLength(obj) {
-    return Object.getOwnPropertyNames(obj).length;
-  }
-
-  function getFirstSheet(src) {
-    return ChangeSS.parse(src)[0];
-  }
-
-  var src = 'canvas($height:$width*2,$width:512px){}', scope, sheet;
-  describe('scope resolves without param use its default var values:', function () {
-    it('1.vars are lazy eval.if no var provided,ignore the dynamic rule and log in console   ', function () {
-      scope = getFirstScope(src.replace('{}', '{width:$width;height:$height;}'));
-      expect(scope.resolve()[0].rules).toEqual({width: Length('512px'), height: Length('1024px')});
-      scope = getFirstScope(src.replace('{}', '{width:$abc}'));
-      spyOn(console, 'log');
-      expect(scope.resolve()[0].rules).toEqual({});
-      if (ChangeSS.traceLog)
-        expect(console.log).toHaveBeenCalled();
-    });
-    it('2.a nested scope can inherit its nearest parent vars', function () {
-      scope = getFirstScope(src.replace('{}', '{ a{width:$width;height:$height;}}'));
-      expect(scope.resolve()[1].rules).toEqual({width: Length('512px'), height: Length('1024px')});
-      scope = getFirstScope(src.replace('{}', '{ a($width:5px){width:$width;height:$height;}}'));
-      expect(scope.resolve()[1].rules).toEqual({width: Length('5px'), height: Length('10px')});
-      scope = getFirstScope(src.replace('{}', '{ a($height:100px){width:$width;height:$height;}}'));
-      expect(scope.resolve()[1].rules).toEqual({width: Length('512px'), height: Length('100px')});
-      scope = getFirstScope(src.replace('{}', '{ a($width:5px){b{width:$width;}}}'));
-      expect(scope.resolve()[2].rules).toEqual({width: Length('5px')});
-    });
-  });
-  describe('scope resolves with param use its default var values:', function () {
-    it('vars belong to a sheet have higher priority over scope vars in this sheet', function () {
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;}$width:21px;'));
-      expect(sheet.resolve()[0].rules).toEqual({width: Length('21px'), height: Length('42px')});
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;}$height:21px;'));
-      expect(sheet.resolve()[0].rules).toEqual({width: Length('512px'), height: Length('21px')});
-    });
-    it('if assign values when invoke resolve($assign),$assign has highest priority', function () {
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;}$width:21px;'));
-      expect(sheet.resolve({'$width': Length(101)})[0].rules).toEqual({width: Length('101'), height: Length('202')});
-    });
-  })
-
 });

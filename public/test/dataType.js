@@ -10,7 +10,7 @@ describe("Basic Type Behaviors", function () {
       return ChangeSS.getType(o);
     }, Length = ChangeSS.Length, Exp = ChangeSS.Exp,
     TYPE = ChangeSS.TYPE, List = ChangeSS.List;
-  describe('Length behaviors', function () {
+  describe('1.Length behaviors', function () {
     len = sheet.vars['$len'];
     var lenReduced = len.reduce(), lenResolved = len.resolve();
     it('Length resolves(reduces) to an instance of Length', function () {
@@ -44,24 +44,29 @@ describe("Basic Type Behaviors", function () {
       ChangeSS.Length.fractionalDigitals = 4;
     })
   });
-  describe('Var behaviors', function () {
-    it('Var resolves to another Var without param', function () {
+  describe('2.Var behaviors', function () {
+    it('without param,Var resolves to its clone ', function () {
       expect(Var('$a').resolve()).toEqual(Var('$a').clone());
+    });
+    it('when var points to an undefined value,it resolves its clone', function () {
+      var v = Var('$var'), param = {'$var': Var('$unknown')};
+      expect(v.resolve(param)).toEqual(v.clone());
+      expect(v.canResolve(param)).toBeFalsy();
     });
     it('Var resolves to any type given the param which has the same name property of vars symbol', function () {
       var $param = {
         '$len': Length('3pi'),
         '$key': 'absolute',
         '$list': List('12px bold Arial'),
-        '$func': Fun('rotate', List('45deg')),
-        '$var': Var('$unknown')
+        '$func': Fun('rotate', List('45deg'))
       };
       Object.getOwnPropertyNames($param).forEach(function (name) {
         expect(Var(name).resolve($param)).toBe($param[name]);
       });
+
     })
   });
-  describe('List behaviors', function () {
+  describe('3.List behaviors', function () {
     it('a list reduces its elements, return itself and keeps its length', function () {
       expect(new ChangeSS.List(1, new ChangeSS.Length(20), 0.33).reduce().length).toEqual(3);
     });
@@ -84,7 +89,7 @@ describe("Basic Type Behaviors", function () {
       expect(l.resolve()).toEqual(new ChangeSS.List('a b c', len.resolve(), 'solid red'));
     });
   });
-  describe('InlineFunc behaviors', function () {
+  describe('4.InlineFunc behaviors', function () {
     var paramList = new List('220', '12', '23'), func = new Fun('rgb', paramList), varFunc = new Fun('abs', new List(new Var('$unknown')));
     it('InlineFunc reduces to itself with paramList resolved', function () {
       expect(typeof vars['$fun']).toBe("string");
@@ -103,7 +108,7 @@ describe("Basic Type Behaviors", function () {
       expect(varFunc.toString()).toBe('abs($unknown)');
     });
   });
-  describe('Exp behaviors', function () {
+  describe('5.Exp behaviors', function () {
     function expThen(left, optor, right) {
       return Exp(left, optor, right);
     }

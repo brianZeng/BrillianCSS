@@ -73,7 +73,7 @@ describe('extension behaviors:', function () {
       src = '@mixin $redBorder{border:1px solid red;&:hover{ border-color:yellow;}} div{@include $redBorder;}';
       getFirstValidatedSheet(src);
       expect(sheet.mixins['$redBorder']).toEqual(jasmine.any(ChangeSS.Scope));
-      expect((scope = sheet.scopes[0]).includes['$redBorder']).toEqual(jasmine.any(Object));
+      expect((scope = sheet.scopes[0]).includes['$redBorder->' + sheet.name]).toEqual(jasmine.any(Object));
       scope.resolve({}, sheet);
     });
     it('mix obj can include another obj', function () {

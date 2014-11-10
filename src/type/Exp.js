@@ -60,8 +60,8 @@ Exp.prototype = (function () {
       return this.clearVarNames();
     },
     canResolve: function ($vars) {
-      return this.getVarNames().every(function (name) {
-        return $vars[name] !== undefined;
+      return this.getVarNames().every(function (v) {
+        return v.canResolve($vars);
       });
     },
     clearVarNames: function () {
@@ -128,10 +128,10 @@ Exp.prototype = (function () {
       if (!(vars = this.variables)) {
         var left = this.left, right = this.right;
         vars = this.variables = [];
-        if (left instanceof Var) List.arrayAdd(vars, left.refSymbol);
+        if (left instanceof Var) List.arrayAdd(vars, left);
         else if (left.getVarNames) left.getVarNames(vars);
         if (right)
-          if (right instanceof Var)List.arrayAdd(vars, right.refSymbol);
+          if (right instanceof Var)List.arrayAdd(vars, right);
           else if (right.getVarNames) right.getVarNames(vars);
       }
       array = array || [];

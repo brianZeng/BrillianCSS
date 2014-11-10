@@ -26,8 +26,9 @@ List.addOrMerge = (function () {
       if (compare(obj, arr[i])) {
         merged = mergeFunc(arr[i], obj);
         if (merged !== undefined)arr[i] = merged;
-        break;
+        return arr;
       }
+    arr.push(obj);
     return arr;
   }
 })();

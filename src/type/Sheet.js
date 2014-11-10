@@ -10,32 +10,32 @@ function Sheet(name) {
 
 Sheet.prototype = (function (proto) {
   proto.add = function (sheetPart) {
-    var type = sheetPart.type, Var, fullName;
+    var type = sheetPart.type, $key;
     if (type == 'var') {
-      Var = sheetPart.name;
-      if (!Var.sheetName || Var.sheetName == this.name) {
-        fullName = Var.symbol;
-        Var.sheetName = '';
-      }
-      else fullName = Var.toString();
-      this.vars[fullName.trim()] = sheetPart.value;
+      var ref = sheetPart.value;
+      $key = sheetPart.name;
+      if ($key.sheetName == this.name)$key.sheetName = '';
+      if (Var.isVar(ref) && !ref.sheetName)ref.sheetName = this.name;
+      this.vars[$key.toString()] = sheetPart.value;
     }
     else if (type == 'style') {
       this.scopes.push(sheetPart.value);
+      sheetPart.value.sheetName = this.name;
     }
     else if (type == 'mix') {
-      var mixObj;
-      Var = sheetPart.name;
-      mixObj = Var.sheetName ? ChangeSS.get(Var.sheetName).mixins : this.mixins;
-      mixObj[sheetPart.value.symbol = Var.symbol] = sheetPart.value;
+      var mixObj = sheetPart.value;
+      $key = sheetPart.name;
+      if ($key.sheetName == this.name) $key.sheetName = '';
+      mixObj.symbol = $key.symbol;
+      this.mixins[$key.toString()] = mixObj;
     }
     else throw 'unknown type';
     return this;
   };
   proto.resolve = function ($vars) {
-    var $param = ChangeSS.assign(mix(this.vars, $vars)), sheet = this;
+    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved);
     return this.scopes.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($param, sheet));
+      r.push.apply(r, scope.resolve($param));
       return r;
     }, []);
   };
