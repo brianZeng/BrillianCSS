@@ -5,7 +5,7 @@ describe("Basic Type Behaviors", function () {
   var source = '$len:20px;' +
     '$list:20px solid red;' +
     '$fun:rgb(20,120,20);';
-  var sheet = ChangeSS(source)[0], vars = sheet.vars, len, Fun = ChangeSS.InlineFunc, Var = ChangeSS.Var,
+  var sheet = ChangeSS.eval(source)[0], vars = sheet.vars, len, Fun = ChangeSS.InlineFunc, Var = ChangeSS.Var,
     getType = function (o) {
       return ChangeSS.getType(o);
     }, Length = ChangeSS.Length, Exp = ChangeSS.Exp,
@@ -90,7 +90,7 @@ describe("Basic Type Behaviors", function () {
     });
   });
   describe('4.InlineFunc behaviors', function () {
-    var paramList = new List('220', '12', '23'), func = new Fun('rgb', paramList), varFunc = new Fun('abs', new List(new Var('$unknown')));
+    var paramList = List.fromArray(['220', ',', '12', ',', '23']), func = new Fun('rgb', paramList), varFunc = new Fun('abs', new List(new Var('$unknown')));
     it('InlineFunc reduces to itself with paramList resolved', function () {
       expect(typeof vars['$fun']).toBe("string");
       expect(func.reduce().param.length).toBe(1);

@@ -8,19 +8,24 @@ ChangeSS = (function (parser) {
       throw Error('cannot get:' + name);
     }
   };
-  function main(input, keep) {
-    var results = List();
+  function main(input, opt) {
+    opt = opt || {keepResults: false};
+    return evalInput(input, opt.keepResults).map(function (sheet) {
+      return sheet.toString();
+    }).join('\n');
+  }
+
+  main.eval = evalInput;
+  function evalInput(input, keep) {
     if (!keep)clear();
+    var results = List();
     main.parse(input).forEach(function (sheet) {
       results.add(merge(sheet));
     });
-    ChangeSS.validateMix_Ext(results);
+    ChangeSS.link(results);
+    // debugger;
     return results;
   }
-
-  main.validateMix_Ext = function (sheets) {
-
-  };
   function clear() {
     sheetMap = {};
   }
@@ -37,9 +42,11 @@ ChangeSS = (function (parser) {
     switch (type) {
       case 'mixin':
       case 'scope':
-        return getter.fromFullName(name, type + 's');
+        return getter.fromFullName(name, type);
       case 'var':
         return getter.variable(name);
+      case 'styles':
+        return getter.styles(name);
       default :
         return getter.sheet(name);
     }
@@ -50,18 +57,21 @@ ChangeSS = (function (parser) {
       var sheet = sheetMap[name];
       return sheet || (sheetMap[name] = new Sheet(name));
     },
-    fromFullName: function (name, sheetPro) {
+    fromFullName: function (name, type) {
       var names = name.split('->'), sheetName = names[1], sheet;
       if (!sheetName)return undefined;
       if (!(sheet = sheetMap[sheetName]))return ChangeSS.error.notExist(name);
-      return sheet[sheetPro][names[0]] || ChangeSS.error.notExist(name);
+      return sheet.get(names[0], type) || ChangeSS.error.notExist(name);
     },
     variable: function (name) {
       var i = name.indexOf('->'), sheetName = name.substr(i + 2), symbol = name.substr(0, i), sheet;
       if (!sheetName || !(sheet = sheetMap[sheetName]) || !symbol)return undefined;
       return sheet.vars[symbol];
+    },
+    styles: function (globalName) {
+      var i = globalName.indexOf('->'), sheet = sheetMap[globalName.substr(i + 2)] || ChangeSS.error.notExist(globalName);
+      return sheet.getStyles(globalName.substr(0, i));
     }
-
   };
   setter = {
     Var: function (Var, value) {
@@ -80,7 +90,7 @@ ChangeSS = (function (parser) {
       return src;
     }).map(function (src) {
       return parser.parse(src).validate();
-    })
+    });
   };
   main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);

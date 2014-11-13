@@ -5,7 +5,7 @@ describe('extension behaviors:', function () {
   var src, sheet, scope;
 
   function getFirstValidatedSheet(src) {
-    scope = (sheet = ChangeSS(src)[0]).scopes[0];
+    scope = (sheet = ChangeSS.eval(src)[0]).scopes[0];
     return sheet;
   }
 
@@ -62,9 +62,7 @@ describe('extension behaviors:', function () {
     it('f.report undefined class', function () {
       src = '.a{@extend .doNotExist}';
       var spy = spyOn(ChangeSS.error, 'notExist');
-      expect(function () {
-        getFirstValidatedSheet(src);
-      }).toThrow();
+      getFirstValidatedSheet(src);
       expect(spy).toHaveBeenCalled();
     })
   });
@@ -94,7 +92,7 @@ describe('extension behaviors:', function () {
     it('what the mixObj extends will also be include', function () {
       src = '@mixin $a{@extend .base} .base{} .super{@include $a;}';
       getFirstValidatedSheet(src);
-      containAll(sheet.get('.super').exts, '.base');
+      containAll(sheet.get('.super').exts, '.base->default');
       src = '@mixin $a{@extend .base} .base{@extend .error;} .super{@include $a;} .error{@include $a}';
       var spy = spyOn(ChangeSS.error, 'cyclicInherit').and.callThrough();
       expect(function () {

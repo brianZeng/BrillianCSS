@@ -20,13 +20,15 @@ Sheet.prototype = (function (proto) {
     }
     else if (type == 'style') {
       this.scopes.push(sheetPart.value);
-      sheetPart.value.sheetName = this.name;
+      sheetPart.value.setSheetName(this.name);
     }
     else if (type == 'mix') {
       var mixObj = sheetPart.value;
       $key = sheetPart.name;
       if ($key.sheetName == this.name) $key.sheetName = '';
       mixObj.symbol = $key.symbol;
+      mixObj.isMixin = true;
+      mixObj.setSheetName(this.name);
       this.mixins[$key.toString()] = mixObj;
     }
     else throw 'unknown type';
@@ -38,6 +40,16 @@ Sheet.prototype = (function (proto) {
       r.push.apply(r, scope.resolve($param));
       return r;
     }, []);
+  };
+  proto.toString = function ($vars) {
+    return this.resolve($vars).map(function (r) {
+      var rules = [], brc;
+      objForEach(r.rules, function (key, value) {
+        rules.push(key + ':' + value + ';')
+      });
+      brc = rules.length ? '{\n*\n}' : '{*}';
+      return r.selector + brc.replace('*', rules.join('\n'));
+    }).join('\n');
   };
   proto.merge = function (sheet) {
     this.vars = mix(this.vars, sheet.vars);
@@ -61,6 +73,12 @@ Sheet.prototype = (function (proto) {
       return this.mixins[id];
     else if (type == 'var')return this.vars[id];
     else return this.mixins[id] || this.vars[id];
+  };
+  proto.getStyles = function (id) {
+    return this.scopes.reduce(function (pre, style) {
+      pre.push.apply(pre, style.getStyles(id));
+      return pre;
+    }, []);
   };
   return proto;
 })({});

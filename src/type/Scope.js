@@ -44,6 +44,17 @@ Scope.prototype = {
     var s = this.toString();
     return s.match(/^\{[\s\r\n\t\f;]*\}$/, s) ? undefined : s;
   },
+  get globalName() {
+    var sheetName = this.sheetName;
+    if (!sheetName)return undefined;
+    return (this.symbol || this.selector) + '->' + sheetName;
+  },
+  setSheetName: function (name) {
+    this.sheetName = name;
+    this.nested.forEach(function (s) {
+      s.setSheetName(name)
+    });
+  },
   get paramString() {
     var r = [];
     objForEach(this.defValues, function (key, value) {
@@ -96,6 +107,7 @@ Scope.prototype = {
   addStyle: function (style) {
     if (style instanceof Scope) {
       this.nested.push(style);
+      if (this.sheetName)style.setSheetName(this.sheetName);
     }
     return this;
   },
@@ -113,7 +125,29 @@ Scope.prototype = {
     function second() {
       return this.selectors;
     }
-    return function (parentSelectors) {
+
+    function backtrackSelector(parentSelectors) {
+      var r, tss;
+      if (parentSelectors) {
+        tss = this.selectors;
+        r = [];
+        parentSelectors.forEach(function (ps) {
+          tss.forEach(function (ts) {
+            ts = ts.replace(ps, '');
+            r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
+          })
+        });
+      } else r = this.selectors;
+      this.nested.forEach(function (s) {
+        s.backtraceSelector(r);
+      });
+      this._selector = null;
+      this.backtraceSelector = second;
+      this.validateSelector = first;
+      return r;
+    }
+
+    function first(parentSelectors) {
       var r, tss;
       if (parentSelectors) {
         r = [];
@@ -128,10 +162,17 @@ Scope.prototype = {
       this.nested.forEach(function (scope) {
         scope.validateSelector(r)
       });
+      this._selector = null;
       this.validateSelector = second;
+      this.backtraceSelector = backtrackSelector;
       return r;
     }
+
+    return first;
   })(),
+  backtraceSelector: function () {
+    return this.selectors;
+  },
   clone: (function () {
     function onPair(key, value) {
       this[key] = value.clone ? value.clone(true) : value;
@@ -175,81 +216,88 @@ Scope.prototype = {
     return array;
   },
   resolve: (function () {
-    var stack, paramStack, $assign;
     function log() {
       if (ChangeSS.traceLog)
         console.log.apply(console, arguments);
     }
-    function resolveScope(scope) {
-      var $vars = assignParam(scope, true), ruleObj = mix(scope.staticRules), selector = scope.selector, r,
-        $resolved = $vars.$resolved;
+
+    function resolveScope(scope, paramStack, $assign) {
+      var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
+        selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
       objForEach(scope.dynamicRules, function (key, rule) {
         if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
           ruleObj[key] = rule.resolve($resolved).toString();
         else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
       });
       r = [
-        {rules: ruleObj, selector: scope.selectors.join(',')}
+        {rules: ruleObj, selector: selector}
       ];
       objForEach(scope.includes, function (key, invokeParam) {
         var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
         objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (key, value) {
           if (invokeParam[key])$param[key] = value;
         });
-        resolveInclude(new Style(selector, mixin), $param, r);
+        resolveInclude(mixin, $param, selector).forEach(function (resObj) {
+          if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
+        });
       });
-      //paramStack.pop();
-      return r;
+      return r.filter(function (pair) {
+        return objNotEmpty(pair.rules)
+      });
     }
 
     function mergeResult(a, b) {
-      a.rules = mix(b.rules, a.rules);
+      if (objNotEmpty(b.rules))
+        a.rules = mix(b.rules, a.rules);
       return a;
     }
 
-    function resolveInclude(mixObj, $vars, results) {
+    function resolveInclude(mixObj, $vars, selector) {
+      mixObj.backtraceSelector();
+      mixObj.selectors = selector.split(',');
       mixObj.validateSelector();
-      return mixObj.resolve($vars).forEach(function (resObj) {
-        List.addOrMerge(results, resObj, 'selector', mergeResult);
-      });
+      return mixObj.resolve($vars);
     }
     function getChild(parent, child) {
       if (parent === child || !parent)return 0;
       return parent.nested[parent.nested.indexOf(child) + 1] || 0;
     }
-    function preVisit(scope) {
-      var childScope = 0, results = [];
-      while (scope)
+
+    function preVisit(scope, $assign) {
+      var childScope = 0, results = [], scopeStack = [], paramStack = [];
+      do {
         if (childScope = getChild(scope, childScope)) {
-          stack.push(scope);
-          paramStack.push(assignParam(scope));
+          scopeStack.push(scope);
+          paramStack.push(assignParam(scope, false, paramStack, $assign));
           scope = childScope;
           childScope = 0;
         }
         else {
-          results.unshift.apply(results, resolveScope(scope));
-          scope = getChild(stack[stack.length - 1], scope);
+          results.unshift.apply(results, resolveScope(scope, paramStack, $assign));
+          scope = getChild(scopeStack[scopeStack.length - 1], scope);
           if (!scope) {
-            childScope = scope = stack.pop();
+            childScope = scope = scopeStack.pop();
             paramStack.pop();
           }
         }
+      } while (scope);
+
       return results;
     }
 
-    function assignParam(scope, resolve) {
+    function assignParam(scope, resolve, paramStack, $assign) {
       var lastAssign = paramStack[paramStack.length - 1] || {},
         $mix = mix(lastAssign, scope.defValues, $assign);
       return resolve ? ChangeSS.assign($mix) : $mix;
     }
 
+    function objNotEmpty(obj) {
+      return obj && Object.getOwnPropertyNames(obj).length > 0;
+    }
     return function ($vars) {
-      stack = [];
-      paramStack = [];
-      if (!$vars)$assign = {};
-      else if ($vars.$resolved)$assign = mix($vars.$unresolved, $vars.$resolved);
-      else $assign = $vars;
-      return preVisit(this);
+      if (!$vars)$vars = {};
+      else if ($vars.$resolved)$vars = mix($vars.$unresolved, $vars.$resolved);
+      return preVisit(this, $vars);
     }
   })()
 };
@@ -257,7 +305,7 @@ ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
   Scope.apply(this);
   this.selector = selectors;
-  this.addScope(scope);
+  this.addScope(scope || new Scope());
 }
 Style.prototype = (function (scopeProto) {
   var cloneFunc = scopeProto.clone, proto;
@@ -296,6 +344,19 @@ Style.prototype = (function (scopeProto) {
   };
   proto.clone = function () {
     return new Style(this.selectors, cloneFunc.apply(this));
+  };
+  proto.getStyles = function (id) {
+    var s;
+    if (id.indexOf(s = this.selector) == 0)
+      if (id === s)
+        return [this];
+      else
+        return this.nested.reduce(function (pre, style) {
+          pre.push.apply(pre, style.getStyles(id));
+          return pre;
+        }, []);
+    else
+      return [];
   };
   return proto;
 })(Scope.prototype);

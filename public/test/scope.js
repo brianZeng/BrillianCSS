@@ -15,6 +15,7 @@ describe('Scope static behaviors', function () {
     for (var i = 1, len = arguments.length; i < len; i++)
       expect(results).toContain(arguments[i]);
   }
+
   function getFirstSheet(src) {
     return ChangeSS.parse(src)[0];
   }
@@ -39,7 +40,7 @@ describe('Scope static behaviors', function () {
     });
     src = 'div{' + r.join('') + '}';
     it('scope resolves static rules as they are input', function () {
-      var scope = ChangeSS(src)[0].scopes[0];
+      var scope = ChangeSS.eval(src)[0].scopes[0];
       console.log(scope.resolve());
       expect(scope.staticRules).toEqual(rules);
     });
@@ -54,8 +55,8 @@ describe('Scope static behaviors', function () {
       expect(getObjLength(scope.dynamicRules)).toBe(4);
     });
     it('a scope can hold default values', function () {
-      var src = 'canvas($width:512px*2,$color:rgb(0,123,0),' +
-        '$border:1 solid black,$display:inline-block,$height:$width){}', scope = getFirstScope(src);
+      var src = 'canvas($width:512px*2;$color:rgb(0,123,0);' +
+        '       $border:1 solid black;$display:inline-block;$height:$width){}', scope = getFirstScope(src);
       expect(scope.defValues).toEqual({
         "$width": Length('1024px'),
         "$color": 'rgb(0,123,0)',
@@ -112,7 +113,7 @@ describe('Scope static behaviors', function () {
     var sheets, src;
 
     function getSheets() {
-      return sheets = ChangeSS(src);
+      return sheets = ChangeSS.eval(src);
     }
 
     it('can be separeted by ====,@sheetname must be the first line of the sheet', function () {
@@ -194,7 +195,9 @@ describe('Scope static behaviors', function () {
         '@extend .auto ->  lib;' +
         '}';
       var lib = getSheets()[0], def = sheets[1];
-      containAll(lib.scopes[0].selectors, 'div', '.auto');
+      containAll(ChangeSS.get('default').scopes.map(function (s) {
+        return s.selector
+      }), 'div', '.auto,div');
       expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
     });
   })

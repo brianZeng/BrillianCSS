@@ -124,7 +124,7 @@ List.prototype = (function (proto) {
         if (v == undefined) return undefined;
         r.push(v);
       }
-      return r.length ? r.join(' ').replace(/[\s\r\n\t\f]+/g, ' ') : '';
+      return r.length ? r.join(' ').replace(/[\s\r\n\t\f]+/g, ' ').replace(/\,+/g, ',') : '';
     }
   });
   Object.defineProperty(proto, 'resolved', {
@@ -154,7 +154,13 @@ List.prototype = (function (proto) {
     else
       return arrayReduce(this, callback, initialValue);
   };
+  proto.toParamList = function () {
+    return this.copy(this.reduce().filter(function (c) {
+      return c != ',';
+    }));
+  };
   proto._type = ChangeSS.TYPE.LIST;
+
   return proto;
 })(Object.create([]));
 ChangeSS.List = List;

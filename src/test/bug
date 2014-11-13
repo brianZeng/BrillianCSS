@@ -1,8 +1,0 @@
-parent($width:512,$height:$width*2){
-
-  width:$width;
-  child($width:12){
-    width:$width;
-    height:$height;
-  }
-}

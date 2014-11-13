@@ -168,22 +168,10 @@ Graph.prototype = {
   }
 };
 ChangeSS.Graph = Graph;
-ChangeSS.validateMix_Ext = (function () {
+ChangeSS.link = (function () {
   ChangeSS.error.cyclicInherit = function (pathInfo, graph) {
     throw Error('Cyclic inherits detected:' + pathInfo);
   };
-  function getScopeOrMixObj(name, sheetName) {
-    var names = name.split('->'), objName = names[0];
-    sheetName = names[1] || sheetName;
-    var sheet = ChangeSS.get(sheetName), o;
-    o = sheet.get(objName);
-    if (o) {
-      if (!o.globalName)o.globalName = names[1] ? name : (objName + sheet.name);
-      return o;
-    }
-    throw ChangeSS.error.notExist(name + '->' + sheetName);
-  }
-
   function reportCircle(graph) {
     var paths = graph.getPaths(info = []), info;
     if (info.length) ChangeSS.error.cyclicInherit(info.map(function (scope) {
@@ -192,97 +180,135 @@ ChangeSS.validateMix_Ext = (function () {
     return paths;
   }
 
-  function collectExt(scope, graph, sheetName) {
-    scope.exts.forEach(function (extName) {
-      graph.addEdge(scope, getScopeOrMixObj(extName, sheetName));
-    });
-    scope.nested.forEach(function (s) {
-      collectExt(s, graph, sheetName);
-    });
-    return graph;
-  }
-  function handleExtPath(path) {
-    for (var i = 0, superScope = path[i], base = path[i + 1]; base; superScope = path[++i], base = path[i + 1]) {
-      List.arrayAdd(base.selectors, superScope.selector);
-      base._selector = null;
-    }
-    return path;
+  function setGlobalNameIFNot(name, sheetName) {
+    if (name.indexOf('->') > -1)return name;
+    if (!sheetName)Error('sheetName need');
+    return name + '->' + sheetName;
   }
 
-  function validateExtCircle(sheets) {
-    var extGraph = new Graph(), sheetName;
-    sheets.forEach(function (sheet) {
-      sheetName = sheet.name;
-      sheet.scopes.forEach(function (s) {
-        collectExt(s, extGraph, sheetName)
-      });
-    });
-
-    reportCircle(extGraph).forEach(handleExtPath);
-  }
-
-  function collectInclude(scope, graph, sheetName) {
-    objForEach(scope.includes, function (includeName) {
-      graph.addEdge(scope, getScopeOrMixObj(includeName));
-    });
-    scope.nested.forEach(function (child) {
-      collectInclude(child, graph, sheetName);
-    });
-    return graph;
-  }
-
-  function validateMixCircle(sheets) {
-    var graph = new Graph(), sheetname;
-    sheets.forEach(function (sheet) {
-      sheetname = sheet.name;
-      sheet.scopes.forEach(function (s) {
-        collectInclude(s, graph, sheetname);
-      });
-      objForEach(sheet.mixins, function (key, mixObj) {
-        collectInclude(mixObj, graph, sheetname);
-      });
-    });
-
-    reportCircle(graph).forEach(injectIncludeExt);
-  }
-
-  function injectIncludeExt(path) {
-    var scope = path.shift(), includeObj, exts = scope.exts;
-    while (includeObj = path.shift())
-      List.arrayAdd(exts, includeObj.exts);
-  }
-
-
-  function filterVar(key, value, proName) {
-    var i;
-    if ((i = key.indexOf('->')) == -1)return;
-    ChangeSS.get(key.substr(i + 2))[proName][key.substr(0, i)] = value;
-    delete this[proName][key];
-  }
-
-  function linkInclude(scope, sheetname) {
-    objForEach(scope.includes, function (key, value) {
-      if (key.indexOf('->') == -1) {
-        this[key + '->' + sheetname] = value;
-        delete this[key];
+  var validateMixCircle, validateExtCircle, linkOtherSheet;
+  linkOtherSheet = (function () {
+    function filterVar(key, value, proName) {
+      var i, gn = key;
+      if ((i = key.indexOf('->')) == -1)
+        gn += '->' + this.name;
+      else {
+        ChangeSS.get(key.substr(i + 2))[proName][key.substr(0, i)] = value;
+        delete this[proName][key];
       }
-    }, scope.includes);
-    scope.nested.forEach(function (c) {
-      linkInclude(c, sheetname);
-    })
-  }
-  function linkOtherSheet(sheet) {
-    objForEach(sheet.vars, filterVar, sheet, 'vars');
-    //mix in should link ext,
-    objForEach(sheet.mixins, filterVar, sheet, 'mixins');
-    sheet.scopes.forEach(function (s) {
-      linkInclude(s, sheet.name)
-    });
-  }
+      value.globalName = gn;
+    }
+
+    function linkInclude(scope, sheetname) {
+      objForEach(scope.includes, function (key, value) {
+        delete this[key];
+        this[setGlobalNameIFNot(key, sheetname)] = value;
+      }, scope.includes);
+      scope.exts = scope.exts.map(function (name) {
+        return setGlobalNameIFNot(name, sheetname);
+      });
+      scope.nested.forEach(function (c) {
+        linkInclude(c, sheetname);
+      });
+    }
+
+    function linkOtherSheet(sheet) {
+      var sheetName = sheet.name;
+      objForEach(sheet.vars, filterVar, sheet, 'vars');
+      objForEach(sheet.mixins, function (key, mixin) {
+        filterVar.apply(sheet, [key, mixin, 'mixins']);
+        linkInclude(mixin, sheetName);
+      });
+      sheet.scopes.forEach(function (s) {
+        linkInclude(s, sheetName);
+      });
+
+    }
+
+    return linkOtherSheet;
+  })();
+  validateMixCircle = (function () {
+    function addMixinExts(scope, mixin) {
+      var cs;
+      List.arrayAdd(scope.exts, mixin.exts);
+      mixin.nested.forEach(function (nestin) {
+        cs = new Style(nestin.selectors);
+        scope.addStyle(cs);
+        cs.validateSelector(scope.selectors);
+        addMixinExts(cs, nestin);
+      })
+    }
+
+    function injectIncludeExt(path) {
+      for (var i = path.length - 1; i > 0; i--)
+        addMixinExts(path[i - 1], path[i]);
+    }
+
+    function collectInclude(scope, graph) {
+      objForEach(scope.includes, function (includeName) {
+        var mixObj = ChangeSS.get(includeName, 'mixin') || ChangeSS.error.notExist(includeName);
+        graph.addEdge(scope, mixObj);
+      });
+      scope.nested.forEach(function (child) {
+        collectInclude(child, graph);
+      });
+      return graph;
+    }
+
+    function validateMixCircle(sheets, graph) {
+      sheets.forEach(function (sheet) {
+        sheet.scopes.forEach(function (s) {
+          collectInclude(s, graph);
+        });
+        objForEach(sheet.mixins, function (key, mixObj) {
+          collectInclude(mixObj, graph);
+        });
+      });
+      reportCircle(graph).forEach(injectIncludeExt);
+    }
+
+    return validateMixCircle;
+  })();
+  validateExtCircle = (function () {
+    function handleExtPath(path) {
+      for (var i = 0, superScope = path[i], baseScope = path[i + 1]; baseScope; superScope = path[++i], baseScope = path[i + 1]) {
+        debugger;
+        List.arrayAdd(baseScope.selectors, superScope.selector);
+        baseScope._selector = null;
+      }
+      return path;
+    }
+
+    function collectExt(scope, graph) {
+      if (!scope.sheetName)Error('no sheetName');
+      scope.exts.forEach(function (name) {
+        ChangeSS.get(name, 'styles').forEach(function (style) {
+          graph.addEdge(scope, style);
+        });
+      });
+      scope.nested.forEach(function (s) {
+        collectExt(s, graph);
+      });
+    }
+
+    function validateExtCircle(sheets, graph) {
+      sheets.forEach(function (sheet) {
+        sheet.scopes.forEach(function (s) {
+          collectExt(s, graph);
+        });
+      });
+      reportCircle(graph).forEach(handleExtPath);
+    }
+
+    return validateExtCircle;
+  })();
   return function (sheets) {
+    var includeGraph, extGraph;
+    includeGraph = new Graph();
+    extGraph = new Graph();
     sheets.forEach(linkOtherSheet);
-    validateMixCircle(sheets);
-    validateExtCircle(sheets);
+    validateMixCircle(sheets, includeGraph);
+    validateExtCircle(sheets, extGraph);
     return sheets;
   }
 })();

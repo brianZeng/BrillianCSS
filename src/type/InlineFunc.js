@@ -72,7 +72,7 @@ InlineFunc.prototype = {
   },
   get paramString() {
     var v = this.param.toString();
-    return '(' + v.replace(/\s+/gi, ',') + ')';
+    return '(' + v.replace(/\s+\,\s*/g, ',') + ')';
   },
   get paramValue() {
     var v = this.param.value;
