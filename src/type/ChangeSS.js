@@ -36,6 +36,7 @@ ChangeSS = (function (parser) {
   }
 
   main.merge = merge;
+
   main.get = function (name, type) {
     name = name || main.defaultSheetName;
     type = (type || '').toLowerCase();
@@ -51,6 +52,7 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
+  main.opt = {};
   getter = {
     sheet: function (name) {
       name = name || main.defaultSheetName;

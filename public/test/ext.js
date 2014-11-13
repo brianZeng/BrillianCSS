@@ -26,10 +26,18 @@ describe('extension behaviors:', function () {
 
   describe('1.inherit selectors:', function () {
     var ss, selectors;
+    beforeEach(function () {
+      ChangeSS.opt.keepEmptyResult = true;
+    });
+    afterEach(function () {
+      ChangeSS.opt.keepEmptyResult = false;
+    });
     it('a.combines base selectors with super selectors', function () {
       src = '.base{}.super{@extend .base;}';
       getFirstValidatedSheet(src);
+
       containAll(ss = getSheetSelectors(sheet), '.base,.super', '.super');
+      debugger;
       expect(ss.length).toBe(2);
     });
     it('b.can handle nested inherits', function () {

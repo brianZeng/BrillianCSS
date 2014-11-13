@@ -200,6 +200,7 @@ ChangeSS.link = (function () {
     }
 
     function linkInclude(scope, sheetname) {
+      if (!scope.sheetName)debugger;
       objForEach(scope.includes, function (key, value) {
         delete this[key];
         this[setGlobalNameIFNot(key, sheetname)] = value;
@@ -270,9 +271,15 @@ ChangeSS.link = (function () {
     return validateMixCircle;
   })();
   validateExtCircle = (function () {
+    function copyExtToSheet(scope, sheet) {
+      var cscope = scope.clone();
+      sheet.add({value: cscope, type: 'style'});
+      return cscope;
+    }
     function handleExtPath(path) {
       for (var i = 0, superScope = path[i], baseScope = path[i + 1]; baseScope; superScope = path[++i], baseScope = path[i + 1]) {
-        debugger;
+        if (baseScope.sheetName !== superScope.sheetName)
+          baseScope = copyExtToSheet(baseScope, ChangeSS.get(superScope.sheetName));
         List.arrayAdd(baseScope.selectors, superScope.selector);
         baseScope._selector = null;
       }

@@ -11,7 +11,7 @@ describe("Basic Type Behaviors", function () {
     }, Length = ChangeSS.Length, Exp = ChangeSS.Exp,
     TYPE = ChangeSS.TYPE, List = ChangeSS.List;
   describe('1.Length behaviors', function () {
-    len = sheet.vars['$len'];
+    len = Length('20px');
     var lenReduced = len.reduce(), lenResolved = len.resolve();
     it('Length resolves(reduces) to an instance of Length', function () {
       expect(lenReduced).toEqual(jasmine.any(ChangeSS.Length));

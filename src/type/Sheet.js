@@ -54,7 +54,9 @@ Sheet.prototype = (function (proto) {
   proto.merge = function (sheet) {
     this.vars = mix(this.vars, sheet.vars);
     this.scopes = this.scopes.concat(sheet.scopes.map(function (s) {
-      return s.clone();
+      var sc = s.clone();
+      if (s.sheetName)sc.setSheetName(s.sheetName);
+      return sc;
     }));
     this.mixins = mix(this.mixins, sheet.mixins);
     return this;

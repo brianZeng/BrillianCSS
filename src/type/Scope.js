@@ -216,6 +216,14 @@ Scope.prototype = {
     return array;
   },
   resolve: (function () {
+    var keepEmptyResult = false;
+    Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
+      set: function (v) {
+        keepEmptyResult = !!v;
+      },
+      get: function () {
+        return keepEmptyResult
+      }});
     function log() {
       if (ChangeSS.traceLog)
         console.log.apply(console, arguments);
@@ -242,7 +250,7 @@ Scope.prototype = {
         });
       });
       return r.filter(function (pair) {
-        return objNotEmpty(pair.rules)
+        return keepEmptyResult || objNotEmpty(pair.rules);
       });
     }
 

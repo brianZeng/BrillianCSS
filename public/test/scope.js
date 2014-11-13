@@ -83,20 +83,16 @@ describe('Scope static behaviors', function () {
         '}';
       var scope = ChangeSS.parse(src)[0].scopes[0];
       expect(scope.nested.length).toBe(4);
-      console.log(scope.nested.map(function (s) {
-        return s.selector;
-      }));
     });
     it('a scope can also nest very deep', function () {
-      var src = 'div{div{p{span{strong{.deep{#verydeep{}}}}}}}';
+      var src = 'div{div{p{span{strong{.deep{#verydeep{color:red}}}}}}}';
       var scope = ChangeSS.parse(src)[0].scopes[0], r;
-      expect((r = scope.resolve()).length).toBe(7);
-      console.log(r.map(function (s) {
-        return s.selector;
-      }));
+      expect((r = scope.resolve()[0].selector.split(' ')).length).toBe(7);
+
     });
     it('scope combines selectors,replace its nested & with its selectors', function () {
       var src = 'code,pre{p,span{b,a{}}}';
+      ChangeSS.opt.keepEmptyResult = true;
       var scope = getFirstScope(src), r;
       expect((r = scope.resolve())[0].selector.split(',').length).toBe(2);
       expect(r[1].selector.split(',').length).toBe(4);
@@ -107,6 +103,7 @@ describe('Scope static behaviors', function () {
       src = 'ul,li{&:hover{}}';
       scope = getFirstScope(src);
       expect(scope.resolve()[1].selector).toBe('ul:hover,li:hover');
+      ChangeSS.opt.keepEmptyResult = false;
     });
   });
   describe('3.multiple sheets(I call it namespace)', function () {
