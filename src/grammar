@@ -14,7 +14,7 @@ Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{name}
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#\*\>]
+sltstart        {nmchar}|[\.#\*\>\+]
 sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
@@ -41,7 +41,7 @@ s               [\s\r\n\t\f]
 <*>':'                                 return ':';
 <EXP>','                               return 'LITERAL';
 <*>','                                 return ',';
-<*>'&'\:*{selector}                       return '&';
+<*>'&'\:*{selector}                    return '&';
 <*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|s|\%)? return 'NUMBER';
 <EXP>\;+                           popUntil(this,'INITIAL');return ';';
 <EXP>(\"|\')[\s\S]*?(\1)           return "STRING";
@@ -100,6 +100,7 @@ assignPair:
 assignList:
        assignPair     {$$={};$$[$1.name]=$1.value}
       |assignList ';' assignPair {$1[$3.name]=$3.value}
+	  |assignList ';'
       ;
 defParamList:
       '(' ')'                       {$$={};}

@@ -127,7 +127,7 @@ Scope.prototype = {
     }
 
     function backtrackSelector(parentSelectors) {
-      var r, tss;
+      var r, tss, tem;
       if (parentSelectors) {
         tss = this.selectors;
         r = [];
@@ -137,14 +137,16 @@ Scope.prototype = {
             r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
           })
         });
-      } else r = this.selectors;
+        tem = this.selectors;
+        this.selectors = r;
+      } else tem = this.selectors;
       this.nested.forEach(function (s) {
-        s.backtraceSelector(r);
+        s.backtraceSelector(tem);
       });
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
-      return r;
+      return this.selectors;
     }
 
     function first(parentSelectors) {
@@ -158,7 +160,8 @@ Scope.prototype = {
           })
         });
         this.selectors = r;
-      } else r = this.selectors;
+      }
+      else r = this.selectors;
       this.nested.forEach(function (scope) {
         scope.validateSelector(r)
       });
@@ -261,10 +264,11 @@ Scope.prototype = {
     }
 
     function resolveInclude(mixObj, $vars, selector) {
-      mixObj.backtraceSelector();
       mixObj.selectors = selector.split(',');
       mixObj.validateSelector();
-      return mixObj.resolve($vars);
+      var r = mixObj.resolve($vars);
+      mixObj.backtraceSelector();
+      return r;
     }
     function getChild(parent, child) {
       if (parent === child || !parent)return 0;
@@ -315,6 +319,7 @@ function Style(selectors, scope) {
   this.selector = selectors;
   this.addScope(scope || new Scope());
 }
+
 Style.prototype = (function (scopeProto) {
   var cloneFunc = scopeProto.clone, proto;
   proto = Object.create(scopeProto);

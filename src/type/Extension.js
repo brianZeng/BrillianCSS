@@ -235,9 +235,14 @@ ChangeSS.link = (function () {
       mixin.nested.forEach(function (nestin) {
         cs = new Style(nestin.selectors);
         scope.addStyle(cs);
+        cs.resolve = resolveToNull;
         cs.validateSelector(scope.selectors);
         addMixinExts(cs, nestin);
       })
+    }
+
+    function resolveToNull() {
+      return [];
     }
 
     function injectIncludeExt(path) {
@@ -276,6 +281,7 @@ ChangeSS.link = (function () {
       sheet.add({value: cscope, type: 'style'});
       return cscope;
     }
+
     function handleExtPath(path) {
       for (var i = 0, superScope = path[i], baseScope = path[i + 1]; baseScope; superScope = path[++i], baseScope = path[i + 1]) {
         if (baseScope.sheetName !== superScope.sheetName)
