@@ -127,7 +127,7 @@ Scope.prototype = {
     }
 
     function backtrackSelector(parentSelectors) {
-      var r, tss, tem;
+      var r, tss;
       if (parentSelectors) {
         tss = this.selectors;
         r = [];
@@ -137,11 +137,11 @@ Scope.prototype = {
             r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
           })
         });
-        tem = this.selectors;
+        tss = this.selectors;
         this.selectors = r;
-      } else tem = this.selectors;
+      } else tss = this.selectors;
       this.nested.forEach(function (s) {
-        s.backtraceSelector(tem);
+        s.backtraceSelector(tss);
       });
       this._selector = null;
       this.backtraceSelector = second;
@@ -170,7 +170,6 @@ Scope.prototype = {
       this.backtraceSelector = backtrackSelector;
       return r;
     }
-
     return first;
   })(),
   backtraceSelector: function () {
