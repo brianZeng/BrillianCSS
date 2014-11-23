@@ -16,8 +16,25 @@ describe('MediaQuery Behaviors', function () {
     scope = getFirstScope(src);
     return media = scope.media;
   }
-
-  describe('a.MediaQuery object attach to relative styles', function () {
+  describe('a.Grammar test:',function(){
+    it('support media query without media type',function(){
+      src='@media (orientation: portrait) { div{}}';
+      getFirstMedia(src);
+      expect(media.toString()).toBe('@media (orientation:portrait)');
+    });
+    it('support multiple expression ',function(){
+       src='@media aural and (device-aspect-ratio: @"16/9") and (max-weight: 3kg) and (color) and (min-width:600px){p{}}';
+       getFirstMedia(src);
+       expect(media.toString()).toBe("@media aural and(device-aspect-ratio:16/9)and(max-weight:3kg)and(color)and(min-width:600px)");
+    });
+    it('support multiple query',function(){
+       src='@media not screen and (color), projection and (max-weight: 3kg){p{}}';
+      getFirstMedia(src);
+      expect(media.mediaTypes).toEqual(['not screen','projection']);
+      expect(media.toString()).toBe('@media not screen and(color),projection and(max-weight:3kg)')
+    });
+  });
+  describe('b.MediaQuery object attach to relative styles', function () {
     it('MediaQuery only nest styles', function () {
       src = '@media screen{  div{ color:red; }  }';
       scope = getFirstScope(src);
@@ -43,17 +60,17 @@ describe('MediaQuery Behaviors', function () {
       }).toThrow();
     })
   });
-  describe('b.MediaQuery resolve :', function () {
+  describe('c.MediaQuery resolve :', function () {
     it('it support vars', function () {
-      src = '@media all(min-width:$m1) and (max-width:960px){div{}}';
+      src = '@media all and (min-width:$m1) and (max-width:960px){div{}}';
       getFirstMedia(src);
-      expect(media.resolve({$m1: '600px'})).toEqual('@media all(min-width:600px)and(max-width:960px)');
+      expect(media.resolve({$m1: '600px'})).toEqual('@media all and(min-width:600px)and(max-width:960px)');
     });
     it('returns clone() if can not be resolved', function () {
       src = '@media (min-width:$x){div{}};';
       getFirstMedia(src);
       expect(media.resolve()).toEqual(media.clone());
-    })
+    });
   });
 
 });

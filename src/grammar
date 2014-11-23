@@ -44,9 +44,9 @@ s               [\s\r\n\t\f]
 <EXP>'and'                             return 'M_ADD';
 <*>','                                 return ',';
 <*>'&'\:*{selector}                    return '&';
-<*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|s|\%)? return 'NUMBER';
+<*>{num}(\%|\w+\b)?                      return 'NUMBER';
 <EXP>\;+                           popUntil(this,'INITIAL');return ';';
-<EXP>(\"|\')[\s\S]*?(\1)           return "STRING";
+<EXP>\@?(\"|\')[\s\S]*?(\1)           return "STRING";
 <EXP>(url\(.*?\)|url\({string}\))  return "URL";
 <EXP>'-'?{key}(?=\([^$])           return 'FUNCNAME';
 <EXP>'+'                           return '+';
@@ -88,7 +88,7 @@ inlineFunc:
     ;
 property:
       exp      %prec COMBINE      {$$=$1.resolve();}
-      |STRING
+      |STRING                     {$$=$1[0]=='@'? $1.substr(2,$1.length-3):$1;}
       |URL
       |IDENT
       ;
@@ -150,13 +150,12 @@ m_exp:
     ;
 m_query:
      IDENT                         {$$=new MediaQuery($1);}
-    |FUNCNAME m_exp                {$$=new MediaQuery($1,$2);}
-    |m_exp                         {$$=new MediaQuery('',$1);}
+    |m_exp                         {$$=new MediaQuery('',$1);;}
     |m_query M_ADD m_exp           {$1.add($3);}
     ;
 m_qlist:
-     MEDIA m_query                 {$$=$2;}
-    |m_qlist ',' m_query           {$1.merge($3);}
+     MEDIA m_query                    {$$=$2;}
+    |m_qlist IDENT  m_query           {$1.merge($3);}
     ;
 m_start:
     m_qlist '{'                    {popUntil(yy.lexer,"INITIAL");$1.reduce();}

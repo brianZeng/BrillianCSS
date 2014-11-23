@@ -36,8 +36,11 @@ MediaQuery.prototype = {
   reduce: function () {
     this.conditions.forEach(function (con) {
       objForEach(con, function (key, v) {
-        if (v.resolve)v = v.resolve();
-        con[key] = v.hasVars ? v : v.toString();
+        if(v==undefined)con[key]=v;
+        else {
+          if (v.resolve)v = v.resolve();
+          con[key] = v.hasVars ? v : v.toString();
+        }
       });
     });
     this.variables = null;
@@ -63,8 +66,11 @@ MediaQuery.prototype = {
     function resolveMedia(conMap, $known) {
       var r = [];
       objForEach(conMap, function (key, value) {
-        if (value.hasVars)value = value.resolve($known);
-        r.push('(' + key + ':' + value + ')');
+        if(value==undefined) r.push('('+key+')');
+        else{
+          if (value.hasVars)value = value.resolve($known);
+          r.push('(' + key + ':' + value + ')');
+        }
       });
       return r.join('and');
     }
@@ -72,7 +78,8 @@ MediaQuery.prototype = {
     return function ($vars) {
       var $known = ChangeSS.assign($vars).$resolved, cons = this.conditions;
       return '@media ' + this.mediaTypes.map(function (m_type, i) {
-        return Scope.trimSelector(m_type) + resolveMedia(cons[i], $known);
+        var mcon=resolveMedia(cons[i], $known);
+        return m_type?   m_type+' and'+mcon  : mcon;
       }).join(',');
     }
   })(),
