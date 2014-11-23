@@ -210,10 +210,10 @@ Scope.prototype = {
     if (this.staticRules.hasOwnProperty(key))return delete this.staticRules[key];
     if (this.dynamicRules.hasOwnProperty(key))return delete this.dynamicRules[key];
   },
-  getVarNames: function (array) {
+  getVar: function (array) {
     array = array || [];
     objForEach(this.dynamicRules, function (key, value) {
-      value.getVarNames(array);
+      value.getVar(array);
     });
     return array;
   },
@@ -334,12 +334,6 @@ Style.prototype = (function (scopeProto) {
         else this.selectors = [Scope.trimSelector(list)];
         this._selector = null;
       }
-    }
-  });
-  Object.defineProperty(proto, 'value', {
-    get: function () {
-      var s = this.getBodyString();
-      return s == '{}' ? undefined : this.selector + s;
     }
   });
   proto.addScope = function (scope) {

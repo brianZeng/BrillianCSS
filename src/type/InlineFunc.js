@@ -36,8 +36,8 @@ objForEach(Math, function (key, fun, def) {
   })());
 InlineFunc.prototype = {
   _type: ChangeSS.TYPE.FUNC,
-  getVarNames: function (array) {
-    return this.param.getVarNames(array);
+  getVar: function (array) {
+    return this.param.getVar(array);
   },
   resolve: function ($vars, info) {
     var v = this.param.resolve($vars, info), func, name = this.name, ret;

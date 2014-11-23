@@ -12,7 +12,6 @@ Var.prototype = (function (TYPE) {
   function isVar(obj) {
     return getType(obj, true) === VAR;
   }
-
   Var.isVar = isVar;
   return{
     _type: ChangeSS.TYPE.VAR,
@@ -51,7 +50,8 @@ Var.prototype = (function (TYPE) {
         if (isVar(real = value.findRef()))return this.clone();
         else value = real;
       return value || this.clone();
-    }, getVarNames: function (array) {
+    },
+    getVar: function (array) {
       array = array || [];
       List.arrayAdd(array, this.symbol);
       return array;

@@ -110,10 +110,10 @@ List.prototype = (function (proto) {
       return list[0].resolve ? list[0].resolve($vars) : list[0];
     return list;
   };
-  proto.getVarNames = function (array) {
+  proto.getVar = function (array) {
     array = array || [];
     this.forEach(function (o) {
-      if (o.hasVars)o.getVarNames(array)
+      if (o.hasVars)o.getVar(array)
     });
     return array;
   };

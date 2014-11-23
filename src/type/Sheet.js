@@ -9,18 +9,24 @@ function Sheet(name) {
 }
 
 Sheet.prototype = (function (proto) {
-  proto.add = function (sheetPart) {
-    var type = sheetPart.type, $key;
-    if (type == 'var') {
-      var ref = sheetPart.value;
+  proto.add = function (sheetPart, type) {
+    var $key, ref;
+    type = type || sheetPart.type;
+    if (sheetPart instanceof Array)
+      sheetPart.forEach(function (p) {
+        this.add(p, type);
+      }, this);
+    else if (type == 'var') {
+      ref = sheetPart.value;
       $key = sheetPart.name;
       if ($key.sheetName == this.name)$key.sheetName = '';
       if (Var.isVar(ref) && !ref.sheetName)ref.sheetName = this.name;
       this.vars[$key.toString()] = sheetPart.value;
     }
     else if (type == 'style') {
-      this.scopes.push(sheetPart.value);
-      sheetPart.value.setSheetName(this.name);
+      ref = sheetPart instanceof Style ? sheetPart : sheetPart.value;
+      this.scopes.push(ref);
+      ref.setSheetName(this.name);
     }
     else if (type == 'mix') {
       var mixObj = sheetPart.value;

@@ -24,9 +24,10 @@ s               [\s\r\n\t\f]
 %%
 <*>{comment}                           /* ignore*/;
 <*>"@mixin"                              return 'MIXIN';
+<*>"@media"                              this.begin("EXP");return 'MEDIA';
 <*>"@include"                            return 'INCLUDE';
 <*>"@sheetname"                          this.begin("EXP");return 'SHEET';
-<*>"@"extend                             this.begin('EXT');return 'EXTENDS';
+<*>"@extend"                             this.begin('EXT');return 'EXTENDS';
 <*>'->'                                  this.begin("EXP");return '->';
 <EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
@@ -39,7 +40,8 @@ s               [\s\r\n\t\f]
 <*>'('                                 return '(';
 <*>')'                                 return ')';
 <*>':'                                 return ':';
-<EXP>','                               return 'LITERAL';
+<EXP>','                               return 'IDENT';
+<EXP>'and'                             return 'M_ADD';
 <*>','                                 return ',';
 <*>'&'\:*{selector}                    return '&';
 <*>{num}(px|pc|px|in|cm|mm|deg|pi|em|ex|rad|s|\%)? return 'NUMBER';
@@ -51,8 +53,8 @@ s               [\s\r\n\t\f]
 <EXP>'-'                           return '-';
 <EXP>'*'                           return '*';
 <EXP>'/'                           return '/';
-<EXP>'#'{hexchar}+                 return 'LITERAL';
-<EXP>{key}                         return 'LITERAL';
+<EXP>'#'{hexchar}+                 return 'IDENT';
+<EXP>("not"|"only"){s}*{Ident}     return 'IDENT';
 <*>{Ident}                         return 'IDENT';
 <*><<EOF>>                         return "EOF";
 /lex
@@ -66,7 +68,7 @@ s               [\s\r\n\t\f]
 %start sheet
 %%
 var:
-    VAR  '->' LITERAL  {$$=new Var($1,$3);}
+    VAR  '->' IDENT  {$$=new Var($1,$3);}
    |VAR                {$$=new Var($1);}
    ;
 exp:
@@ -88,7 +90,7 @@ property:
       exp      %prec COMBINE      {$$=$1.resolve();}
       |STRING
       |URL
-      |LITERAL
+      |IDENT
       ;
 list:
       property         {$$=new List($1);}
@@ -115,7 +117,7 @@ scopeBodyPart:
    |nestedStyle                  {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
-   |EXTENDS   SELECTOR '->' LITERAL{$$={type:'ext',name:$2,sheetName:$4};}
+   |EXTENDS   SELECTOR '->' IDENT{$$={type:'ext',name:$2,sheetName:$4};}
    |scopeBodyPart ';'
    ;
 scopeBody:
@@ -126,7 +128,6 @@ scope:
     '{' scopeBody '}'               {$$=$2;}
     |defParamList '{' scopeBody '}' {$$=$3.addDefValues($1);}
     |defParamList '{' '}'           {$$=new Scope().addDefValues($1);}
-    | '{' '}'                       {$$=new Scope();}
     ;
 nestedStyle:
     '&' scope                    {$$=new Style($1,$2);}
@@ -141,6 +142,32 @@ selectors:
       ;
 style:
       selectors scope              {$$=new Style($1,$2);}
+     |selectors '{' '}'            {$$=new Style($1);}
+    ;
+m_exp:
+    '(' IDENT ')'                  {$$={key:$2};}
+    |'(' IDENT ':' list ')'        {$$={key:$2,value:$4};}
+    ;
+m_query:
+     IDENT                         {$$=new MediaQuery($1);}
+    |FUNCNAME m_exp                {$$=new MediaQuery($1,$2);}
+    |m_exp                         {$$=new MediaQuery('',$1);}
+    |m_query M_ADD m_exp           {$1.add($3);}
+    ;
+m_qlist:
+     MEDIA m_query                 {$$=$2;}
+    |m_qlist ',' m_query           {$1.merge($3);}
+    ;
+m_start:
+    m_qlist '{'                    {popUntil(yy.lexer,"INITIAL");$1.reduce();}
+    ;
+m_content:
+     m_start                       {$$=[];$$.media=$1;}
+    |m_content style               {$1.push($2);}
+    ;
+m_end:
+     m_content '}'                 {$1.media.apply($1);}
+    |m_end ';'
     ;
 sheetPart:
      style          {$$={type:'style',value:$1}}
@@ -149,10 +176,12 @@ sheetPart:
     |sheetPart ';'
     ;
 sheet:
-     SHEET LITERAL ';'{$$=new Sheet($2);}
-    |sheetPart        {$$=new Sheet().add($1)}
-    |sheet sheetPart  {$1.add($2);}
-    |sheet "EOF"      {return $$=$1;}
+     SHEET IDENT ';'     {$$=new Sheet($2);}
+    |sheetPart           {$$=new Sheet().add($1);}
+    |m_end               {$$=new Sheet().add($1,'style');}
+    |sheet sheetPart     {$1.add($2);}
+    |sheet m_end         {$1.add($2,'style');}
+    |sheet "EOF"         {return $$=$1;}
     ;
 %%
 function popUntil(lexer,state){
