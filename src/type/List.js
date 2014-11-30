@@ -61,6 +61,30 @@ List.fromArray = function (arry) {
   Array.prototype.push.apply(l, arry);
   return l;
 };
+List.mapBy=(function(){
+  function equal(a){
+    return a;
+  }
+  return function(nameOrFunc){
+    if(typeof nameOrFunc=="string")
+      return function(a){return a[nameOrFunc]};
+    else if(typeof nameOrFunc=="function")
+      return function(a){return nameOrFunc(a);};
+    return equal;
+  }
+})();
+List.groupBy=function(arr,mapFuncOrName){
+  var ids=[],mapBy=List.mapBy(mapFuncOrName),groups=[],id,item,index;
+  for(var i= 0,len=arr.length;i<len;i++){
+    index=ids.indexOf(id=mapBy(item=arr[i]));
+    if(index==-1) {
+      groups.push([item]);
+      ids.push(id);
+    }
+    else groups[index].push(item);
+  }
+  return groups;
+};
 List.prototype = (function (proto) {
   proto.add = function (item) {
     if (this.indexOf(item) > -1)return false;

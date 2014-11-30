@@ -41,13 +41,45 @@ Sheet.prototype = (function (proto) {
     return this;
   };
   proto.resolve = function ($vars) {
-    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved);
-    return this.scopes.reduce(function (r, scope) {
+    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={},
+    reduceFunc= function(scopes){
+         return scopes.reduce(function(pre,scope){
+           pre.push.apply(pre,scope.resolve($param));
+           return pre;
+         },[]);
+        };
+    List.groupBy(this.scopes,'media').forEach(function(group){
+      var media=group[0].media,key;
+      if(media===undefined)r["*"]=reduceFunc(group);
+      else if(typeof (key=media.resolve($assign.$resolved))==="string")
+        r[key+'{*}']=reduceFunc(group)
+    });
+   /* return this.scopes.reduce(function (r, scope) {
       r.push.apply(r, scope.resolve($param));
       return r;
-    }, []);
+    }, []);*/
+    return r;
   };
-  proto.toString = function ($vars) {
+  proto.toString =(function(){
+    var separator='\n';
+    function mapScope(scope){
+      var rules = [], brc;
+      objForEach(scope.rules, function (key, value) {rules.push(key + ':' + value + ';');});
+      brc=rules.length? '{'+separator+'*'+separator+'}':'{*}';
+      return scope.selector+brc.replace('*',rules.join(separator));
+    }
+    function mapGroup(group){
+      return group.map(mapScope).join(separator);
+    }
+    return function($vars){
+      var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
+      objForEach(groups,function(key,group){
+        key=key.replace('{*}',keyRep);
+        r.push(key.replace('*',mapGroup(group)))
+      });
+      return r.join(separator);
+    }
+  })();/* function ($vars) {
     return this.resolve($vars).map(function (r) {
       var rules = [], brc;
       objForEach(r.rules, function (key, value) {
@@ -56,7 +88,7 @@ Sheet.prototype = (function (proto) {
       brc = rules.length ? '{\n*\n}' : '{*}';
       return r.selector + brc.replace('*', rules.join('\n'));
     }).join('\n');
-  };
+  };*/
   proto.merge = function (sheet) {
     this.vars = mix(this.vars, sheet.vars);
     this.scopes = this.scopes.concat(sheet.scopes.map(function (s) {

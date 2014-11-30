@@ -3,7 +3,14 @@
  */
 describe('MediaQuery Behaviors', function () {
   var src, scope, sheet, media;
-
+ function StringEqual(str1,str2,ignoreRex){
+   ignoreRex=ignoreRex||/[^\S]/g;
+   expect(str1.replace(ignoreRex,'')).toBe(str2.replace(ignoreRex,''))
+ }
+  function stringContain(str1,str2,ignoreRex){
+    ignoreRex=ignoreRex||/[^\S]/g;
+    expect(str1.replace(ignoreRex,'').indexOf(str2.replace(ignoreRex,''))>-1).toBe(true);
+  }
   function getFirstScope(src) {
     return scope = ChangeSS.parse(src)[0].validate().scopes[0];
   }
@@ -72,5 +79,27 @@ describe('MediaQuery Behaviors', function () {
       expect(media.resolve()).toEqual(media.clone());
     });
   });
+  describe('d.Sheet Contains MediaQuery resolve:',function(){
+    it('separate sheets by MediaQuery',function(){
+      var r;
+      src='div{} @media screen and (min-width:960px){ p{} }';
+      getFirstSheet(src);
+      expect((r=Object.getOwnPropertyNames(sheet.resolve())).length).toBe(2);
+      expect(r).toContain('*');
+      expect(r).toContain('@media screen and(min-width:960px){*}');
+    });
+    it('ignore scopes with unresolved MediaQuery',function(){
+      src='div{} @media screen and (min-width:960px){ p{} } @media screen and(max-width:$unknown){ p{} }';
+      getFirstSheet(src);
+      expect(Object.getOwnPropertyNames(sheet.resolve()).length).toBe(2);
+    });
+    it('use toString($vars) method to get results',function(){
+      src='$mm:960px;@media screen and (min-width:$mm){ p{ font-size:1.5em;} }';
+      getFirstSheet(src);
+      var r=sheet.toString();
+      expect(r.indexOf('@media screen and(min-width:960px)')).toBe(0);
+      stringContain(r,'{ p{ font-size:1.5em;} }');
+    });
+  })
 
 });

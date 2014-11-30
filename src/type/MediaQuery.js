@@ -76,7 +76,7 @@ MediaQuery.prototype = {
     }
 
     return function ($vars) {
-      var $known = ChangeSS.assign($vars).$resolved, cons = this.conditions;
+      var $known =$vars? ChangeSS.assign($vars).$resolved:{}, cons = this.conditions;
       return '@media ' + this.mediaTypes.map(function (m_type, i) {
         var mcon=resolveMedia(cons[i], $known);
         return m_type?   m_type+' and'+mcon  : mcon;
