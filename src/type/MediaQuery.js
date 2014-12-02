@@ -108,17 +108,19 @@ MediaQuery.prototype = {
     return array;
   },
   asKeyFrames:(function(){
-    var vendorPrefixes=['o','moz','ms','webkit',''].map(function(pre){
+    var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
+    function mapPrefix(pre){
       if(pre)pre='-'+pre+'-';
       return '@'+pre+'keyframes';
-    }),normalizePrefixes=['@keyframes'];
+    }
     function resolveKeyframes(){
-      var prefix;
+      var prefix,name=this.mediaTypes[0],r;
       if((prefix=this.groupPrefix)===normalizePrefixes[0]){
-        if(ChangeSS.opt.addKeyFramesVendorPrefix) return vendorPrefixes;
-        return ChangeSS.opt.preferKeyFramesVendorPrefix? ['@-'+ChangeSS.opt.vendorPrefix+'-keyframes']:normalizePrefixes;
+        if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
+        else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
       }
-      return [prefix]
+      else r= [prefix];
+      return r.map(function(pre){return pre+' '+name});
     }
     return function(prefix){
       this.groupPrefix=prefix;
