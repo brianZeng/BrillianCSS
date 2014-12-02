@@ -14,7 +14,7 @@ Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{name}
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#\*\>\+]
+sltstart        {nmchar}|[\.#\*\>\+]|\d+\%
 sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
@@ -28,6 +28,7 @@ s               [\s\r\n\t\f]
 <*>"@include"                            return 'INCLUDE';
 <*>"@sheetname"                          this.begin("EXP");return 'SHEET';
 <*>"@extend"                             this.begin('EXT');return 'EXTENDS';
+<*>\@(\-(webkit|moz|ms|o)\-)?keyframes   return 'KEYFRAMES';
 <*>'->'                                  this.begin("EXP");return '->';
 <EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
@@ -169,9 +170,10 @@ m_end:
     |m_end ';'
     ;
 sheetPart:
-     style          {$$={type:'style',value:$1}}
-    |mixScope       {$1.type='mix';}
-    |assignPair     {$1.type='var';}
+     style           {$$={type:'style',value:$1}}
+    |KEYFRAMES style {$$={type:'style',value:$2.asKeyFrames($1)}}
+    |mixScope        {$1.type='mix';}
+    |assignPair      {$1.type='var';}
     |sheetPart ';'
     ;
 sheet:

@@ -7,6 +7,7 @@ function MediaQuery(mType, condition) {
   this.conditions = [
     {}
   ];
+  this.groupPrefix='@media';
   this.add(condition);
 }
 MediaQuery.prototype = {
@@ -54,15 +55,16 @@ MediaQuery.prototype = {
       });
       return o;
     }
-
     return function () {
       var m = new MediaQuery();
       m.mediaTypes = this.mediaTypes.slice();
       m.conditions = this.conditions.map(cloneObj);
+      m.groupPrefix=this.groupPrefix;
       return m;
     }
   })(),
   toString: (function () {
+    var MEDIA_AND=' and ';
     function resolveMedia(conMap, $known) {
       var r = [];
       objForEach(conMap, function (key, value) {
@@ -72,14 +74,17 @@ MediaQuery.prototype = {
           r.push('(' + key + ':' + value + ')');
         }
       });
-      return r.join('and');
+      return r.join(MEDIA_AND);
     }
 
     return function ($vars) {
       var $known =$vars? ChangeSS.assign($vars).$resolved:{}, cons = this.conditions;
-      return '@media ' + this.mediaTypes.map(function (m_type, i) {
+      return this.groupPrefix+' '+ this.mediaTypes.map(function (m_type, i) {
         var mcon=resolveMedia(cons[i], $known);
-        return m_type?   m_type+' and'+mcon  : mcon;
+        if(m_type)
+          return mcon? m_type+MEDIA_AND+mcon:m_type;
+        return mcon;
+        //return m_type?   m_type+MEDIA_AND+mcon  : mcon;
       }).join(',');
     }
   })(),
@@ -101,7 +106,26 @@ MediaQuery.prototype = {
       });
     });
     return array;
-  }
+  },
+  asKeyFrames:(function(){
+    var vendorPrefixes=['o','moz','ms','webkit',''].map(function(pre){
+      if(pre)pre='-'+pre+'-';
+      return '@'+pre+'keyframes';
+    }),normalizePrefixes=['@keyframes'];
+    function resolveKeyframes(){
+      var prefix;
+      if((prefix=this.groupPrefix)===normalizePrefixes[0]){
+        if(ChangeSS.opt.addKeyFramesVendorPrefix) return vendorPrefixes;
+        return ChangeSS.opt.preferKeyFramesVendorPrefix? ['@-'+ChangeSS.opt.vendorPrefix+'-keyframes']:normalizePrefixes;
+      }
+      return [prefix]
+    }
+    return function(prefix){
+      this.groupPrefix=prefix;
+      this.resolve=resolveKeyframes;
+      return this;
+    }
+  })()
 };
 MediaQuery.prototype.resolve = function ($vars) {
   return this.canResolve($vars) ? this.toString($vars) : this.clone();

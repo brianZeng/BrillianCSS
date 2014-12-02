@@ -47,12 +47,14 @@ Sheet.prototype = (function (proto) {
            pre.push.apply(pre,scope.resolve($param));
            return pre;
          },[]);
-        };
+     };
     List.groupBy(this.scopes,'media').forEach(function(group){
-      var media=group[0].media,key;
-      if(media===undefined)r["*"]=reduceFunc(group);
+      var media=group[0].media,key,gresults=reduceFunc(group);
+      if(media===undefined)r["*"]=gresults;
       else if(typeof (key=media.resolve($assign.$resolved))==="string")
-        r[key+'{*}']=reduceFunc(group)
+        r[key+'{*}']=gresults;
+      else if(key instanceof  Array)
+        key.forEach(function(k){r[k+'{*}']=gresults.slice()});
     });
    /* return this.scopes.reduce(function (r, scope) {
       r.push.apply(r, scope.resolve($param));

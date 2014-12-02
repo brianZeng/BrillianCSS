@@ -26,7 +26,7 @@ Scope.prototype = {
   selectors: [''],
   toString: (function () {
     function mapResult(separator) {
-      separator = separator || window ? '\r\n' : '';
+      separator = separator || window ? '\n' : '';
       return function (r) {
         return r.selector + '{' + separator + rules(r).join(separator) + '}';
       }
@@ -40,10 +40,6 @@ Scope.prototype = {
       return this.resolve($vars).map(mapResult(separator));
     }
   })(),
-  get value() {
-    var s = this.toString();
-    return s.match(/^\{[\s\r\n\t\f;]*\}$/, s) ? undefined : s;
-  },
   get globalName() {
     var sheetName = this.sheetName;
     if (!sheetName)return undefined;
@@ -217,7 +213,12 @@ Scope.prototype = {
     });
     return array;
   },
-  resolve: (function () {
+  /**
+   * @function
+   * @param  [object] $vars
+   * @return {array<object>}
+   */
+   resolve: (function () {
     var keepEmptyResult = false;
     Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
       set: function (v) {
@@ -336,6 +337,7 @@ Style.prototype = (function (scopeProto) {
       }
     }
   });
+
   proto.addScope = function (scope) {
     if (scope instanceof Scope) {
       this.defValues = mix(this.defValues, scope.defValues);
@@ -363,6 +365,19 @@ Style.prototype = (function (scopeProto) {
         }, []);
     else
       return [];
+  };
+  var keyFrameWrapper={
+    validateSelector:function(){return this.selectors},
+    backtraceSelector:function(){return this.selectors},
+    resolve:function(){
+      return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
+    }
+  },keyFrameLegalReg=/^(\d+\%|from|to)/;
+  function filterKeyFrame(r){return keyFrameLegalReg.test(r.selector);}
+  proto.asKeyFrames=function(prefix){
+    objForEach(keyFrameWrapper,function(key,value){ this[key]=value; },this);
+    this.media=new MediaQuery(this.selector).asKeyFrames(prefix);
+    return this;
   };
   return proto;
 })(Scope.prototype);

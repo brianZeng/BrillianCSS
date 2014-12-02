@@ -32,13 +32,13 @@ describe('MediaQuery Behaviors', function () {
     it('support multiple expression ',function(){
        src='@media aural and (device-aspect-ratio: @"16/9") and (max-weight: 3kg) and (color) and (min-width:600px){p{}}';
        getFirstMedia(src);
-       expect(media.toString()).toBe("@media aural and(device-aspect-ratio:16/9)and(max-weight:3kg)and(color)and(min-width:600px)");
+       expect(media.toString()).toBe("@media aural and (device-aspect-ratio:16/9) and (max-weight:3kg) and (color) and (min-width:600px)");
     });
     it('support multiple query',function(){
        src='@media not screen and (color), projection and (max-weight: 3kg){p{}}';
       getFirstMedia(src);
       expect(media.mediaTypes).toEqual(['not screen','projection']);
-      expect(media.toString()).toBe('@media not screen and(color),projection and(max-weight:3kg)')
+      expect(media.toString()).toBe('@media not screen and (color),projection and (max-weight:3kg)')
     });
   });
   describe('b.MediaQuery object attach to relative styles', function () {
@@ -71,7 +71,7 @@ describe('MediaQuery Behaviors', function () {
     it('it support vars', function () {
       src = '@media all and (min-width:$m1) and (max-width:960px){div{}}';
       getFirstMedia(src);
-      expect(media.resolve({$m1: '600px'})).toEqual('@media all and(min-width:600px)and(max-width:960px)');
+      expect(media.resolve({$m1: '600px'})).toEqual('@media all and (min-width:600px) and (max-width:960px)');
     });
     it('returns clone() if can not be resolved', function () {
       src = '@media (min-width:$x){div{}};';
@@ -86,10 +86,10 @@ describe('MediaQuery Behaviors', function () {
       getFirstSheet(src);
       expect((r=Object.getOwnPropertyNames(sheet.resolve())).length).toBe(2);
       expect(r).toContain('*');
-      expect(r).toContain('@media screen and(min-width:960px){*}');
+      expect(r).toContain('@media screen and (min-width:960px){*}');
     });
     it('ignore scopes with unresolved MediaQuery',function(){
-      src='div{} @media screen and (min-width:960px){ p{} } @media screen and(max-width:$unknown){ p{} }';
+      src='div{} @media screen and (min-width:960px){ p{} } @media screen and (max-width:$unknown){ p{} }';
       getFirstSheet(src);
       expect(Object.getOwnPropertyNames(sheet.resolve()).length).toBe(2);
     });
@@ -97,7 +97,7 @@ describe('MediaQuery Behaviors', function () {
       src='$mm:960px;@media screen and (min-width:$mm){ p{ font-size:1.5em;} }';
       getFirstSheet(src);
       var r=sheet.toString();
-      expect(r.indexOf('@media screen and(min-width:960px)')).toBe(0);
+      expect(r.indexOf('@media screen and (min-width:960px)')).toBe(0);
       stringContain(r,'{ p{ font-size:1.5em;} }');
     });
   })

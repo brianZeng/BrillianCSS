@@ -52,7 +52,20 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
-  main.opt = {};
+  main.opt = {
+    addKeyFramesVendorPrefix:true,
+    preferKeyFramesVendorPrefix:true
+  };
+  main.opt.vendorPrefix=(function(){
+    if(window&&window.getComputedStyle){
+      for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
+        if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+      }
+      if(pre)return pre[1];
+      return styles.OLink? 'o':'';
+    }
+    return '';
+  })();
   getter = {
     sheet: function (name) {
       name = name || main.defaultSheetName;
