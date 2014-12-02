@@ -1,0 +1,60 @@
+
+.main($leftWidth:180px;$mainBackground:rgb(199,222,248);$rightWidth:360px){
+  @extend .content;
+  background:$mainBackground;
+  &::before{
+    display: block;
+    content: '';
+    clear: both;
+    margin-top: 10px;
+    height: 20px;
+    background-color: transparent;
+  }
+  .left($arrowMovement:20px){
+    width:$leftWidth;
+    float:left;
+    height:100%;
+    overflow: hidden;
+    padding-right:$arrowMovement;
+    >h3{
+      color: rgb(0,128,119);
+      text-decoration:underline;
+      margin:10px 20px;
+    }
+    .items{
+      > *{
+        p{
+          font: 18px '微软雅黑';
+          padding:10px $arrowMovement*2 5px;
+          width:$leftWidth-$arrowMovement*2;
+          margin:0;
+          &:hover{
+            color: rgb(0,128,119);
+          }
+        }
+        left: 0;
+        position: relative;
+        margin-bottom: 10px;
+        @include $arrow2right($background:$mainBackground;$hoverBackground:$bodyBackground;
+          $width:$leftWidth-$arrowMovement*2;$movement:$arrowMovement);
+      }
+
+    }
+  }
+  .right{
+  float: right;
+   }
+  .CodeMirror{
+      width:$rightWidth;
+      height:200px;
+      right:-1px;
+    }
+
+  > article{
+    margin-left:$leftWidth;
+    min-height: 600px;
+    section{
+      margin:10px $rightWidth 0 0;
+    }
+  }
+}

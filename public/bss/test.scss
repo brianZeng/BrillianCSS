@@ -1,0 +1,36 @@
+menu($height:100px;$textColor:white;$background:deepskyblue){
+  margin: 0;
+  min-width:600px;
+  text-align:center;
+  padding: 0 5%;
+  background:$background;
+  height: $height;
+ >menuitem{
+   height: $height;
+   max-height: $height;
+   width: 15%;
+   min-width: 100px;
+   display: inline-block;
+ }
+ >menuitem{
+   >img($imgSize:$height/2){
+     border-bottom: 2px solid $textColor;
+     margin-top: 5%;
+     width: $imgSize;
+     height:$imgSize;
+   }
+   >p{
+     font-size: 1em;
+     margin-top: 5%;
+     color: $textColor;
+   }
+   >input{
+     height: 90%;
+     width: 90%;
+     margin: 5% 5%;
+   }
+ }
+}
+*{
+  box-sizing: border-box;
+}

@@ -1,0 +1,45 @@
+$headerColor:rgb(98,137,198);
+$navColor:rgb(0,64,192);
+header($headerHeight:50px){
+  background:$headerColor;
+  height:$headerHeight;
+  padding: 0;
+  nav($fontsize:23px){
+    display:inline-block;
+    float:right;
+    margin-top: ($headerHeight-$fontsize)/2;
+    @include $linkContainer($color:skyblue;$fontsize:$fontsize;$hoverColor:$navColor);
+  }
+  .logo($logoColor:rgb(95,37,138);$logoShadow:9px rgb(242,226,238)){
+    transform:rotate(-2deg);
+    text-shadow: 0 0 $logoShadow;
+    display: inline-block;
+    color: $logoColor;
+    font-size: $headerHeight-10px;
+    margin-top: -4px;
+    vertical-align: top;
+    letter-spacing: 0;
+  }
+  box-shadow: 0 3px 5px 2px #555;
+  margin-bottom: 4px;
+}
+@mixin $linkContainer($hoverColor:darkblue;$color:skyblue;$visitedColor:black;$distance:10px;
+$font:bold $fontsize "times new roman";$fontsize:20px)
+{
+a{
+  padding:0 $distance;
+  color:$color;
+  text-decoration: none;
+  font:$font;
+  &:hover{
+    color:$hoverColor;
+    cursor:pointer;
+  }
+  &:visited{
+    color:$visitedColor;
+  }
+}
+> a+a{
+  border-left:1px solid $color;
+}
+}

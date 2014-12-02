@@ -1,0 +1,16 @@
+@sheetname lib;
+.boxsize{
+  box-sizing:border-box;
+}
+@mixin $circle($size:100px;$innerColor:transparent;$outerColor:blue;$outerWidth:$size/6;$hoverInner:$innerColor;$hoverOuter:red){
+  width:$size;
+  height:$size;
+  background:$innerColor;
+  border-radius:100%;
+  border:$outerColor solid $outerWidth;
+&:hover{
+  background:$hoverInner;
+  border:$hoverOuter solid $outerWidth;
+}
+  @extend .boxsize;
+}

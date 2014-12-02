@@ -1,0 +1,198 @@
+@mixin $triangleRight($size:20px;$innerColor:transparent;$outColor:transparent;$border:$size solid){
+  border-left:$border $innerColor;
+  border-top:$border $outColor;
+  border-bottom:$border $outColor;
+  width:$size;
+}
+@mixin $arrow2right($width:100px;$height:40px;$background:red;$movement:$width/4;
+$hoverBackground:white;$size:$height/2;$cursor:pointer){
+  width: $width;
+  height: $height;
+  background: $background;
+  transition:margin-left 0.4s ease-in-out;
+  cursor:$cursor;
+  clear:right;
+> *{
+  float:right;
+}
+&:hover{
+  margin-left: $movement;
+  background: $hoverBackground;
+  &::after{
+    @include $triangleRight($innerColor:$hoverBackground);
+  }
+  &::before{
+    @include $triangleRight($outColor:$hoverBackground);
+  }
+}
+&::after{
+  @extend .pesdo;
+  margin-left: $width;
+  @include $triangleRight($innerColor:$background);
+}
+&::before{
+  @extend .pesdo;
+  margin-left:-$size;
+  @include $triangleRight($outColor:$background;$aniTime:0.2s);
+}
+}
+.pesdo{
+  content: '';
+  position: absolute;
+}
+.test{
+  @include $arrow2right($hoverBackground:black);
+}
+
+
+
+$headerColor:rgb(98,137,198);
+$navColor:rgb(0,64,192);
+header($headerHeight:50px){
+  background:$headerColor;
+  height:$headerHeight;
+  padding: 0;
+nav($fontsize:23px){
+  display:inline-block;
+  float:right;
+  margin-top: ($headerHeight-$fontsize)/2;
+  @include $linkContainer($color:skyblue;$fontsize:$fontsize;$hoverColor:$navColor);
+}
+.logo($logoColor:rgb(95,37,138);$logoShadow:9px rgb(242,226,238)){
+  transform:rotate(-2deg);
+  text-shadow: 0 0 $logoShadow;
+  display: inline-block;
+  color: $logoColor;
+  font-size: $headerHeight-10px;
+  margin-top: -4px;
+  vertical-align: top;
+  letter-spacing: 0;
+}
+  box-shadow: 0 3px 5px 2px #555;
+  margin-bottom: 4px;
+}
+@mixin $linkContainer($hoverColor:darkblue;$color:skyblue;$visitedColor:black;$distance:10px;
+$font:bold $fontsize "times new roman";$fontsize:20px)
+{
+a{
+  padding:0 $distance;
+  color:$color;
+  text-decoration: none;
+  font:$font;
+  &:hover{
+    color:$hoverColor;
+    cursor:pointer;
+  }
+  &:visited{
+    color:$visitedColor;
+  }
+}
+> a+a{
+  border-left:1px solid $color;
+}
+}
+*{
+  box-sizing:border-box;
+  font-size:12px;
+  font-family: '微软雅黑';
+  letter-spacing: 1px;
+}
+body($bodyBackground:rgb(224,241,244)){
+  background:$bodyBackground;
+  padding: 0;
+  margin:0;
+}
+.content{
+  min-width: 600px;
+  max-width: 960px;
+  margin: 0px auto;
+}
+h3{
+  text-align: center;
+  font-size: 20px;
+}
+.code{
+  background: $headerColor;
+  color:white;
+  font-weight: bold;
+  padding:1px 3px;
+  margin: 2px;
+  border: 1px solid $headerColor;
+  border-radius: 3px;
+}
+code{
+  @extend .code;
+}
+section{
+  dd{
+    max-width: 320px;
+    margin: 10px;
+    pre{
+      @extend .code;
+    }
+  }
+}
+
+.main($leftWidth:180px;$mainBackground:rgb(199,222,248);$rightWidth:360px){
+  @extend .content;
+  background:$mainBackground;
+&::before{
+  display: block;
+  content: '';
+  clear: both;
+  margin-top: 10px;
+  height: 20px;
+  background-color: transparent;
+}
+.left($arrowMovement:20px){
+  width:$leftWidth;
+  float:left;
+  height:100%;
+  overflow: hidden;
+  padding-right:$arrowMovement;
+>h3{
+  color: rgb(0,128,119);
+  text-decoration:underline;
+  margin:10px 20px;
+}
+.items{
+  > *{
+    p{
+      font: 18px '微软雅黑';
+      padding:10px $arrowMovement*2 5px;
+      width:$leftWidth-$arrowMovement*2;
+      margin:0;
+      &:hover{
+        color: rgb(0,128,119);
+      }
+    }
+    left: 0;
+    position: relative;
+    margin-bottom: 10px;
+    @include $arrow2right($background:$mainBackground;$hoverBackground:$bodyBackground;
+    $width:$leftWidth-$arrowMovement*2;$movement:$arrowMovement);
+  }
+
+}
+}
+.right{
+  float: right;
+}
+.CodeMirror{
+  width:$rightWidth;
+  height:200px;
+  right:-1px;
+}
+
+> article{
+  margin-left:$leftWidth;
+  min-height: 600px;
+  section{
+    margin:10px $rightWidth 0 0;
+  }
+}
+}
+$colWidth:200px;
+$textareaFontSize:12px;
+$logoFontSize:$textareaFontSize+4px;
+$bodyBackground:rgb(224,241,244);

@@ -1,0 +1,4 @@
+$colWidth:200px;
+$textareaFontSize:12px;
+$logoFontSize:$textareaFontSize+4px;
+$bodyBackground:rgb(224,241,244);
