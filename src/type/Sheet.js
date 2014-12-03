@@ -40,17 +40,23 @@ Sheet.prototype = (function (proto) {
     else throw 'unknown type';
     return this;
   };
+  function addResult(container,key,array){
+    var r=container[key];
+    if(r==undefined)container[key]=array;
+    else r.push.apply(r,array);
+  }
   proto.resolve = function ($vars) {
     var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
     this.scopes.forEach(function(scope){
       var spec=scope.spec,key,result;
-      if(spec===undefined)r['*']=scope.resolve($param);
+      if(spec===undefined)
+        addResult(r,'*',scope.resolve($param));
       else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
-        r[key+'{*}']=scope.resolve($param);
+        addResult(r,key+'{*}',scope.resolve($param));
       else if(spec instanceof KeyFrame)
       {
         result=scope.resolve($param);
-        spec.getAnimations().forEach(function(key){r[key+'{*}']=result});
+        spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
       }
     });
     return r;

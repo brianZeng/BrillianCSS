@@ -1607,37 +1607,26 @@ Sheet.prototype = (function (proto) {
     else throw 'unknown type';
     return this;
   };
+  function addResult(container,key,array){
+    var r=container[key];
+    if(r==undefined)container[key]=array;
+    else r.push.apply(r,array);
+  }
   proto.resolve = function ($vars) {
-    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};/*,
-    reduceFunc= function(scopes){
-         return scopes.reduce(function(pre,scope){
-           pre.push.apply(pre,scope.resolve($param));
-           return pre;
-         },[]);
-     };*/
+    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
     this.scopes.forEach(function(scope){
       var spec=scope.spec,key,result;
-      if(spec===undefined)r['*']=scope.resolve($param);
+      //debugger;
+      if(spec===undefined)
+        addResult(r,'*',scope.resolve($param));
       else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
-        r[key+'{*}']=scope.resolve($param);
+        addResult(r,key+'{*}',scope.resolve($param));
       else if(spec instanceof KeyFrame)
       {
         result=scope.resolve($param);
-        spec.getAnimations().forEach(function(key){r[key+'{*}']=result});
+        spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
       }
     });
-    /* List.groupBy(this.scopes,'media').forEach(function(group){
-      var media=group[0].media,key,gresults=reduceFunc(group);
-      if(media===undefined)r["*"]=gresults;
-      else if(typeof (key=media.resolve($assign.$resolved))==="string")
-        r[key+'{*}']=gresults;
-      else if(key instanceof  Array)
-        key.forEach(function(k){r[k+'{*}']=gresults.slice()});
-    });
-    return this.scopes.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($param));
-      return r;
-    }, []);*/
     return r;
   };
   proto.toString =(function(){
@@ -1659,16 +1648,7 @@ Sheet.prototype = (function (proto) {
       });
       return r.join(separator);
     }
-  })();/* function ($vars) {
-    return this.resolve($vars).map(function (r) {
-      var rules = [], brc;
-      objForEach(r.rules, function (key, value) {
-        rules.push(key + ':' + value + ';')
-      });
-      brc = rules.length ? '{\n*\n}' : '{*}';
-      return r.selector + brc.replace('*', rules.join('\n'));
-    }).join('\n');
-  };*/
+  })();
   proto.merge = function (sheet) {
     this.vars = mix(this.vars, sheet.vars);
     this.scopes = this.scopes.concat(sheet.scopes.map(function (s) {
