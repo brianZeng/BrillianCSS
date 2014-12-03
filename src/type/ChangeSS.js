@@ -99,13 +99,19 @@ ChangeSS = (function (parser) {
       os.merge(sheet);
     }
   };
-
+  var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
+  if(sheetSplitReg.compile)sheetSplitReg.compile();
   main.parse = function (input) {
-    return input.split(/\={4,}/g).filter(function (src) {
-      return src;
-    }).map(function (src) {
-      return parser.parse(src).validate();
-    });
+    var range,r;
+    if(!sheetSplitReg.test(input))
+      r=[input];
+    else{
+      r=[];
+      sheetSplitReg.exec();
+      while (range=sheetSplitReg.exec(input)[0])
+        r.push(range);
+    }
+    return r.map(function(src){return parser.parse(src)});
   };
   main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);

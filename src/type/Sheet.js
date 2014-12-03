@@ -7,7 +7,9 @@ function Sheet(name) {
   this.mixins = {};
   this.vars = {};
 }
-
+Sheet.trim=function(sheetName){
+  return sheetName? Scope.trimSelector(sheetName).replace(/(\-\>\s*)/,''):'';
+};
 Sheet.prototype = (function (proto) {
   proto.add = function (sheetPart, type) {
     var $key, ref;

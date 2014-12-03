@@ -1,3 +1,4 @@
+@sheetname bootstrap;
 .alert($alert-link-font-weight:bold;$alert-padding:15px;$alert-border-radius:$border-radius-base;) {
   padding: $alert-padding;
   margin-bottom: $line-height-computed;
@@ -45,21 +46,22 @@ h4 {
 // Alternate styles
 //
 // Generate contextual modifier classes for colorizing the alert.
-
 .alert-success($alert-success-bg:$state-success-bg;$alert-success-border:$state-success-border;
 $alert-success-text:$state-success-text) {
   @include $alert-variant -> bootstrap-lib($bg:$alert-success-bg;$bdc:$alert-success-border;$tc:$alert-success-text);
 }
-/*.alert-info {
-  @include $alert-variant -> bootstrap-lib ($alert-info-bg, $alert-info-border, $alert-info-text);
+.alert-info($alert-info-bg:$state-info-bg;$alert-info-border:$state-info-border;
+$alert-info-text:$state-info-text) {
+  @include $alert-variant -> bootstrap-lib($bg:$alert-info-bg;$bdc:$alert-info-border;$tc:$alert-info-text);
 }
-.alert-warning {
-  @include $alert-variant->bootstrap-lib ($alert-warning-bg, $alert-warning-border, $alert-warning-text);
+.alert-warning($alert-warning-bg:$state-warning-bg;$alert-warning-border:$state-warning-border;
+$alert-warning-text:$state-warning-text) {
+  @include $alert-variant -> bootstrap-lib($bg:$alert-warning-bg;$bdc:$alert-warning-border;$tc:$alert-warning-text);
 }
-.alert-danger {
-  @include $alert-variant-> bootstrap-lib ($alert-danger-bg, $alert-danger-border, $alert-danger-text);
-}*/
-====
+.alert-danger($alert-danger-bg:$state-danger-bg;$alert-danger-border:$state-danger-border;
+$alert-danger-text:$state-danger-text) {
+  @include $alert-variant -> bootstrap-lib($bg:$alert-danger-bg;$bdc:$alert-danger-border;$tc:$alert-danger-text);
+}
 @sheetname bootstrap-lib;
 @mixin $alert-variant{
   background-color: $bg;

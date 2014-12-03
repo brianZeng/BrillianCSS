@@ -79,7 +79,8 @@ Scope.prototype = {
     var names = selector.split('->').map(Scope.trimSelector);
     selector = names[0];
     sheetName = sheetName || names[1];
-    if (sheetName)selector += '->' + sheetName;
+    if (sheetName)
+      selector += '->' + Sheet.trim(sheetName);
     List.arrayAdd(this.exts, selector);
     return this;
   },

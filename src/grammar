@@ -115,7 +115,7 @@ scopeBodyPart:
    |nestedStyle                  {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
-   |EXTENDS   SELECTOR '->' IDENT{$$={type:'ext',name:$2,sheetName:$4};}
+   |EXTENDS   SELECTOR '->'      {$$={type:'ext',name:$2,sheetName:$3};}
    |scopeBodyPart ';'
    ;
 scopeBody:
