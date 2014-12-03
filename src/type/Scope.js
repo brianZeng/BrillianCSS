@@ -111,6 +111,19 @@ Scope.prototype = {
     this.includes[varName] = rules;
     return this;
   },
+  asContainer:function(){
+    this.selectors=[''];
+    var nested=this.nested,def=this.defValues;
+    Scope.apply(this);
+    nested.forEach(function(s){s.validateSelector()});
+    this.nested=nested;
+    this.defValues=def;
+    return this;
+  },
+  asMediaQuery:function(mediaQuery){
+    this.asContainer().spec=mediaQuery;
+    return this;
+  },
   canResolve: function ($vars) {
     $vars = this.mixParam($vars || {});
     return Object.getOwnPropertyNames(this.dynamicRules).every(function (key) {
@@ -366,18 +379,15 @@ Style.prototype = (function (scopeProto) {
     else
       return [];
   };
-  var keyFrameWrapper={
-    validateSelector:function(){return this.selectors},
-    backtraceSelector:function(){return this.selectors},
-    resolve:function(){
-      return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
-    }
-  },keyFrameLegalReg=/^(\d+\%|from|to)/;
-  function filterKeyFrame(r){return keyFrameLegalReg.test(r.selector);}
+
+  function filterKeyFrame(r){return /^(\d+\%|from|to)\s*$/.test(r.selector);}
+  function keyFrameResolve(){
+    return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
+  }
   proto.asKeyFrames=function(prefix){
-    objForEach(keyFrameWrapper,function(key,value){ this[key]=value; },this);
-    this.media=new MediaQuery(this.selector).asKeyFrames(prefix);
-    return this;
+    this.spec=new KeyFrame(this.selector,prefix);
+    this.resolve=keyFrameResolve;
+    return this.asContainer();
   };
   return proto;
 })(Scope.prototype);

@@ -24,7 +24,7 @@ describe('KeyFrames Behaviors',function(){
   }
   function getFirstMedia(src) {
     scope = getFirstScope(src.replace('{}','{0%{}}'));
-    return media = scope.media;
+    return media = scope.spec;
   }
   describe('a.grammar test:',function(){
     it('support @keyframes',function(){

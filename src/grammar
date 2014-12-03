@@ -158,20 +158,10 @@ m_qlist:
      MEDIA m_query                    {$$=$2;}
     |m_qlist IDENT  m_query           {$1.merge($3);}
     ;
-m_start:
-    m_qlist '{'                    {popUntil(yy.lexer,"INITIAL");$1.reduce();}
-    ;
-m_content:
-     m_start                       {$$=[];$$.media=$1;}
-    |m_content style               {$1.push($2);}
-    ;
-m_end:
-     m_content '}'                 {$1.media.apply($1);}
-    |m_end ';'
-    ;
 sheetPart:
      style           {$$={type:'style',value:$1}}
     |KEYFRAMES style {$$={type:'style',value:$2.asKeyFrames($1)}}
+    |m_qlist scope   {$$={type:'style',value:$2.asMediaQuery($1.reduce())}}
     |mixScope        {$1.type='mix';}
     |assignPair      {$1.type='var';}
     |sheetPart ';'

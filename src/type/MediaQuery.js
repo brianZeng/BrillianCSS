@@ -106,30 +106,34 @@ MediaQuery.prototype = {
       });
     });
     return array;
-  },
-  asKeyFrames:(function(){
-    var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
-    function mapPrefix(pre){
-      if(pre)pre='-'+pre+'-';
-      return '@'+pre+'keyframes';
-    }
-    function resolveKeyframes(){
-      var prefix,name=this.mediaTypes[0],r;
-      if((prefix=this.groupPrefix)===normalizePrefixes[0]){
+  }
+};
+MediaQuery.prototype.resolve = function ($vars) {
+  return this.canResolve($vars) ? this.toString($vars) : this.clone();
+};
+ChangeSS.MediaQuery = MediaQuery;
+function KeyFrame(name,prefix){
+  this.name=name;
+  this.prefix=prefix;
+}
+KeyFrame.prototype=(function(){
+  var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
+  function mapPrefix(pre){
+    if(pre)pre='-'+pre+'-';
+    return '@'+pre+'keyframes';
+  }
+  return {
+    toString:function(){
+      return this.prefix+' '+this.name;
+    },
+    getAnimations:function(){
+      var prefix,name=this.name,r;
+      if((prefix=this.prefix)===normalizePrefixes[0]){
         if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
         else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
       }
       else r= [prefix];
       return r.map(function(pre){return pre+' '+name});
     }
-    return function(prefix){
-      this.groupPrefix=prefix;
-      this.resolve=resolveKeyframes;
-      return this;
-    }
-  })()
-};
-MediaQuery.prototype.resolve = function ($vars) {
-  return this.canResolve($vars) ? this.toString($vars) : this.clone();
-};
-ChangeSS.MediaQuery = MediaQuery;
+  }
+})();

@@ -21,7 +21,7 @@ describe('MediaQuery Behaviors', function () {
 
   function getFirstMedia(src) {
     scope = getFirstScope(src);
-    return media = scope.media;
+    return media = scope.spec;
   }
   describe('a.Grammar test:',function(){
     it('support media query without media type',function(){
@@ -40,21 +40,30 @@ describe('MediaQuery Behaviors', function () {
       expect(media.mediaTypes).toEqual(['not screen','projection']);
       expect(media.toString()).toBe('@media not screen and (color),projection and (max-weight:3kg)')
     });
+    it('support query with defValue',function(){
+      src='@media screen ($color:red){ div{} }';
+      getFirstMedia(src);
+      expect(scope.defValues).toEqual({$color:'red'});
+      src='@media screen and (max-weight:3kg) ($color:red){ div{} }';
+      getFirstMedia(src);
+      expect(scope.defValues).toEqual({$color:'red'});
+      expect(scope.spec.toString()).toEqual('@media screen and (max-weight:3kg)');
+    })
   });
   describe('b.MediaQuery object attach to relative styles', function () {
     it('MediaQuery only nest styles', function () {
       src = '@media screen{  div{ color:red; }  }';
       scope = getFirstScope(src);
-      expect(scope.media.clone()).toEqual(new ChangeSS.MediaQuery('screen'));
+      expect(scope.spec.clone()).toEqual(new ChangeSS.MediaQuery('screen'));
       src = '@media screen{ $a:1px;  }';
       expect(function () {
         getFirstScope(src)
       }).toThrow();
     });
-    it('styles in the same block share a same MediaQuery instance', function () {
+    it('styles are nested in mediaQuery scope', function () {
       src = '@media screen{  div{ color:red; } p{} }';
-      sheet = getFirstSheet(src);
-      expect(sheet.scopes[0].media).toBe(sheet.scopes[1].media);
+      getFirstScope(src);
+      expect(scope.nested.length).toBe(2);
     });
     it('not support nested mediaQuery', function () {
       src = 'div{ @media print{ div{} } }';
@@ -65,7 +74,7 @@ describe('MediaQuery Behaviors', function () {
       expect(function () {
         getFirstScope(src)
       }).toThrow();
-    })
+    });
   });
   describe('c.MediaQuery resolve :', function () {
     it('it support vars', function () {

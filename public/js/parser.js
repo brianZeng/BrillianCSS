@@ -72,12 +72,12 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,15],$V1=[1,14],$V2=[1,11],$V3=[1,17],$V4=[1,6],$V5=[1,4,31,39,46,51,54],$V6=[1,22],$V7=[1,23],$V8=[1,4,24,31,39,46,51,54],$V9=[1,31],$Va=[31,35],$Vb=[14,34,41],$Vc=[1,4,6,8,10,11,12,13,14,15,16,19,20,22,24,27,30,31,34,35,36,39,46,51,54],$Vd=[1,38],$Ve=[1,40],$Vf=[1,4,6,24,27,30,31,35,36,39,46,51,54],$Vg=[1,45],$Vh=[1,51],$Vi=[1,48],$Vj=[1,49],$Vk=[1,58],$Vl=[1,64],$Vm=[1,65],$Vn=[1,68],$Vo=[1,69],$Vp=[1,70],$Vq=[1,62],$Vr=[1,63],$Vs=[6,34],$Vt=[1,73],$Vu=[6,34,44],$Vv=[6,27,30,31,35,36],$Vw=[1,77],$Vx=[6,24,27,30,31,35,36],$Vy=[6,24,27,30,31,34,35,36],$Vz=[15,24],$VA=[1,4,6,8,11,14,15,16,19,20,24,27,30,31,35,36,39,46,51,54],$VB=[1,87],$VC=[1,88],$VD=[1,89],$VE=[1,90],$VF=[1,4,6,8,10,11,12,13,14,15,16,19,20,24,27,30,31,35,36,39,46,51,54],$VG=[1,4,6,8,10,11,14,15,16,19,20,24,27,30,31,35,36,39,46,51,54];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,15],$V1=[1,14],$V2=[1,12],$V3=[1,11],$V4=[1,6],$V5=[1,4,31,39,46,48,51,52],$V6=[1,20],$V7=[1,4,24,31,39,46,48,51,52],$V8=[1,26],$V9=[1,24],$Va=[1,31],$Vb=[1,33],$Vc=[14,34,41],$Vd=[1,4,6,8,10,11,12,13,14,15,16,19,20,22,24,27,30,31,34,35,36,39,46,48,51,52],$Ve=[1,41],$Vf=[1,47],$Vg=[1,44],$Vh=[1,45],$Vi=[1,4,6,24,27,30,31,35,36,39,46,48,51,52],$Vj=[6,14,34],$Vk=[1,54],$Vl=[6,14,34,44],$Vm=[1,62],$Vn=[1,63],$Vo=[1,66],$Vp=[1,67],$Vq=[1,68],$Vr=[1,60],$Vs=[1,61],$Vt=[6,27,30,31,35,36],$Vu=[1,72],$Vv=[6,24,27,30,31,35,36],$Vw=[6,24,27,30,31,34,35,36],$Vx=[15,24],$Vy=[1,4,6,8,11,14,15,16,19,20,24,27,30,31,35,36,39,46,48,51,52],$Vz=[1,85],$VA=[1,86],$VB=[1,87],$VC=[1,88],$VD=[1,4,6,8,10,11,12,13,14,15,16,19,20,24,27,30,31,35,36,39,46,48,51,52],$VE=[1,4,6,8,10,11,14,15,16,19,20,24,27,30,31,35,36,39,46,48,51,52];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"var":3,"VAR":4,"->":5,"IDENT":6,"exp":7,"NUMBER":8,"inlineFunc":9,"+":10,"-":11,"*":12,"/":13,"(":14,")":15,"FUNCNAME":16,"list":17,"property":18,"STRING":19,"URL":20,"assignPair":21,":":22,"assignList":23,";":24,"defParamList":25,"includeCall":26,"INCLUDE":27,"scopeBodyPart":28,"nestedStyle":29,"EXTENDS":30,"SELECTOR":31,"scopeBody":32,"scope":33,"{":34,"}":35,"&":36,"style":37,"mixScope":38,"MIXIN":39,"selectors":40,",":41,"m_exp":42,"m_query":43,"M_ADD":44,"m_qlist":45,"MEDIA":46,"m_start":47,"m_content":48,"m_end":49,"sheetPart":50,"KEYFRAMES":51,"sheet":52,"SHEET":53,"EOF":54,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"VAR",5:"->",6:"IDENT",8:"NUMBER",10:"+",11:"-",12:"*",13:"/",14:"(",15:")",16:"FUNCNAME",19:"STRING",20:"URL",22:":",24:";",27:"INCLUDE",30:"EXTENDS",31:"SELECTOR",34:"{",35:"}",36:"&",39:"MIXIN",41:",",44:"M_ADD",46:"MEDIA",51:"KEYFRAMES",53:"SHEET",54:"EOF"},
-productions_: [0,[3,3],[3,1],[7,1],[7,1],[7,1],[7,3],[7,3],[7,3],[7,3],[7,2],[7,3],[9,3],[9,4],[18,1],[18,1],[18,1],[18,1],[17,1],[17,2],[21,3],[23,1],[23,3],[23,2],[25,2],[25,3],[26,3],[26,2],[28,3],[28,1],[28,1],[28,2],[28,4],[28,2],[32,1],[32,2],[33,3],[33,4],[33,3],[29,2],[29,1],[38,3],[40,1],[40,3],[37,2],[37,3],[42,3],[42,5],[43,1],[43,1],[43,3],[45,2],[45,3],[47,2],[48,1],[48,2],[49,2],[49,2],[50,1],[50,2],[50,1],[50,1],[50,2],[52,3],[52,1],[52,1],[52,2],[52,2],[52,2]],
+symbols_: {"error":2,"var":3,"VAR":4,"->":5,"IDENT":6,"exp":7,"NUMBER":8,"inlineFunc":9,"+":10,"-":11,"*":12,"/":13,"(":14,")":15,"FUNCNAME":16,"list":17,"property":18,"STRING":19,"URL":20,"assignPair":21,":":22,"assignList":23,";":24,"defParamList":25,"includeCall":26,"INCLUDE":27,"scopeBodyPart":28,"nestedStyle":29,"EXTENDS":30,"SELECTOR":31,"scopeBody":32,"scope":33,"{":34,"}":35,"&":36,"style":37,"mixScope":38,"MIXIN":39,"selectors":40,",":41,"m_exp":42,"m_query":43,"M_ADD":44,"m_qlist":45,"MEDIA":46,"sheetPart":47,"KEYFRAMES":48,"sheet":49,"SHEET":50,"m_end":51,"EOF":52,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"VAR",5:"->",6:"IDENT",8:"NUMBER",10:"+",11:"-",12:"*",13:"/",14:"(",15:")",16:"FUNCNAME",19:"STRING",20:"URL",22:":",24:";",27:"INCLUDE",30:"EXTENDS",31:"SELECTOR",34:"{",35:"}",36:"&",39:"MIXIN",41:",",44:"M_ADD",46:"MEDIA",48:"KEYFRAMES",50:"SHEET",51:"m_end",52:"EOF"},
+productions_: [0,[3,3],[3,1],[7,1],[7,1],[7,1],[7,3],[7,3],[7,3],[7,3],[7,2],[7,3],[9,3],[9,4],[18,1],[18,1],[18,1],[18,1],[17,1],[17,2],[21,3],[23,1],[23,3],[23,2],[25,2],[25,3],[26,3],[26,2],[28,3],[28,1],[28,1],[28,2],[28,4],[28,2],[32,1],[32,2],[33,3],[33,4],[33,3],[29,2],[29,1],[38,3],[40,1],[40,3],[37,2],[37,3],[42,3],[42,5],[43,1],[43,1],[43,3],[45,2],[45,3],[47,1],[47,2],[47,2],[47,1],[47,1],[47,2],[49,3],[49,1],[49,1],[49,2],[49,2],[49,2]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -119,7 +119,7 @@ break;
 case 18: case 42:
 this.$=new List($$[$0]);
 break;
-case 19: case 55:
+case 19:
 $$[$0-1].push($$[$0]);
 break;
 case 20:
@@ -198,47 +198,41 @@ case 52:
 $$[$0-2].merge($$[$0]);
 break;
 case 53:
-popUntil(yy.lexer,"INITIAL");$$[$0-1].reduce();
-break;
-case 54:
-this.$=[];this.$.media=$$[$0];
-break;
-case 56:
-$$[$0-1].media.apply($$[$0-1]);
-break;
-case 58:
 this.$={type:'style',value:$$[$0]}
 break;
-case 59:
+case 54:
 this.$={type:'style',value:$$[$0].asKeyFrames($$[$0-1])}
 break;
-case 60:
+case 55:
+this.$={type:'style',value:$$[$0].asMediaQuery($$[$0-1].reduce())}
+break;
+case 56:
 $$[$0].type='mix';
 break;
-case 61:
+case 57:
 $$[$0].type='var';
 break;
-case 63:
+case 59:
 this.$=new Sheet($$[$0-1]);
 break;
-case 64:
+case 60:
 this.$=new Sheet().add($$[$0]);
 break;
-case 65:
+case 61:
 this.$=new Sheet().add($$[$0],'style');
 break;
-case 66:
+case 62:
 $$[$0-1].add($$[$0]);
 break;
-case 67:
+case 63:
 $$[$0-1].add($$[$0],'style');
 break;
-case 68:
+case 64:
 return this.$=$$[$0-1];
 break;
 }
 },
-table: [{3:12,4:$V0,21:8,31:$V1,37:5,38:7,39:$V2,40:10,45:16,46:$V3,47:13,48:9,49:4,50:3,51:$V4,52:1,53:[1,2]},{1:[3],3:12,4:$V0,21:8,31:$V1,37:5,38:7,39:$V2,40:10,45:16,46:$V3,47:13,48:9,49:19,50:18,51:$V4,54:[1,20]},{6:[1,21]},o($V5,[2,64],{24:$V6}),o($V5,[2,65],{24:$V7}),o($V8,[2,58]),{31:$V1,37:24,40:10},o($V8,[2,60]),o($V8,[2,61]),{31:$V1,35:[1,25],37:26,40:10},{14:$V9,25:30,33:27,34:[1,28],41:[1,29]},{3:32,4:$V0},{22:[1,33]},o($Va,[2,54]),o($Vb,[2,42]),o($Vc,[2,2],{5:[1,34]}),{6:[1,36],34:[1,35]},{6:$Vd,14:$Ve,42:39,43:37},o($V5,[2,66],{24:$V6}),o($V5,[2,67],{24:$V7}),o($V5,[2,68]),{24:[1,41]},o($V8,[2,62]),o($V8,[2,57]),o($V8,[2,59]),o($V8,[2,56]),o($Va,[2,55]),o($Vf,[2,44]),{6:$Vg,26:47,27:$Vh,28:44,29:46,30:$Vi,31:$V1,32:43,35:[1,42],36:$Vj,37:50,40:10},{31:[1,52]},{34:[1,53]},{3:12,4:$V0,15:[1,54],21:56,23:55},{14:$V9,25:30,33:57,34:$Vk},{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp,17:59,18:60,19:$Vq,20:$Vr},{6:[1,71]},o($Va,[2,53]),{6:$Vd,14:$Ve,42:39,43:72},o($Vs,[2,51],{44:$Vt}),o($Vu,[2,48]),o($Vu,[2,49]),{6:[1,74]},o($V5,[2,63]),o($Vf,[2,45]),{6:$Vg,26:47,27:$Vh,28:76,29:46,30:$Vi,31:$V1,35:[1,75],36:$Vj,37:50,40:10},o($Vv,[2,34],{24:$Vw}),{22:[1,78]},o($Vx,[2,29]),o($Vx,[2,30]),{31:[1,79]},{14:$V9,25:30,33:80,34:$Vk},o($Vx,[2,40]),{3:81,4:$V0},o($Vb,[2,43]),{6:$Vg,26:47,27:$Vh,28:44,29:46,30:$Vi,31:$V1,32:82,35:[1,83],36:$Vj,37:50,40:10},o($Vy,[2,24]),{15:[1,84],24:[1,85]},o($Vz,[2,21]),o($V8,[2,41]),{6:$Vg,26:47,27:$Vh,28:44,29:46,30:$Vi,31:$V1,32:43,36:$Vj,37:50,40:10},o([1,15,24,31,39,46,51,54],[2,20],{7:61,3:66,9:67,18:86,4:$V0,6:$Vl,8:$Vm,11:$Vn,14:$Vo,16:$Vp,19:$Vq,20:$Vr}),o($VA,[2,18]),o([1,4,6,8,14,15,16,19,20,24,27,30,31,35,36,39,46,51,54],[2,14],{10:$VB,11:$VC,12:$VD,13:$VE}),o($VA,[2,15]),o($VA,[2,16]),o($VA,[2,17]),o($VF,[2,3]),o($VF,[2,4]),o($VF,[2,5]),{3:66,4:$V0,7:91,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},{3:66,4:$V0,7:92,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},{14:[1,93]},o($Vc,[2,1]),o($Vs,[2,52],{44:$Vt}),{14:$Ve,42:94},{15:[1,95],22:[1,96]},o($Vf,[2,36]),o($Vv,[2,35],{24:$Vw}),o($Vx,[2,33]),{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp,17:97,18:60,19:$Vq,20:$Vr},o($Vx,[2,31],{5:[1,98]}),o($Vx,[2,39]),o($Vx,[2,27],{25:99,14:$V9}),{6:$Vg,26:47,27:$Vh,28:76,29:46,30:$Vi,31:$V1,35:[1,100],36:$Vj,37:50,40:10},o($Vf,[2,38]),o($Vy,[2,25]),o($Vz,[2,23],{3:12,21:101,4:$V0}),o($VA,[2,19]),{3:66,4:$V0,7:102,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},{3:66,4:$V0,7:103,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},{3:66,4:$V0,7:104,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},{3:66,4:$V0,7:105,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp},o($VF,[2,10]),{10:$VB,11:$VC,12:$VD,13:$VE,15:[1,106]},{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,15:[1,107],16:$Vp,17:108,18:60,19:$Vq,20:$Vr},o($Vu,[2,50]),o($Vu,[2,46]),{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,16:$Vp,17:109,18:60,19:$Vq,20:$Vr},o([24,27,30,31,35,36],[2,28],{7:61,3:66,9:67,18:86,4:$V0,6:$Vl,8:$Vm,11:$Vn,14:$Vo,16:$Vp,19:$Vq,20:$Vr}),{6:[1,110]},o($Vx,[2,26]),o($Vf,[2,37]),o($Vz,[2,22]),o($VG,[2,6],{12:$VD,13:$VE}),o($VG,[2,7],{12:$VD,13:$VE}),o($VF,[2,8]),o($VF,[2,9]),o($VF,[2,11]),o($VF,[2,12]),{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,15:[1,111],16:$Vp,18:86,19:$Vq,20:$Vr},{3:66,4:$V0,6:$Vl,7:61,8:$Vm,9:67,11:$Vn,14:$Vo,15:[1,112],16:$Vp,18:86,19:$Vq,20:$Vr},o($Vx,[2,32]),o($VF,[2,13]),o($Vu,[2,47])],
+table: [{3:13,4:$V0,21:9,31:$V1,37:5,38:8,39:$V2,40:10,45:7,46:$V3,47:3,48:$V4,49:1,50:[1,2],51:[1,4]},{1:[3],3:13,4:$V0,21:9,31:$V1,37:5,38:8,39:$V2,40:10,45:7,46:$V3,47:16,48:$V4,51:[1,17],52:[1,18]},{6:[1,19]},o($V5,[2,60],{24:$V6}),o($V5,[2,61]),o($V7,[2,53]),{31:$V1,37:21,40:10},{6:[1,23],14:$V8,25:25,33:22,34:$V9},o($V7,[2,56]),o($V7,[2,57]),{14:$V8,25:25,33:27,34:[1,28],41:[1,29]},{6:$Va,14:$Vb,42:32,43:30},{3:34,4:$V0},{22:[1,35]},o($Vc,[2,42]),o($Vd,[2,2],{5:[1,36]}),o($V5,[2,62],{24:$V6}),o($V5,[2,63]),o($V5,[2,64]),{24:[1,37]},o($V7,[2,58]),o($V7,[2,54]),o($V7,[2,55]),{6:$Va,14:$Vb,42:32,43:38},{6:$Ve,26:43,27:$Vf,28:40,29:42,30:$Vg,31:$V1,32:39,36:$Vh,37:46,40:10},{34:[1,48]},{3:13,4:$V0,15:[1,49],21:51,23:50},o($Vi,[2,44]),{6:$Ve,26:43,27:$Vf,28:40,29:42,30:$Vg,31:$V1,32:39,35:[1,52],36:$Vh,37:46,40:10},{31:[1,53]},o($Vj,[2,51],{44:$Vk}),o($Vl,[2,48]),o($Vl,[2,49]),{6:[1,55]},{14:$V8,25:25,33:56,34:$V9},{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq,17:57,18:58,19:$Vr,20:$Vs},{6:[1,69]},o($V5,[2,59]),o($Vj,[2,52],{44:$Vk}),{6:$Ve,26:43,27:$Vf,28:71,29:42,30:$Vg,31:$V1,35:[1,70],36:$Vh,37:46,40:10},o($Vt,[2,34],{24:$Vu}),{22:[1,73]},o($Vv,[2,29]),o($Vv,[2,30]),{31:[1,74]},{14:$V8,25:25,33:75,34:$V9},o($Vv,[2,40]),{3:76,4:$V0},{6:$Ve,26:43,27:$Vf,28:40,29:42,30:$Vg,31:$V1,32:77,35:[1,78],36:$Vh,37:46,40:10},o($Vw,[2,24]),{15:[1,79],24:[1,80]},o($Vx,[2,21]),o($Vi,[2,45]),o($Vc,[2,43]),{14:$Vb,42:81},{15:[1,82],22:[1,83]},o($V7,[2,41]),o([1,15,24,31,39,46,48,51,52],[2,20],{7:59,3:64,9:65,18:84,4:$V0,6:$Vm,8:$Vn,11:$Vo,14:$Vp,16:$Vq,19:$Vr,20:$Vs}),o($Vy,[2,18]),o([1,4,6,8,14,15,16,19,20,24,27,30,31,35,36,39,46,48,51,52],[2,14],{10:$Vz,11:$VA,12:$VB,13:$VC}),o($Vy,[2,15]),o($Vy,[2,16]),o($Vy,[2,17]),o($VD,[2,3]),o($VD,[2,4]),o($VD,[2,5]),{3:64,4:$V0,7:89,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},{3:64,4:$V0,7:90,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},{14:[1,91]},o($Vd,[2,1]),o($Vi,[2,36]),o($Vt,[2,35],{24:$Vu}),o($Vv,[2,33]),{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq,17:92,18:58,19:$Vr,20:$Vs},o($Vv,[2,31],{5:[1,93]}),o($Vv,[2,39]),o($Vv,[2,27],{25:94,14:$V8}),{6:$Ve,26:43,27:$Vf,28:71,29:42,30:$Vg,31:$V1,35:[1,95],36:$Vh,37:46,40:10},o($Vi,[2,38]),o($Vw,[2,25]),o($Vx,[2,23],{3:13,21:96,4:$V0}),o($Vl,[2,50]),o($Vl,[2,46]),{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq,17:97,18:58,19:$Vr,20:$Vs},o($Vy,[2,19]),{3:64,4:$V0,7:98,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},{3:64,4:$V0,7:99,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},{3:64,4:$V0,7:100,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},{3:64,4:$V0,7:101,8:$Vn,9:65,11:$Vo,14:$Vp,16:$Vq},o($VD,[2,10]),{10:$Vz,11:$VA,12:$VB,13:$VC,15:[1,102]},{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,15:[1,103],16:$Vq,17:104,18:58,19:$Vr,20:$Vs},o([24,27,30,31,35,36],[2,28],{7:59,3:64,9:65,18:84,4:$V0,6:$Vm,8:$Vn,11:$Vo,14:$Vp,16:$Vq,19:$Vr,20:$Vs}),{6:[1,105]},o($Vv,[2,26]),o($Vi,[2,37]),o($Vx,[2,22]),{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,15:[1,106],16:$Vq,18:84,19:$Vr,20:$Vs},o($VE,[2,6],{12:$VB,13:$VC}),o($VE,[2,7],{12:$VB,13:$VC}),o($VD,[2,8]),o($VD,[2,9]),o($VD,[2,11]),o($VD,[2,12]),{3:64,4:$V0,6:$Vm,7:59,8:$Vn,9:65,11:$Vo,14:$Vp,15:[1,107],16:$Vq,18:84,19:$Vr,20:$Vs},o($Vv,[2,32]),o($Vl,[2,47]),o($VD,[2,13])],
 defaultActions: {},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
@@ -1292,6 +1286,19 @@ Scope.prototype = {
     this.includes[varName] = rules;
     return this;
   },
+  asContainer:function(){
+    this.selectors=[''];
+    var nested=this.nested,def=this.defValues;
+    Scope.apply(this);
+    nested.forEach(function(s){s.validateSelector()});
+    this.nested=nested;
+    this.defValues=def;
+    return this;
+  },
+  asMediaQuery:function(mediaQuery){
+    this.asContainer().spec=mediaQuery;
+    return this;
+  },
   canResolve: function ($vars) {
     $vars = this.mixParam($vars || {});
     return Object.getOwnPropertyNames(this.dynamicRules).every(function (key) {
@@ -1547,18 +1554,15 @@ Style.prototype = (function (scopeProto) {
     else
       return [];
   };
-  var keyFrameWrapper={
-    validateSelector:function(){return this.selectors},
-    backtraceSelector:function(){return this.selectors},
-    resolve:function(){
-      return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
-    }
-  },keyFrameLegalReg=/^(\d+\%|from|to)/;
-  function filterKeyFrame(r){return keyFrameLegalReg.test(r.selector);}
+
+  function filterKeyFrame(r){return /^(\d+\%|from|to)\s*$/.test(r.selector);}
+  function keyFrameResolve(){
+    return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
+  }
   proto.asKeyFrames=function(prefix){
-    objForEach(keyFrameWrapper,function(key,value){ this[key]=value; },this);
-    this.media=new MediaQuery(this.selector).asKeyFrames(prefix);
-    return this;
+    this.spec=new KeyFrame(this.selector,prefix);
+    this.resolve=keyFrameResolve;
+    return this.asContainer();
   };
   return proto;
 })(Scope.prototype);/**
@@ -1604,14 +1608,25 @@ Sheet.prototype = (function (proto) {
     return this;
   };
   proto.resolve = function ($vars) {
-    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={},
+    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};/*,
     reduceFunc= function(scopes){
          return scopes.reduce(function(pre,scope){
            pre.push.apply(pre,scope.resolve($param));
            return pre;
          },[]);
-     };
-    List.groupBy(this.scopes,'media').forEach(function(group){
+     };*/
+    this.scopes.forEach(function(scope){
+      var spec=scope.spec,key,result;
+      if(spec===undefined)r['*']=scope.resolve($param);
+      else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
+        r[key+'{*}']=scope.resolve($param);
+      else if(spec instanceof KeyFrame)
+      {
+        result=scope.resolve($param);
+        spec.getAnimations().forEach(function(key){r[key+'{*}']=result});
+      }
+    });
+    /* List.groupBy(this.scopes,'media').forEach(function(group){
       var media=group[0].media,key,gresults=reduceFunc(group);
       if(media===undefined)r["*"]=gresults;
       else if(typeof (key=media.resolve($assign.$resolved))==="string")
@@ -1619,7 +1634,7 @@ Sheet.prototype = (function (proto) {
       else if(key instanceof  Array)
         key.forEach(function(k){r[k+'{*}']=gresults.slice()});
     });
-   /* return this.scopes.reduce(function (r, scope) {
+    return this.scopes.reduce(function (r, scope) {
       r.push.apply(r, scope.resolve($param));
       return r;
     }, []);*/
@@ -1794,33 +1809,37 @@ MediaQuery.prototype = {
       });
     });
     return array;
-  },
-  asKeyFrames:(function(){
-    var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
-    function mapPrefix(pre){
-      if(pre)pre='-'+pre+'-';
-      return '@'+pre+'keyframes';
-    }
-    function resolveKeyframes(){
-      var prefix,name=this.mediaTypes[0],r;
-      if((prefix=this.groupPrefix)===normalizePrefixes[0]){
+  }
+};
+MediaQuery.prototype.resolve = function ($vars) {
+  return this.canResolve($vars) ? this.toString($vars) : this.clone();
+};
+ChangeSS.MediaQuery = MediaQuery;
+function KeyFrame(name,prefix){
+  this.name=name;
+  this.prefix=prefix;
+}
+KeyFrame.prototype=(function(){
+  var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
+  function mapPrefix(pre){
+    if(pre)pre='-'+pre+'-';
+    return '@'+pre+'keyframes';
+  }
+  return {
+    toString:function(){
+      return this.prefix+' '+this.name;
+    },
+    getAnimations:function(){
+      var prefix,name=this.name,r;
+      if((prefix=this.prefix)===normalizePrefixes[0]){
         if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
         else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
       }
       else r= [prefix];
       return r.map(function(pre){return pre+' '+name});
     }
-    return function(prefix){
-      this.groupPrefix=prefix;
-      this.resolve=resolveKeyframes;
-      return this;
-    }
-  })()
-};
-MediaQuery.prototype.resolve = function ($vars) {
-  return this.canResolve($vars) ? this.toString($vars) : this.clone();
-};
-ChangeSS.MediaQuery = MediaQuery;/**
+  }
+})();/**
  * Created by 柏然 on 2014/11/6.
  */
 function Graph() {
@@ -2482,11 +2501,11 @@ case 2:this.begin("EXP");return 46;
 break;
 case 3:return 27;
 break;
-case 4:this.begin("EXP");return 53;
+case 4:this.begin("EXP");return 50;
 break;
 case 5:this.begin('EXT');return 30;
 break;
-case 6:return 51;
+case 6:return 48;
 break;
 case 7:this.begin("EXP");return 5;
 break;
