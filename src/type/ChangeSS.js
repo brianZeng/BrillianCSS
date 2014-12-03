@@ -57,7 +57,7 @@ ChangeSS = (function (parser) {
     preferKeyFramesVendorPrefix:true
   };
   main.opt.vendorPrefix=(function(){
-    if(window&&window.getComputedStyle){
+    if(typeof window!=="undefined"&&window.getComputedStyle){
       for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
         if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
       }
@@ -194,3 +194,4 @@ ChangeSS.TYPE = {
   KEYWORD: 'keyword',
   LIST: 'list'
 };
+if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;

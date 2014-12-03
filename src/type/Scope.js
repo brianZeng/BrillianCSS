@@ -157,6 +157,10 @@ Scope.prototype = {
       this.validateSelector = first;
       return this.selectors;
     }
+    function replaceSelector(childSlt,parentSlt){
+      if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
+      return childSlt.replace(/\&/g,parentSlt);
+    }
 
     function first(parentSelectors) {
       var r, tss;
@@ -165,7 +169,8 @@ Scope.prototype = {
         tss = this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-            r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
+           // r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
+            r.push(replaceSelector(ts,ps));
           })
         });
         this.selectors = r;

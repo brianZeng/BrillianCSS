@@ -61,6 +61,8 @@ function readSrcFiles(){
 function generateParser(){
   return Promise.all([readFilePromise(dir.grammarPath),readSrcFiles()]).then(function(data){
    var generator=new jison.Jison.Generator(data.join(''),{'case-insensitive':true}),source=generator.generate();
+   source=source.substr(0,source.indexOf('if (typeof require !=='));
+
     return writeFilePromise(path.normalize('public/js/parser.js'),source.replace(/\;\s+\,/g,';'),'utf8').then(function(){
       return generator;
     });

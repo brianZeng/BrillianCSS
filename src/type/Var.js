@@ -4,8 +4,11 @@
 function Var(symbol, sheetName) {
   if (!(this instanceof Var))return new Var(symbol, sheetName);
   this.symbol = symbol.trim();
-  this.sheetName = sheetName || '';
+  this.sheetName = Var.trim(sheetName);
 }
+Var.trim=function(sheetName){
+  return sheetName? Scope.trimSelector(sheetName).replace(/(\-\>\s*)/,''):'';
+};
 Var.prototype = (function (TYPE) {
   var VAR = TYPE.VAR, getType = ChangeSS.getType, LEN = TYPE.LENGTH, KEYWORD = TYPE.KEYWORD;
 

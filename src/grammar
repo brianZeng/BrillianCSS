@@ -4,19 +4,16 @@ nonascii	    [\200-\377]
 unicode		    \\{h}{1,6}(\r\n|[ \t\r\n\f])?
 escape		    {unicode}|\\[ -~\200-\377]
 nmstart		    [_a-z]|{nonascii}|{escape}
-nmchar		    [_a-zA-Z0-9-]|{nonascii}|{escape}
+nmchar		    [_a-zA-Z0-9]|{nonascii}|{escape}
 hexchar         [0-9a-fA-F]
-key             {nmstart}{nmchar}*
-namestart       [_a-zA-Z]|{nonascii}|{escape}
-namechar        [_a-zA-Z0-9]|{nonascii}|{escape}
-name            {namestart}{namechar}*
+key             {nmstart}("-"?{nmchar})*
 Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
-var             "$"{name}
+var             "$"{Ident}+
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#\*\>\+]|\d+\%
+sltstart        {nmchar}|[\.#\*\>\+\-]|\d+\%
 sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())
-sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
+sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&]
 selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
 comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
 s               [\s\r\n\t\f]
@@ -29,7 +26,7 @@ s               [\s\r\n\t\f]
 <*>"@sheetname"                          this.begin("EXP");return 'SHEET';
 <*>"@extend"                             this.begin('EXT');return 'EXTENDS';
 <*>\@(\-(webkit|moz|ms|o)\-)?keyframes   return 'KEYFRAMES';
-<*>'->'                                  this.begin("EXP");return '->';
+<*>'->'{s}*{Ident}                       return '->';
 <EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
 <INITIAL>{selector}                      return 'SELECTOR';
@@ -49,7 +46,7 @@ s               [\s\r\n\t\f]
 <EXP>\;+                           popUntil(this,'INITIAL');return ';';
 <EXP>\@?(\"|\')[\s\S]*?(\1)           return "STRING";
 <EXP>(url\(.*?\)|url\({string}\))  return "URL";
-<EXP>'-'?{key}(?=\([^$])           return 'FUNCNAME';
+<EXP>{Ident}(?=\()           return 'FUNCNAME';
 <EXP>'+'                           return '+';
 <EXP>'-'                           return '-';
 <EXP>'*'                           return '*';
@@ -69,7 +66,7 @@ s               [\s\r\n\t\f]
 %start sheet
 %%
 var:
-    VAR  '->' IDENT  {$$=new Var($1,$3);}
+    VAR  '->'          {$$=new Var($1,$2);}
    |VAR                {$$=new Var($1);}
    ;
 exp:

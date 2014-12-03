@@ -1,0 +1,3 @@
+div{
+  color:darken($a,5%);
+}
