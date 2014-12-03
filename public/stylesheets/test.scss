@@ -1,76 +1,198 @@
-@sheetname bootstrap;
-.alert($alert-link-font-weight:bold;$alert-padding:15px;$alert-border-radius:$border-radius-base;) {
-  padding: $alert-padding;
-  margin-bottom: $line-height-computed;
-  border: 1px solid transparent;
-  border-radius: $alert-border-radius;
-
-// Headings for larger alerts
-h4 {
-  margin-top: 0;
-  // Specified for the h4 to prevent conflicts of changing $headings-color
-  color: inherit;
+@mixin $triangleRight($size:20px;$innerColor:transparent;$outColor:transparent;$border:$size solid){
+  border-left:$border $innerColor;
+  border-top:$border $outColor;
+  border-bottom:$border $outColor;
+  width:$size;
 }
-// Provide class for links that match alerts
-.alert-link {
-  font-weight: $alert-link-font-weight;
+@mixin $arrow2right($width:100px;$height:40px;$background:red;$movement:$width/4;
+$hoverBackground:white;$size:$height/2;$cursor:pointer){
+  width: $width;
+  height: $height;
+  background: $background;
+  transition:margin-left 0.4s ease-in-out;
+  cursor:$cursor;
+  clear:right;
+> *{
+  float:right;
+}
+&:hover{
+  margin-left: $movement;
+  background: $hoverBackground;
+  &::after{
+    @include $triangleRight($innerColor:$hoverBackground);
+  }
+  &::before{
+    @include $triangleRight($outColor:$hoverBackground);
+  }
+}
+&::after{
+  @extend .pesdo;
+  margin-left: $width;
+  @include $triangleRight($innerColor:$background);
+}
+&::before{
+  @extend .pesdo;
+  margin-left:-$size;
+  @include $triangleRight($outColor:$background;$aniTime:0.2s);
+}
+}
+.pesdo{
+  content: '';
+  position: absolute;
+}
+.test{
+  @include $arrow2right($hoverBackground:black);
 }
 
-// Improve alignment and spacing of inner content
-> p,
-> ul {
-  margin-bottom: 0;
-}
-> p + p {
-  margin-top: 5px;
-}
-}
 
-// Dismissible alerts
-//
-// Expand the right padding and account for the close button's positioning.
 
-.alert-dismissable, // The misspelled .alert-dismissable was deprecated in 3.2.0.
-.alert-dismissible {
-  padding-right: ($alert-padding + 20);
-
-  // Adjust close link position
-  .close {
-    position: relative;
-    top: -2px;
-    right: -21px;
-    color: inherit;
+$headerColor:rgb(98,137,198);
+$navColor:rgb(0,64,192);
+header($headerHeight:50px){
+  background:$headerColor;
+  height:$headerHeight;
+  padding: 0;
+nav($fontsize:23px){
+  display:inline-block;
+  float:right;
+  margin-top: ($headerHeight-$fontsize)/2;
+  @include $linkContainer($color:skyblue;$fontsize:$fontsize;$hoverColor:$navColor);
+}
+.logo($logoColor:rgb(95,37,138);$logoShadow:9px rgb(242,226,238)){
+  transform:rotate(-2deg);
+  text-shadow: 0 0 $logoShadow;
+  display: inline-block;
+  color: $logoColor;
+  font-size: $headerHeight-10px;
+  margin-top: -4px;
+  vertical-align: top;
+  letter-spacing: 0;
+}
+  box-shadow: 0 3px 5px 2px #555;
+  margin-bottom: 4px;
+}
+@mixin $linkContainer($hoverColor:darkblue;$color:skyblue;$visitedColor:black;$distance:10px;
+$font:bold $fontsize "times new roman";$fontsize:20px)
+{
+a{
+  padding:0 $distance;
+  color:$color;
+  text-decoration: none;
+  font:$font;
+  &:hover{
+    color:$hoverColor;
+    cursor:pointer;
+  }
+  &:visited{
+    color:$visitedColor;
+  }
+}
+> a+a{
+  border-left:1px solid $color;
+}
+}
+*{
+  box-sizing:border-box;
+  font-size:12px;
+  font-family: '微软雅黑';
+  letter-spacing: 1px;
+}
+body($bodyBackground:rgb(224,241,244)){
+  background:$bodyBackground;
+  padding: 0;
+  margin:0;
+}
+.content{
+  min-width: 600px;
+  max-width: 960px;
+  margin: 0px auto;
+}
+h3{
+  text-align: center;
+  font-size: 20px;
+}
+.code{
+  background: $headerColor;
+  color:white;
+  font-weight: bold;
+  padding:1px 3px;
+  margin: 2px;
+  border: 1px solid $headerColor;
+  border-radius: 3px;
+}
+code{
+  @extend .code;
+}
+section{
+  dd{
+    max-width: 320px;
+    margin: 10px;
+    pre{
+      @extend .code;
+    }
   }
 }
 
-// Alternate styles
-//
-// Generate contextual modifier classes for colorizing the alert.
-.alert-success($alert-success-bg:$state-success-bg;$alert-success-border:$state-success-border;
-$alert-success-text:$state-success-text) {
-  @include $alert-variant -> bootstrap-lib($bg:$alert-success-bg;$bdc:$alert-success-border;$tc:$alert-success-text);
+.main($leftWidth:180px;$mainBackground:rgb(199,222,248);$rightWidth:360px){
+  @extend .content;
+  background:$mainBackground;
+&::before{
+  display: block;
+  content: '';
+  clear: both;
+  margin-top: 10px;
+  height: 20px;
+  background-color: transparent;
 }
-.alert-info($alert-info-bg:$state-info-bg;$alert-info-border:$state-info-border;
-$alert-info-text:$state-info-text) {
-  @include $alert-variant -> bootstrap-lib($bg:$alert-info-bg;$bdc:$alert-info-border;$tc:$alert-info-text);
+.left($arrowMovement:20px){
+  width:$leftWidth;
+  float:left;
+  height:100%;
+  overflow: hidden;
+  padding-right:$arrowMovement;
+>h3{
+  color: rgb(0,128,119);
+  text-decoration:underline;
+  margin:10px 20px;
 }
-.alert-warning($alert-warning-bg:$state-warning-bg;$alert-warning-border:$state-warning-border;
-$alert-warning-text:$state-warning-text) {
-  @include $alert-variant -> bootstrap-lib($bg:$alert-warning-bg;$bdc:$alert-warning-border;$tc:$alert-warning-text);
+.items{
+  > *{
+    p{
+      font: 18px '微软雅黑';
+      padding:10px $arrowMovement*2 5px;
+      width:$leftWidth-$arrowMovement*2;
+      margin:0;
+      &:hover{
+        color: rgb(0,128,119);
+      }
+    }
+    left: 0;
+    position: relative;
+    margin-bottom: 10px;
+    @include $arrow2right($background:$mainBackground;$hoverBackground:$bodyBackground;
+    $width:$leftWidth-$arrowMovement*2;$movement:$arrowMovement);
+  }
+
 }
-.alert-danger($alert-danger-bg:$state-danger-bg;$alert-danger-border:$state-danger-border;
-$alert-danger-text:$state-danger-text) {
-  @include $alert-variant -> bootstrap-lib($bg:$alert-danger-bg;$bdc:$alert-danger-border;$tc:$alert-danger-text);
 }
-@sheetname bootstrap-lib;
-@mixin $alert-variant{
-  background-color: $bg;
-  border-color: $bdc;
-  color: $tc;
-hr {
-  border-top-color: darken($bdc, 5%);
+.right{
+  float: right;
 }
-.alert-link {
-  color: darken($bdc, 10%);
+.CodeMirror{
+  width:$rightWidth;
+  height:200px;
+  right:-1px;
+}
+
+> article{
+  margin-left:$leftWidth;
+  min-height: 600px;
+  section{
+    margin:10px $rightWidth 0 0;
+  }
 }
 }
+$colWidth:200px;
+$textareaFontSize:12px;
+$logoFontSize:$textareaFontSize+4px;
+$bodyBackground:rgb(224,241,244);

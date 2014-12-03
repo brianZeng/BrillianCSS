@@ -484,7 +484,7 @@ ChangeSS = (function (parser) {
       os.merge(sheet);
     }
   };
- var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
+  var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
   main.parse = function (input) {
     var range,r;
     if(!sheetSplitReg.test(input))
@@ -495,18 +495,7 @@ ChangeSS = (function (parser) {
       while (range=sheetSplitReg.exec(input)[0])
         r.push(range);
     }
-    debugger;
-   return r.map(function(src){return parser.parse(src)});
- /* return input.split(/\@sheetname/g).reduce(function(r,src){
-      if(src){
-        r.push(parser.parse('@sheetname'+src)).validate()
-      }
-      return r;
-    }).filter(function (src) {
-      return src;
-    }).map(function (src) {
-      return parser.parse(src).validate();
-    });*/
+    return r.map(function(src){return parser.parse(src).validate()});
   };
   main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);
