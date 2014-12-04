@@ -2,7 +2,7 @@
  * Created by 柏然 on 2014/11/1.
  */
 function Sheet(name) {
-  this.name = name || ChangeSS.defaultSheetName;
+  this.name = name || ChangeSS.opt.defaultSheetName;
   this.scopes = [];
   this.mixins = {};
   this.vars = {};

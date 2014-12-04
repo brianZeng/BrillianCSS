@@ -3,13 +3,13 @@
 nonascii	    [\200-\377]
 unicode		    \\{h}{1,6}(\r\n|[ \t\r\n\f])?
 escape		    {unicode}|\\[ -~\200-\377]
-nmstart		    [_a-z]|{nonascii}|{escape}
-nmchar		    [_a-zA-Z0-9]|{nonascii}|{escape}
+nmstart		    [_a-zA-Z]|{nonascii}|{escape}
+nmchar		    {nmstart}|[0-9]
 hexchar         [0-9a-fA-F]
 key             {nmstart}("-"?{nmchar})*
 Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
-var             "$"{Ident}+
+var             "$"{nmchar}+
 string          (\"|\')[\s\S]*?(\1)
 sltstart        {nmchar}|[\.#\*\>\+\-]|\d+\%
 sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())

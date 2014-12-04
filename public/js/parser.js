@@ -391,7 +391,12 @@ ChangeSS = (function (parser) {
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
+    },parseError:function(){
+
     }
+  };
+  parser.yy.parseError=parser.parseError=function(errStr,err){
+    main.error.parseError(errStr,err);
   };
   function main(input, opt) {
     opt = opt || {keepResults: false};
@@ -423,7 +428,7 @@ ChangeSS = (function (parser) {
   main.merge = merge;
 
   main.get = function (name, type) {
-    name = name || main.defaultSheetName;
+    name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
     switch (type) {
       case 'mixin':
@@ -453,7 +458,7 @@ ChangeSS = (function (parser) {
   })();
   getter = {
     sheet: function (name) {
-      name = name || main.defaultSheetName;
+      name = name || main.opt.defaultSheetName;
       var sheet = sheetMap[name];
       return sheet || (sheetMap[name] = new Sheet(name));
     },
@@ -480,20 +485,21 @@ ChangeSS = (function (parser) {
       Var.sheetName = '';
     },
     sheet: function (sheet) {
-      var name = sheet.name || main.defaultSheetName, os = getter.sheet(name);
+      var name = sheet.name || main.opt.defaultSheetName, os = getter.sheet(name);
       os.merge(sheet);
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
   main.parse = function (input) {
-    var range,r;
-    if(!sheetSplitReg.test(input))
+    var range, r,i=input.indexOf('@sheetname');
+    if(i==-1)
       r=[input];
     else{
+      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
       r=[];
-      sheetSplitReg.exec();
       while (range=sheetSplitReg.exec(input)[0])
         r.push(range);
+      sheetSplitReg.exec();
     }
     return r.map(function(src){return parser.parse(src).validate()});
   };
@@ -512,7 +518,7 @@ ChangeSS = (function (parser) {
   };
   return main;
 })(parser);
-ChangeSS.defaultSheetName = 'default';
+ChangeSS.opt.defaultSheetName = 'default';
 ChangeSS.assign = function ($param, $known) {
   var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
   $known = mix($known);
@@ -584,7 +590,8 @@ ChangeSS.TYPE = {
   KEYWORD: 'keyword',
   LIST: 'list'
 };
-if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;/**
+if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;
+/**
  * Created by 柏然 on 2014/11/1.
  */
 function Length(str) {
@@ -1582,7 +1589,7 @@ Style.prototype = (function (scopeProto) {
  * Created by 柏然 on 2014/11/1.
  */
 function Sheet(name) {
-  this.name = name || ChangeSS.defaultSheetName;
+  this.name = name || ChangeSS.opt.defaultSheetName;
   this.scopes = [];
   this.mixins = {};
   this.vars = {};
@@ -2561,7 +2568,7 @@ case 35:return "EOF";
 break;
 }
 },
-rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*)))/,/^(?:(([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)((([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])*?(?=[\;\}\{]))/,/^(?:(\$(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*))+))/,/^(?:((([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)(((([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])|(:(:+|\w+-|\b\w+\b(?!\())))*?(?=(\((\$(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*))+):)|\{|,)))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:&:*((([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)(((([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])|(:(:+|\w+-|\b\w+\b(?!\())))*?(?=(\((\$(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*))+):)|\{|,)))/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*)))/,/^(?:(-?(([_a-z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?([_a-zA-Z0-9]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))*)))/,/^(?:$)/],
+rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])*?(?=[\;\}\{]))/,/^(?:(\$(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])+))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])|(:(:+|\w+-|\b\w+\b(?!\())))*?(?=(\((\$(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])+):)|\{|,)))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:&:*(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&])|(:(:+|\w+-|\b\w+\b(?!\())))*?(?=(\((\$(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])+):)|\{|,)))/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,21,22,23,34,35],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,9,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,11,14,15,16,17,18,21,22,23,34,35],"inclusive":true}}
 });
 return lexer;

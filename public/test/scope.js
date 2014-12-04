@@ -131,7 +131,7 @@ describe('Scope static behaviors', function () {
         '@sheetname bar;';
       expect(getSheets).toThrow();
     });
-    it('the default sheet name is ChangeSS.defaultSheetName', function () {
+    it('the default sheet name is ChangeSS.opt.defaultSheetName', function () {
       src = '@sheetname default;$color:red;' +
         '====' +
         '@sheetname bar;$color:blue;' +

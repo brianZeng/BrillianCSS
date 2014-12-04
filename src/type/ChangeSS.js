@@ -6,7 +6,12 @@ ChangeSS = (function (parser) {
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
+    },parseError:function(){
+
     }
+  };
+  parser.yy.parseError=parser.parseError=function(errStr,err){
+    main.error.parseError(errStr,err);
   };
   function main(input, opt) {
     opt = opt || {keepResults: false};
@@ -38,7 +43,7 @@ ChangeSS = (function (parser) {
   main.merge = merge;
 
   main.get = function (name, type) {
-    name = name || main.defaultSheetName;
+    name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
     switch (type) {
       case 'mixin':
@@ -68,7 +73,7 @@ ChangeSS = (function (parser) {
   })();
   getter = {
     sheet: function (name) {
-      name = name || main.defaultSheetName;
+      name = name || main.opt.defaultSheetName;
       var sheet = sheetMap[name];
       return sheet || (sheetMap[name] = new Sheet(name));
     },
@@ -95,20 +100,21 @@ ChangeSS = (function (parser) {
       Var.sheetName = '';
     },
     sheet: function (sheet) {
-      var name = sheet.name || main.defaultSheetName, os = getter.sheet(name);
+      var name = sheet.name || main.opt.defaultSheetName, os = getter.sheet(name);
       os.merge(sheet);
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
   main.parse = function (input) {
-    var range,r;
-    if(!sheetSplitReg.test(input))
+    var range, r,i=input.indexOf('@sheetname');
+    if(i==-1)
       r=[input];
     else{
+      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
       r=[];
-      sheetSplitReg.exec();
       while (range=sheetSplitReg.exec(input)[0])
         r.push(range);
+      sheetSplitReg.exec();
     }
     return r.map(function(src){return parser.parse(src).validate()});
   };
@@ -127,7 +133,7 @@ ChangeSS = (function (parser) {
   };
   return main;
 })(parser);
-ChangeSS.defaultSheetName = 'default';
+ChangeSS.opt.defaultSheetName = 'default';
 ChangeSS.assign = function ($param, $known) {
   var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
   $known = mix($known);

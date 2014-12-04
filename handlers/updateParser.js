@@ -6,6 +6,7 @@ var Promise=require('bluebird'),path=require('path'),fs=require('fs'),dir,jison=
 dir={
   bssPath:path.normalize('public/stylesheets/bss/'),
   grammarPath:path.normalize('src/grammar'),
+  bootstrapTestPath:path.normalize('bootstrap_BSS'),
   interpreterPath:path.normalize('src/interpreter.js'),
   testPath:path.normalize('public/stylesheets/test.scss'),
   srcPath:['ChangeSS','Length','Var','Exp','InlineFunc','List','Scope','Sheet','MediaQuery','Extension'].map(function(file){return path.normalize('src/type/'+file+'.js')})
@@ -18,13 +19,20 @@ module.exports=function(req,res,next){
     res.locals.testInput=data;
   }).then(function(){ next(); },function(err){next(err);})
 };
+module.exports.readBootstrapTest=function(){
+  var names=[];
+  return readDirFilesPromise(dir.bootstrapTestPath,names).then(function(contents){
+    return contents.map(function(c,i){ return {name:names[i],content:c} })
+  });
+};
 module.exports.asyncFS=asyncFS;
 function readTest(){
   return asyncFS.readFileAsync(dir.testPath);
 }
-function readDirFilesPromise(dirPath){
+function readDirFilesPromise(dirPath,namesArray){
   var defer=Promise.defer();
   fs.readdir(dirPath,function(error,names){
+    if(names&&namesArray) namesArray.push.apply(namesArray,names);
     return error? defer.reject(error):defer.resolve(names.map(function(name){return path.join(dirPath,name)}));
   });
   return defer.promise.then(readFilesPromise);
