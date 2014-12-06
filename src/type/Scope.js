@@ -143,8 +143,9 @@ Scope.prototype = {
         r = [];
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-            ts = ts.replace(ps, '');
-            r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
+           // ts = ts.replace(ps, '');
+           // r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
+            r.push(retraceSelector(ts,ps));
           })
         });
         tss = this.selectors;
@@ -161,6 +162,10 @@ Scope.prototype = {
     function replaceSelector(childSlt,parentSlt){
       if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
+    }
+    function retraceSelector(childSlt,parentSlt){
+      var reg=new RegExp(parentSlt,'g');
+      return childSlt.replace(reg,'&').replace(/^&\s+/,'');
     }
 
     function first(parentSelectors) {

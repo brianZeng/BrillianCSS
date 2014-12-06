@@ -83,7 +83,7 @@ describe('extension behaviors:', function () {
       scope.resolve({}, sheet);
     });
     it('mix obj can include another obj', function () {
-      src = '@mixin $a{} @mixin $b{@include $a;}';
+      src = '@mixin $a{};@mixin $b{@include $a;}';
       getFirstValidatedSheet(src);
       expect(sheet.mixins['$a']).toEqual(jasmine.any(ChangeSS.Scope));
       expect(sheet.mixins['$b']).toEqual(jasmine.any(ChangeSS.Scope));

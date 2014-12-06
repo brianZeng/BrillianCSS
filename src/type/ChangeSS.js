@@ -6,8 +6,8 @@ ChangeSS = (function (parser) {
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
-    },parseError:function(){
-
+    },parseError:function(msg){
+       throw Error(msg);
     }
   };
   parser.yy.parseError=parser.parseError=function(errStr,err){
@@ -28,7 +28,6 @@ ChangeSS = (function (parser) {
       results.add(merge(sheet));
     });
     ChangeSS.link(results);
-    // debugger;
     return results;
   }
   function clear() {
@@ -104,7 +103,7 @@ ChangeSS = (function (parser) {
       os.merge(sheet);
     }
   };
-  var sheetSplitReg= /((\@sheetname)[\s\S]*(?=\2)|\2[\s\S]*$)/g;
+  var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
   main.parse = function (input) {
     var range, r,i=input.indexOf('@sheetname');
     if(i==-1)

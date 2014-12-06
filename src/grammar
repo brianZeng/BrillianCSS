@@ -9,11 +9,11 @@ hexchar         [0-9a-fA-F]
 key             {nmstart}("-"?{nmchar})*
 Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
-var             "$"{nmchar}+
+var             "$"{nmstart}(('-'{nmstart})|{nmchar})*
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#\*\>\+\-]|\d+\%
-sltclass        \:(\:+|\w+\-|\b\w+\b(?!=\())
-sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f\&]
+sltstart        {nmchar}|[\.#\*\>\+\-\&]|\d+\%
+sltclass        \:(\:|\w+\-?(?!=\())
+sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
 comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
 s               [\s\r\n\t\f]
@@ -26,7 +26,7 @@ s               [\s\r\n\t\f]
 <*>"@sheetname"                          this.begin("EXP");return 'SHEET';
 <*>"@extend"                             this.begin('EXT');return 'EXTENDS';
 <*>\@(\-(webkit|moz|ms|o)\-)?keyframes   return 'KEYFRAMES';
-<*>'->'{s}*{Ident}                       return '->';
+<*>'->'{s}*{Ident}                       return 'POINTER';
 <EXT>{sltstart}{sltchar}*?(?=[\;\}\{])   this.popState();return 'SELECTOR';
 <*>{var}                                 return 'VAR';
 <INITIAL>{selector}                      return 'SELECTOR';
@@ -41,12 +41,11 @@ s               [\s\r\n\t\f]
 <EXP>','                               return 'IDENT';
 <EXP>'and'                             return 'M_ADD';
 <*>','                                 return ',';
-<*>'&'\:*{selector}                    return '&';
-<*>{num}(\%|\w+\b)?                      return 'NUMBER';
+<*>{num}(\%|\w+\b)?                    return 'NUMBER';
 <EXP>\;+                           popUntil(this,'INITIAL');return ';';
 <EXP>\@?(\"|\')[\s\S]*?(\1)           return "STRING";
-<EXP>(url\(.*?\)|url\({string}\))  return "URL";
-<EXP>{Ident}(?=\()           return 'FUNCNAME';
+<EXP>(url\(.*?\)|url\({string}\))     return "URL";
+<EXP>{Ident}(?=\()                    return 'FUNCNAME';
 <EXP>'+'                           return '+';
 <EXP>'-'                           return '-';
 <EXP>'*'                           return '*';
@@ -66,7 +65,7 @@ s               [\s\r\n\t\f]
 %start sheet
 %%
 var:
-    VAR  '->'          {$$=new Var($1,$2);}
+    VAR  POINTER       {$$=new Var($1,$2);}
    |VAR                {$$=new Var($1);}
    ;
 exp:
@@ -112,10 +111,10 @@ includeCall:
     ;
 scopeBodyPart:
     IDENT ':' list               {$$={name:$1,value:$3.resolve(),type:'rule'};}
-   |nestedStyle                  {$$={type:'style',value:$1};}
+   |style                        {$$={type:'style',value:$1};}
    |includeCall                  {$1.type='include';}
    |EXTENDS   SELECTOR           {$$={type:'ext',name:$2};}
-   |EXTENDS   SELECTOR '->'      {$$={type:'ext',name:$2,sheetName:$3};}
+   |EXTENDS   SELECTOR POINTER   {$$={type:'ext',name:$2,sheetName:$3};}
    |scopeBodyPart ';'
    ;
 scopeBody:
@@ -127,12 +126,9 @@ scope:
     |defParamList '{' scopeBody '}' {$$=$3.addDefValues($1);}
     |defParamList '{' '}'           {$$=new Scope().addDefValues($1);}
     ;
-nestedStyle:
-    '&' scope                    {$$=new Style($1,$2);}
-    |style
-    ;
 mixScope:
     MIXIN var scope              {$$={name:$2,value:$3}}
+    |MIXIN var '{' '}'           {$$={name:$2,value:new Scope()};}
     ;
 selectors:
        SELECTOR                  {$$=new List($1);}
@@ -161,14 +157,12 @@ sheetPart:
     |m_qlist scope   {$$={type:'style',value:$2.asMediaQuery($1.reduce())}}
     |mixScope        {$1.type='mix';}
     |assignPair      {$1.type='var';}
+    |SHEET IDENT     {$$={type:'sheetname',value:$2};}
     |sheetPart ';'
     ;
 sheet:
-     SHEET IDENT ';'     {$$=new Sheet($2);}
-    |sheetPart           {$$=new Sheet().add($1);}
-    |m_end               {$$=new Sheet().add($1,'style');}
+     sheetPart           {$$=new Sheet().add($1);}
     |sheet sheetPart     {$1.add($2);}
-    |sheet m_end         {$1.add($2,'style');}
     |sheet "EOF"         {return $$=$1;}
     ;
 %%

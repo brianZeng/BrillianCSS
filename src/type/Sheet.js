@@ -39,6 +39,8 @@ Sheet.prototype = (function (proto) {
       mixObj.setSheetName(this.name);
       this.mixins[$key.toString()] = mixObj;
     }
+    else if(type=='sheetname')
+      this.name=sheetPart.value;
     else throw 'unknown type';
     return this;
   };

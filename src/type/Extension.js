@@ -295,9 +295,10 @@ ChangeSS.link = (function () {
     function collectExt(scope, graph) {
       if (!scope.sheetName)Error('no sheetName');
       scope.exts.forEach(function (name) {
-        ChangeSS.get(name, 'styles').forEach(function (style) {
+       var styles= ChangeSS.get(name, 'styles');
+       styles.length? styles.forEach(function (style) {
           graph.addEdge(scope, style);
-        });
+        }):ChangeSS.error.notExist(name);
       });
       scope.nested.forEach(function (s) {
         collectExt(s, graph);
