@@ -1,0 +1,47 @@
+@mixin $triangleRight($size:20px;$innerColor:transparent;$outColor:transparent;$border:$size solid){
+  border-left:$border $innerColor;
+  border-top:$border $outColor;
+  border-bottom:$border $outColor;
+  width:$size;
+ }
+@mixin $arrow2right($width:100px;$height:40px;$background:red;$movement:$width/4;
+  $hoverBackground:white;$size:$height/2;$cursor:pointer){
+  width: $width;
+  height: $height;
+  background: $background;
+  transition:margin-left 0.4s ease-in-out;
+  cursor:$cursor;
+  clear:right;
+   > *{
+    float:right;
+  }
+  &:hover{
+    margin-left: $movement;
+    background: $hoverBackground;
+    &::after{
+      @include $triangleRight($innerColor:$hoverBackground);
+    }
+    &::before{
+      @include $triangleRight($outColor:$hoverBackground);
+    }
+  }
+  &::after{
+  @extend .pesdo;
+  margin-left: $width;
+  @include $triangleRight($innerColor:$background);
+}
+&::before{
+  @extend .pesdo;
+  margin-left:-$size;
+  @include $triangleRight($outColor:$background;$aniTime:0.2s);
+ }
+}
+.pesdo{
+  content: '';
+  position: absolute;
+}
+.test{
+ @include $arrow2right($hoverBackground:black);
+}
+
+

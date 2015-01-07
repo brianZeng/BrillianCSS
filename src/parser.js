@@ -585,7 +585,7 @@ var parser = (function () {
       return this.clearVarNames();
     },
     canResolve: function ($vars) {
-      return this.getVarNames().every(function (name) {
+      return this.getVar().every(function (name) {
         return $vars[name] !== undefined;
       });
     },
@@ -597,7 +597,7 @@ var parser = (function () {
       return this;
     },
     get hasVars() {
-      var a = this.getVarNames();
+      var a = this.getVar();
       return a.length > 0;
     },
     get type() {
@@ -661,15 +661,15 @@ var parser = (function () {
         return v.hasVars ? v : v.value;
       }
     })(),
-    getVarNames: function (array) {
+    getVar: function (array) {
       var vars;
       if (!(vars = this.variables)) {
         var left = this.left, right = this.right;
         vars = this.variables = [];
         if (Exp.isVar(left)) List.arrayAdd(vars, left);
-        else if (left instanceof Exp) left.getVarNames(vars);
+        else if (left instanceof Exp) left.getVar(vars);
         if (Exp.isVar(right))List.arrayAdd(vars, right);
-        else if (right instanceof Exp) right.getVarNames(vars);
+        else if (right instanceof Exp) right.getVar(vars);
       }
       array = array || [];
       vars.forEach(function (key) {
@@ -787,10 +787,10 @@ var parser = (function () {
       }, new List());
       return v.canResolve($vars) ? v.value : v.length == 1 ? v[0] : v;
     };
-    proto.getVarNames = function (array) {
+    proto.getVar = function (array) {
       array = array || [];
       this.forEach(function (o) {
-        if (o.hasVars)o.getVarNames(array)
+        if (o.hasVars)o.getVar(array)
       });
       return array;
     };
@@ -1001,7 +1001,7 @@ var parser = (function () {
     },
     recordUnresolvedInfo: function ($known, unresolved) {
       var knownNames = $known instanceof Array ? $known : Object.getOwnPropertyNames($known), r = [];
-      unresolved.getVarNames().forEach(function (v) {
+      unresolved.getVar().forEach(function (v) {
         if (knownNames.indexOf(v) == -1) List.arrayAdd(r, v);
       });
       return 'exp:|' + unresolved + '| unable to find var:' + r.join(' ');

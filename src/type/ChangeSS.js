@@ -6,7 +6,12 @@ ChangeSS = (function (parser) {
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
+    },parseError:function(msg){
+       throw Error(msg);
     }
+  };
+  parser.yy.parseError=parser.parseError=function(errStr,err){
+    main.error.parseError(errStr,err);
   };
   function main(input, opt) {
     opt = opt || {keepResults: false};
@@ -23,7 +28,6 @@ ChangeSS = (function (parser) {
       results.add(merge(sheet));
     });
     ChangeSS.link(results);
-    // debugger;
     return results;
   }
   function clear() {
@@ -38,7 +42,7 @@ ChangeSS = (function (parser) {
   main.merge = merge;
 
   main.get = function (name, type) {
-    name = name || main.defaultSheetName;
+    name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
     switch (type) {
       case 'mixin':
@@ -52,10 +56,23 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
-  main.opt = {};
+  main.opt = {
+    addKeyFramesVendorPrefix:true,
+    preferKeyFramesVendorPrefix:true
+  };
+  main.opt.vendorPrefix=(function(){
+    if(typeof window!=="undefined"&&window.getComputedStyle){
+      for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
+        if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+      }
+      if(pre)return pre[1];
+      return styles.OLink? 'o':'';
+    }
+    return '';
+  })();
   getter = {
     sheet: function (name) {
-      name = name || main.defaultSheetName;
+      name = name || main.opt.defaultSheetName;
       var sheet = sheetMap[name];
       return sheet || (sheetMap[name] = new Sheet(name));
     },
@@ -82,17 +99,23 @@ ChangeSS = (function (parser) {
       Var.sheetName = '';
     },
     sheet: function (sheet) {
-      var name = sheet.name || main.defaultSheetName, os = getter.sheet(name);
+      var name = sheet.name || main.opt.defaultSheetName, os = getter.sheet(name);
       os.merge(sheet);
     }
   };
-
+  var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
   main.parse = function (input) {
-    return input.split(/\={4,}/g).filter(function (src) {
-      return src;
-    }).map(function (src) {
-      return parser.parse(src).validate();
-    });
+    var range, r,i=input.indexOf('@sheetname');
+    if(i==-1)
+      r=[input];
+    else{
+      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+      r=[];
+      while (range=sheetSplitReg.exec(input)[0])
+        r.push(range);
+      sheetSplitReg.exec();
+    }
+    return r.map(function(src){return parser.parse(src).validate()});
   };
   main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);
@@ -109,7 +132,7 @@ ChangeSS = (function (parser) {
   };
   return main;
 })(parser);
-ChangeSS.defaultSheetName = 'default';
+ChangeSS.opt.defaultSheetName = 'default';
 ChangeSS.assign = function ($param, $known) {
   var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
   $known = mix($known);
@@ -181,3 +204,4 @@ ChangeSS.TYPE = {
   KEYWORD: 'keyword',
   LIST: 'list'
 };
+if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;

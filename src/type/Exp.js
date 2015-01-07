@@ -60,7 +60,7 @@ Exp.prototype = (function () {
       return this.clearVarNames();
     },
     canResolve: function ($vars) {
-      return this.getVarNames().every(function (v) {
+      return this.getVar().every(function (v) {
         return v.canResolve($vars);
       });
     },
@@ -72,7 +72,7 @@ Exp.prototype = (function () {
       return this;
     },
     get hasVars() {
-      var a = this.getVarNames();
+      var a = this.getVar();
       return a.length > 0;
     },
     resolve: (function () {
@@ -123,16 +123,16 @@ Exp.prototype = (function () {
       }
 
     })(),
-    getVarNames: function (array) {
+    getVar: function (array) {
       var vars;
       if (!(vars = this.variables)) {
         var left = this.left, right = this.right;
         vars = this.variables = [];
         if (left instanceof Var) List.arrayAdd(vars, left);
-        else if (left.getVarNames) left.getVarNames(vars);
+        else if (left.getVar) left.getVar(vars);
         if (right)
           if (right instanceof Var)List.arrayAdd(vars, right);
-          else if (right.getVarNames) right.getVarNames(vars);
+          else if (right.getVar) right.getVar(vars);
       }
       array = array || [];
       vars.forEach(function (symbol) {

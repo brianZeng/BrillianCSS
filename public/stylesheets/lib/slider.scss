@@ -1,0 +1,46 @@
+@sheetname lib;
+@mixin $thumb($thumbColor:white;$thumbShadow:0px 0px 6px 2px rgba(0,0,0,0.6);$height:10px){
+  background: $thumbColor;
+  width: $height;
+  height: $height;
+  border-radius: 100%;
+  cursor: pointer;
+  position: relative;
+  top: 0px;
+  z-index: 1;
+&:active{
+  box-shadow:$thumbShadow;
+}
+&:hover{
+  box-shadow:$thumbShadow;
+}
+}
+@mixin $track($trackColor:red;$trackBorder:$borderWidth solid $borderColor;$borderWidth:2px;$borderColor:yellow;$borderRadius:10px){
+  background: $trackColor;
+  border-radius: $borderRadius;
+  border:$trackBorder;
+}
+@mixin  $slider($width:200px;$height:11px){
+  -webkit-appearance: none;
+  width:$width;
+  outline:none;
+&::-ms-thumb{
+  @include $thumb;
+}
+&::-moz-range-track{
+  @include $track($borderRadius:$height);
+}
+&::-moz-range-thumb{
+  @include $thumb;
+}
+&::-ms-track{
+  @include $track($borderRadius:$height);
+}
+&::-webkit-slider-runnable-track{
+  @include $track($borderRadius:$height);
+}
+&::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  @include $thumb;
+}
+}

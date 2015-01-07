@@ -1,0 +1,18 @@
+<html>
+<head>
+    <script src="/js/jasmine.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/jasmine.css">
+    <script src="/js/parser.js"></script>
+    <% files.forEach(function(file){%>
+       <script src="<%= "/test/"+file %>"></script>
+    <% }); %>
+</head>
+<script>
+    var Fun=ChangeSS.InlineFunc,Var=ChangeSS.Var, TYPE=ChangeSS.TYPE,List=ChangeSS.List,
+            getType=function(o){return ChangeSS.getType(o);},Length=ChangeSS.Length,Exp=ChangeSS.Exp;
+    describe('unknown bugs',function(){
+
+    });
+</script>
+
+</html>

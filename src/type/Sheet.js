@@ -2,25 +2,33 @@
  * Created by 柏然 on 2014/11/1.
  */
 function Sheet(name) {
-  this.name = name || ChangeSS.defaultSheetName;
+  this.name = name || ChangeSS.opt.defaultSheetName;
   this.scopes = [];
   this.mixins = {};
   this.vars = {};
 }
-
+Sheet.trim=function(sheetName){
+  return sheetName? Scope.trimSelector(sheetName).replace(/(\-\>\s*)/,''):'';
+};
 Sheet.prototype = (function (proto) {
-  proto.add = function (sheetPart) {
-    var type = sheetPart.type, $key;
-    if (type == 'var') {
-      var ref = sheetPart.value;
+  proto.add = function (sheetPart, type) {
+    var $key, ref;
+    type = type || sheetPart.type;
+    if (sheetPart instanceof Array)
+      sheetPart.forEach(function (p) {
+        this.add(p, type);
+      }, this);
+    else if (type == 'var') {
+      ref = sheetPart.value;
       $key = sheetPart.name;
       if ($key.sheetName == this.name)$key.sheetName = '';
       if (Var.isVar(ref) && !ref.sheetName)ref.sheetName = this.name;
       this.vars[$key.toString()] = sheetPart.value;
     }
     else if (type == 'style') {
-      this.scopes.push(sheetPart.value);
-      sheetPart.value.setSheetName(this.name);
+      ref = sheetPart instanceof Style ? sheetPart : sheetPart.value;
+      this.scopes.push(ref);
+      ref.setSheetName(this.name);
     }
     else if (type == 'mix') {
       var mixObj = sheetPart.value;
@@ -31,26 +39,52 @@ Sheet.prototype = (function (proto) {
       mixObj.setSheetName(this.name);
       this.mixins[$key.toString()] = mixObj;
     }
+    else if(type=='sheetname')
+      this.name=sheetPart.value;
     else throw 'unknown type';
     return this;
   };
+  function addResult(container,key,array){
+    var r=container[key];
+    if(r==undefined)container[key]=array;
+    else r.push.apply(r,array);
+  }
   proto.resolve = function ($vars) {
-    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved);
-    return this.scopes.reduce(function (r, scope) {
-      r.push.apply(r, scope.resolve($param));
-      return r;
-    }, []);
+    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
+    this.scopes.forEach(function(scope){
+      var spec=scope.spec,key,result;
+      if(spec===undefined)
+        addResult(r,'*',scope.resolve($param));
+      else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
+        addResult(r,key+'{*}',scope.resolve($param));
+      else if(spec instanceof KeyFrame)
+      {
+        result=scope.resolve($param);
+        spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
+      }
+    });
+    return r;
   };
-  proto.toString = function ($vars) {
-    return this.resolve($vars).map(function (r) {
+  proto.toString =(function(){
+    var separator='\n';
+    function mapScope(scope){
       var rules = [], brc;
-      objForEach(r.rules, function (key, value) {
-        rules.push(key + ':' + value + ';')
+      objForEach(scope.rules, function (key, value) {rules.push(key + ':' + value + ';');});
+      brc=rules.length? '{'+separator+'*'+separator+'}':'{*}';
+      return scope.selector+brc.replace('*',rules.join(separator));
+    }
+    function mapGroup(group){
+      return group.map(mapScope).join(separator);
+    }
+    return function($vars){
+      var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
+      objForEach(groups,function(key,group){
+        key=key.replace('{*}',keyRep);
+        r.push(key.replace('*',mapGroup(group)))
       });
-      brc = rules.length ? '{\n*\n}' : '{*}';
-      return r.selector + brc.replace('*', rules.join('\n'));
-    }).join('\n');
-  };
+      return r.join(separator);
+    }
+  })();
   proto.merge = function (sheet) {
     this.vars = mix(this.vars, sheet.vars);
     this.scopes = this.scopes.concat(sheet.scopes.map(function (s) {

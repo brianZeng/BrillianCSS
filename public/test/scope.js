@@ -28,7 +28,7 @@ describe('Scope static behaviors', function () {
     return thisObj;
   }
 
-  describe('1.scope components', function () {
+  describe('1.scope components:', function () {
     var rules = {
       padding: '10px',
       background: 'red',
@@ -73,7 +73,7 @@ describe('Scope static behaviors', function () {
       //expect(scope.clone()).toEqual(scope);
     });
   });
-  describe('2.nesting support', function () {
+  describe('2.nesting support:', function () {
     it('a scope can nest many scopes', function () {
       var src = 'form{' +
         ' &:hover{}' +
@@ -81,7 +81,9 @@ describe('Scope static behaviors', function () {
         ' >input{}' +
         ' input[name="o"]{}' +
         '}';
-      var scope = ChangeSS.parse(src)[0].scopes[0];
+      //src='form{ &:hover{}}';
+      var scope =getFirstSheet(src).scopes[0];
+      debugger;
       expect(scope.nested.length).toBe(4);
     });
     it('a scope can also nest very deep', function () {
@@ -113,42 +115,28 @@ describe('Scope static behaviors', function () {
       return sheets = ChangeSS.eval(src);
     }
 
-    it('can be separeted by ====,@sheetname must be the first line of the sheet', function () {
+    it('can be separeted by @sheetname,@sheetname must be the first line of the sheet', function () {
       src = '@sheetname foo;$color:red;' +
-        '====' +
         '@sheetname bar;$color:blue;' +
-        '====' +
-        '@sheetname bar_bar;$color:yellow;' +
-        '====';
+        '@sheetname bar_bar;$color:yellow;' ;
       expect(getSheets().length).toBe(3);
       containAll(sheets.map(function (sheet) {
         return sheet.name
       }), 'foo', 'bar', 'bar_bar');
-      src = '@sheetname foo;' +
-        '$color:red;' +
-        '====' +
-        '$color:blue;' +
-        '@sheetname bar;';
-      expect(getSheets).toThrow();
     });
-    it('the default sheet name is ChangeSS.defaultSheetName', function () {
-      src = '@sheetname default;$color:red;' +
-        '====' +
-        '@sheetname bar;$color:blue;' +
-        '====' +
-        '$color:yellow;' +
-        '====';
+    it('the default sheet name is ChangeSS.opt.defaultSheetName', function () {
+      src = '@sheetname default;$color:red;'+
+        '@sheetname bar;$color:blue;';
       expect(getSheets().length).toBe(2);
       expect(sheets.map(function (sheet) {
         return sheet.name
       })).toEqual(['default', 'bar']);
       expect(sheets.map(function (sheet) {
         return sheet.get('$color')
-      })).toEqual(['yellow', 'blue']);
+      })).toEqual(['red', 'blue']);
     });
     it('can assign a value or mixin to another sheet var', function () {
       src = '@sheetname foo;$color:red;' +
-        '====' +
         '@sheetname bar;$color:blue;' +
         '$color->foo:white;';
       expect(getSheets().length).toBe(2);
@@ -156,7 +144,6 @@ describe('Scope static behaviors', function () {
         return sheet.get('$color')
       })).toEqual(['white', 'blue']);
       src = '@sheetname foo;$color:red;' +
-        '====' +
         '@sheetname bar;$color:blue;' +
         '$color->bar:#000;';
       getSheets();
@@ -165,7 +152,6 @@ describe('Scope static behaviors', function () {
       })).toEqual(['red', '#000']);
       src = '@sheetname bar;' +
         'div{}' +
-        '====' +
         '@sheetname foo;' +
         '@mixin $error -> bar ($a:red){width:20px;}';
       expect(getSheets()[0].get('$error', 'mixin').staticRules).toEqual({width: '20px'});
@@ -174,7 +160,6 @@ describe('Scope static behaviors', function () {
     it('cannot assign a scope to another sheet,because ....', function () {
       src = '@sheetname bar;' +
         'div{}' +
-        '====' +
         '@sheetname foo;' +
         '.error -> bar{width:20px;}';
       expect(getSheets()[1].scopes[0].selector).toBe('.error -> bar');
@@ -184,9 +169,8 @@ describe('Scope static behaviors', function () {
         '$color:red;' +
         '@mixin $dash{border:1px dashed #123};' +
         '.auto{width:100%}' +
-        '====' +
         '$colorRef:$color->lib;' +
-        'div{' +
+        '@sheetname default; div{' +
         'background:$color ->lib;' +
         '@include $dash  -> lib;' +
         '@extend .auto ->  lib;' +

@@ -17,7 +17,7 @@ objForEach(Math, function (key, fun, def) {
       }
     }
   }, InlineFunc.Func = {},
-  (function () {
+(function () {
     var types = [function (len) {
       return len.convert('rad')
     },
@@ -34,10 +34,14 @@ objForEach(Math, function (key, fun, def) {
       res: {asin: types[1], acos: types[1], atan: types[1], sin: types[2], cos: types[2], tan: types[2]}
     }
   })());
+//TODO:要把color Function 加入
 InlineFunc.prototype = {
   _type: ChangeSS.TYPE.FUNC,
-  getVarNames: function (array) {
-    return this.param.getVarNames(array);
+  get hasVars(){
+    return this.param.hasVars;
+  },
+  getVar: function (array) {
+    return this.param.getVar(array);
   },
   resolve: function ($vars, info) {
     var v = this.param.resolve($vars, info), func, name = this.name, ret;
@@ -49,10 +53,6 @@ InlineFunc.prototype = {
       })).resolve();
     ret = new InlineFunc(this.name, v);
     return v.hasVars ? ret : ret.toString();
-  },
-  get value() {
-    var v = this.paramValue;
-    return v == undefined ? undefined : this.name + v;
   },
   reduce: function () {
     var p = this.param.resolve();

@@ -26,7 +26,7 @@ Scope.prototype = {
   selectors: [''],
   toString: (function () {
     function mapResult(separator) {
-      separator = separator || window ? '\r\n' : '';
+      separator = separator || window ? '\n' : '';
       return function (r) {
         return r.selector + '{' + separator + rules(r).join(separator) + '}';
       }
@@ -40,10 +40,6 @@ Scope.prototype = {
       return this.resolve($vars).map(mapResult(separator));
     }
   })(),
-  get value() {
-    var s = this.toString();
-    return s.match(/^\{[\s\r\n\t\f;]*\}$/, s) ? undefined : s;
-  },
   get globalName() {
     var sheetName = this.sheetName;
     if (!sheetName)return undefined;
@@ -83,7 +79,8 @@ Scope.prototype = {
     var names = selector.split('->').map(Scope.trimSelector);
     selector = names[0];
     sheetName = sheetName || names[1];
-    if (sheetName)selector += '->' + sheetName;
+    if (sheetName)
+      selector += '->' + Sheet.trim(sheetName);
     List.arrayAdd(this.exts, selector);
     return this;
   },
@@ -115,6 +112,19 @@ Scope.prototype = {
     this.includes[varName] = rules;
     return this;
   },
+  asContainer:function(){
+    this.selectors=[''];
+    var nested=this.nested,def=this.defValues;
+    Scope.apply(this);
+    nested.forEach(function(s){s.validateSelector()});
+    this.nested=nested;
+    this.defValues=def;
+    return this;
+  },
+  asMediaQuery:function(mediaQuery){
+    this.asContainer().spec=mediaQuery;
+    return this;
+  },
   canResolve: function ($vars) {
     $vars = this.mixParam($vars || {});
     return Object.getOwnPropertyNames(this.dynamicRules).every(function (key) {
@@ -127,26 +137,35 @@ Scope.prototype = {
     }
 
     function backtrackSelector(parentSelectors) {
-      var r, tss, tem;
+      var r, tss;
       if (parentSelectors) {
         tss = this.selectors;
         r = [];
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-            ts = ts.replace(ps, '');
-            r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
+           // ts = ts.replace(ps, '');
+           // r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
+            r.push(retraceSelector(ts,ps));
           })
         });
-        tem = this.selectors;
+        tss = this.selectors;
         this.selectors = r;
-      } else tem = this.selectors;
+      } else tss = this.selectors;
       this.nested.forEach(function (s) {
-        s.backtraceSelector(tem);
+        s.backtraceSelector(tss);
       });
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
       return this.selectors;
+    }
+    function replaceSelector(childSlt,parentSlt){
+      if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
+      return childSlt.replace(/\&/g,parentSlt);
+    }
+    function retraceSelector(childSlt,parentSlt){
+      var reg=new RegExp(parentSlt,'g');
+      return childSlt.replace(reg,'&').replace(/^&\s+/,'');
     }
 
     function first(parentSelectors) {
@@ -156,7 +175,8 @@ Scope.prototype = {
         tss = this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-            r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
+           // r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
+            r.push(replaceSelector(ts,ps));
           })
         });
         this.selectors = r;
@@ -170,7 +190,6 @@ Scope.prototype = {
       this.backtraceSelector = backtrackSelector;
       return r;
     }
-
     return first;
   })(),
   backtraceSelector: function () {
@@ -211,14 +230,19 @@ Scope.prototype = {
     if (this.staticRules.hasOwnProperty(key))return delete this.staticRules[key];
     if (this.dynamicRules.hasOwnProperty(key))return delete this.dynamicRules[key];
   },
-  getVarNames: function (array) {
+  getVar: function (array) {
     array = array || [];
     objForEach(this.dynamicRules, function (key, value) {
-      value.getVarNames(array);
+      value.getVar(array);
     });
     return array;
   },
-  resolve: (function () {
+  /**
+   * @function
+   * @param  [object] $vars
+   * @return {array<object>}
+   */
+   resolve: (function () {
     var keepEmptyResult = false;
     Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
       set: function (v) {
@@ -337,12 +361,7 @@ Style.prototype = (function (scopeProto) {
       }
     }
   });
-  Object.defineProperty(proto, 'value', {
-    get: function () {
-      var s = this.getBodyString();
-      return s == '{}' ? undefined : this.selector + s;
-    }
-  });
+
   proto.addScope = function (scope) {
     if (scope instanceof Scope) {
       this.defValues = mix(this.defValues, scope.defValues);
@@ -370,6 +389,16 @@ Style.prototype = (function (scopeProto) {
         }, []);
     else
       return [];
+  };
+
+  function filterKeyFrame(r){return /^(\d+\%|from|to)\s*$/.test(r.selector);}
+  function keyFrameResolve(){
+    return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
+  }
+  proto.asKeyFrames=function(prefix){
+    this.spec=new KeyFrame(this.selector,prefix);
+    this.resolve=keyFrameResolve;
+    return this.asContainer();
   };
   return proto;
 })(Scope.prototype);

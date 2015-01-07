@@ -4,15 +4,15 @@
 function Var(symbol, sheetName) {
   if (!(this instanceof Var))return new Var(symbol, sheetName);
   this.symbol = symbol.trim();
-  this.sheetName = sheetName || '';
+  this.sheetName = Sheet.trim(sheetName);
 }
+
 Var.prototype = (function (TYPE) {
   var VAR = TYPE.VAR, getType = ChangeSS.getType, LEN = TYPE.LENGTH, KEYWORD = TYPE.KEYWORD;
 
   function isVar(obj) {
     return getType(obj, true) === VAR;
   }
-
   Var.isVar = isVar;
   return{
     _type: ChangeSS.TYPE.VAR,
@@ -51,7 +51,8 @@ Var.prototype = (function (TYPE) {
         if (isVar(real = value.findRef()))return this.clone();
         else value = real;
       return value || this.clone();
-    }, getVarNames: function (array) {
+    },
+    getVar: function (array) {
       array = array || [];
       List.arrayAdd(array, this.symbol);
       return array;
