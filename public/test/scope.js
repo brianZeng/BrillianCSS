@@ -181,5 +181,8 @@ describe('Scope static behaviors', function () {
       }), 'div', '.auto,div');
       expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
     });
-  })
+  });
+  describe('4.backtrackSelector',function(){
+
+  });
 });

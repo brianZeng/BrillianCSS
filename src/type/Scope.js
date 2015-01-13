@@ -143,8 +143,6 @@ Scope.prototype = {
         r = [];
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // ts = ts.replace(ps, '');
-           // r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
             r.push(retraceSelector(ts,ps));
           })
         });
@@ -154,6 +152,7 @@ Scope.prototype = {
       this.nested.forEach(function (s) {
         s.backtraceSelector(tss);
       });
+
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
@@ -164,8 +163,13 @@ Scope.prototype = {
       return childSlt.replace(/\&/g,parentSlt);
     }
     function retraceSelector(childSlt,parentSlt){
-      var reg=new RegExp(parentSlt,'g');
-      return childSlt.replace(reg,'&').replace(/^&\s+/,'');
+      if(childSlt[parentSlt.length]==' ')
+        childSlt=childSlt.substring(parentSlt.length+1);
+      var rs=childSlt.split(parentSlt),str,ors=[];
+      for(var i= 0,len=rs.length;i<len;i++)
+        ors.push((str=rs[i])===''?'&':str);
+      ors[0].replace(/^&\s+/,'');
+      return ors.join('');
     }
 
     function first(parentSelectors) {
@@ -175,7 +179,6 @@ Scope.prototype = {
         tss = this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
             r.push(replaceSelector(ts,ps));
           })
         });
@@ -262,7 +265,7 @@ Scope.prototype = {
       objForEach(scope.dynamicRules, function (key, rule) {
         if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
           ruleObj[key] = rule.resolve($resolved).toString();
-        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
+        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
       });
       r = [
         {rules: ruleObj, selector: selector}
