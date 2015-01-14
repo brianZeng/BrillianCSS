@@ -105,6 +105,10 @@ MediaQuery.prototype = {
       });
     });
     return array;
+  },
+  asVar:function(symbol){
+    this.symbol=symbol;
+    return this;
   }
 };
 MediaQuery.prototype.resolve = function ($vars) {

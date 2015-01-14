@@ -65,7 +65,7 @@ Sheet.prototype = (function (proto) {
         addResult(r,key+'{*}',scopeResolveFunc(scope,$param));
       else if(spec instanceof KeyFrame)
       {
-        result=scopeResolveFunc(scope,$param);
+        result=keyFrameResolveFunc(scope,$param);
         spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
       }
     });

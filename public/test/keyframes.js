@@ -96,7 +96,8 @@ describe('KeyFrames Behaviors',function(){
         'color:red;' +
         'invalid{left:20px}' +
         ' to{left:100px;}}';
-      stringEqual(getFirstSheet(src).toString(),'@keyframes move{to { left:100px; }}');
+      getFirstSheet(src);
+      stringEqual(sheet.toString(),'@keyframes move{to { left:100px; }}');
     })
   });
   describe('c.var can be used in @keframes:',function(){

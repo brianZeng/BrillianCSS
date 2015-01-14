@@ -48,7 +48,19 @@ describe('MediaQuery Behaviors', function () {
       getFirstMedia(src);
       expect(scope.defValues).toEqual({$color:'red'});
       expect(scope.spec.toString()).toEqual('@media screen and (max-weight:3kg)');
-    })
+    });
+    it('media condition can be treated as var using @treatas',function(){
+      src='@media screen and (max-width:480px) @treatas $iphone{div{}}';
+      getFirstMedia(src);
+      expect(media.symbol).toBe('$iphone');
+    });
+    it('scope rules can refer media via var symbol',function(){
+      src='div{' +
+      'color:red;' +
+      ' @media $iphone{' +
+      '   color:blue;' +
+      '}}';
+    });
   });
   describe('b.MediaQuery object attach to relative styles', function () {
     it('MediaQuery only nest styles', function () {
@@ -65,7 +77,7 @@ describe('MediaQuery Behaviors', function () {
       getFirstScope(src);
       expect(scope.nested.length).toBe(2);
     });
-    it('not support nested mediaQuery', function () {
+    xit('not support nested mediaQuery', function () {
       src = 'div{ @media print{ div{} } }';
       expect(function () {
         getFirstScope(src)

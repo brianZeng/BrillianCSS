@@ -21,6 +21,7 @@ s               [\s\r\n\t\f]
 %s INITIAL EXP EXT
 %%
 <*>{comment}                           /* ignore*/;
+<*>"@treatas"                            return 'TREATAS';
 <*>"@mixin"                              return 'MIXIN';
 <*>"@media"                              this.begin("EXP");return 'MEDIA';
 <*>"@include"                            return 'INCLUDE';
@@ -126,10 +127,10 @@ scope:
     '{' scopeBody '}'               {$$=$2;}
     |defParamList '{' scopeBody '}' {$$=$3.addDefValues($1);}
     |defParamList '{' '}'           {$$=new Scope().addDefValues($1);}
+    |'{' '}'                        {$$=new Scope()}
     ;
 mixScope:
     MIXIN var scope              {$$={name:$2,value:$3}}
-    |MIXIN var '{' '}'           {$$={name:$2,value:new Scope()};}
     ;
 selectors:
        SELECTOR                  {$$=new List($1);}
@@ -137,7 +138,8 @@ selectors:
       ;
 style:
       selectors scope              {$$=new Style($1,$2);}
-     |selectors '{' '}'            {$$=new Style($1);}
+     |m_qlist scope                {$$=$2.asMediaQuery($1.reduce());}
+     |KEYFRAMES SELECTOR scope     {$$=$3.asKeyFrames($1,$2);}
     ;
 m_exp:
     '(' IDENT ')'                  {$$={key:$2};}
@@ -151,20 +153,20 @@ m_query:
 m_qlist:
      MEDIA m_query                    {$$=$2;}
     |m_qlist IDENT  m_query           {$1.merge($3);}
+    |m_qlist TREATAS VAR              {$1.asVar($3);}
     ;
 sheetPart:
      style           {$$={type:'style',value:$1}}
-    |KEYFRAMES style {$$={type:'style',value:$2.asKeyFrames($1)}}
-    |m_qlist scope   {$$={type:'style',value:$2.asMediaQuery($1.reduce())}}
     |mixScope        {$1.type='mix';}
     |assignPair      {$1.type='var';}
-    |SHEET IDENT     {$$={type:'sheetname',value:$2};}
     |sheetPart ';'
     ;
 sheet:
-     sheetPart           {$$=new Sheet().add($1);}
-    |sheet sheetPart     {$1.add($2);}
-    |sheet "EOF"         {return $$=$1;}
+     SHEET IDENT ';' sheetPart {$$=new Sheet($2).add($4);}
+    |SHEET IDENT sheetPart {$$=new Sheet($2).add($3);}
+    |sheetPart             {$$=new Sheet().add($1);}
+    |sheet sheetPart       {$1.add($2);}
+    |sheet "EOF"           {return $$=$1;}
     ;
 %%
 function popUntil(lexer,state){

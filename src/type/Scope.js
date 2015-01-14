@@ -113,7 +113,7 @@ Scope.prototype = {
     return this;
   },
   asContainer:function(){
-    this.selectors=[''];
+    this.selectors=[this.selector=''];
     var nested=this.nested,def=this.defValues;
     Scope.apply(this);
     nested.forEach(function(s){s.validateSelector()});
@@ -124,6 +124,11 @@ Scope.prototype = {
   asMediaQuery:function(mediaQuery){
     this.asContainer().spec=mediaQuery;
     return this;
+  },
+  asKeyFrames:function(prefix,name){
+    this.spec=new KeyFrame(name,prefix);
+    this.resolve=keyFrameResolve;
+    return this.asContainer();
   },
   canResolve: function ($vars) {
     $vars = this.mixParam($vars || {});
@@ -242,7 +247,7 @@ Scope.prototype = {
   },
   /**
    * @function
-   * @param  [object] $vars
+   * @param  $vars {Object}
    * @return {Array<{selector:string,rules:Object}>}
    * TODO:convert <selector,rules,spec>
    */
@@ -253,7 +258,11 @@ Scope.prototype = {
 ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
   Scope.apply(this);
-  this.selector = selectors;
+  if(selectors instanceof MediaQuery){
+    this.selector='&';
+
+  }
+  else this.selector = selectors;
   this.addScope(scope || new Scope());
 }
 
@@ -302,16 +311,6 @@ Style.prototype = (function (scopeProto) {
         }, []);
     else
       return [];
-  };
-
-  function filterKeyFrame(r){return /^(\d+\%|from|to)\s*$/.test(r.selector);}
-  function keyFrameResolve(){
-    return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
-  }
-  proto.asKeyFrames=function(prefix){
-    this.spec=new KeyFrame(this.selector,prefix);
-    this.resolve=keyFrameResolve;
-    return this.asContainer();
   };
   return proto;
 })(Scope.prototype);
