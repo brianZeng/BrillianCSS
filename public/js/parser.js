@@ -385,6 +385,12 @@ function popUntil(lexer,state){
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
+  function main(input, opt) {
+    opt = opt || {keepResults: false};
+    return evalInput(input, opt.keepResults).map(function (sheet) {
+      return sheet.toString();
+    }).join('\n');
+  }
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
@@ -395,31 +401,10 @@ ChangeSS = (function (parser) {
   parser.yy.parseError=parser.parseError=function(errStr,err){
     main.error.parseError(errStr,err);
   };
-  function main(input, opt) {
-    opt = opt || {keepResults: false};
-    return evalInput(input, opt.keepResults).map(function (sheet) {
-      return sheet.toString();
-    }).join('\n');
-  }
+
 
   main.eval = evalInput;
-  function evalInput(input, keep) {
-    if (!keep)clear();
-    var results = List();
-    main.parse(input).forEach(function (sheet) {
-      results.add(merge(sheet));
-    });
-    ChangeSS.link(results);
-    return results;
-  }
-  function clear() {
-    sheetMap = {};
-  }
 
-  function merge(obj) {
-    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
-    else throw 'not implement';
-  }
 
   main.merge = merge;
 
@@ -513,43 +498,28 @@ ChangeSS = (function (parser) {
     throw  Error('unknown type');
   };
   return main;
+  function evalInput(input, keep) {
+    if (!keep)clear();
+    var results = List();
+    main.parse(input).forEach(function (sheet) {
+      results.add(merge(sheet));
+    });
+    ChangeSS.link(results);
+    return results;
+  }
+  function clear() {
+    sheetMap = {};
+  }
+  function merge(obj) {
+    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
+    else throw 'not implement';
+  }
+
+
 })(parser);
 ChangeSS.opt.defaultSheetName = 'default';
-ChangeSS.assign = function ($param, $known) {
-  var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
-  $known = mix($known);
-  do {
-    con = false;
-    objForEach($unknown, function (key, value) {
-      switch (ChangeSS.getType(value)) {
-        case typeEnum.KEYWORD:
-        case typeEnum.LENGTH:
-          $known[key] = value;
-          delete $unknown[key];
-          break;
-        case typeEnum.LIST:
-          $unknown[key] = value = value.resolve($known);
-          if (!value.hasVars) {
-            $known[key] = value.toString();
-            delete  $unknown[key];
-          } else return;
-          break;
-        case typeEnum.NONE:
-          throw 'unknown type';
-        default :
-          if (value.canResolve($known))
-            $unknown[key] = value.resolve($known);
-          else return;
-      }
-      con = true;
-    });
-    if (!con)
-      con = Object.getOwnPropertyNames($unknown).some(function (key) {
-        $unknown[key].canResolve($known)
-      });
-  } while (con);
-  return {$resolved: $known, $unresolved: $unknown};
-};
+ChangeSS.assign = assign;
+
 ChangeSS.traceLog = true;
 function mix() {
   for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
@@ -563,7 +533,7 @@ function objForEach(obj, callback, thisObj, arg) {
   thisObj = thisObj || obj;
   if (typeof obj == "object" && obj)
     for (var i = 0, keys = Object.getOwnPropertyNames(obj), key = keys[0]; key !== undefined; key = keys[++i])
-      callback.apply(thisObj, [key, obj[key], arg]);
+      callback.apply(thisObj, [obj[key],key, arg]);
   return thisObj;
 }
 (function (parser) {
@@ -577,7 +547,7 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
-ChangeSS.TYPE = {
+var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
   VAR: 'var',
@@ -921,7 +891,7 @@ function InlineFunc(name, paramList) {
   this.name = name;
   this.param = paramList || new List();
 }
-objForEach(Math, function (key, fun, def) {
+objForEach(Math, function ( fun, key,def) {
     if (typeof fun == "function") {
       var convertArg = def.arg[key], convertRes = def.res[key];
       this[key] = function (mathArg) {
@@ -1217,7 +1187,7 @@ Scope.prototype = {
       }
     }
     function rules(ruleObj) {
-      return objForEach(ruleObj, function (key, value) {
+      return objForEach(ruleObj, function (value,key) {
         this.push(key + ':' + value + ';');
       }, []);
     }
@@ -1238,7 +1208,7 @@ Scope.prototype = {
   },
   get paramString() {
     var r = [];
-    objForEach(this.defValues, function (key, value) {
+    objForEach(this.defValues, function (value,key) {
       r.push(key + ':' + value);
     });
     return r.length ? '(' + r.join(',') + ')' : '';
@@ -1281,7 +1251,7 @@ Scope.prototype = {
       else if (value.resolve) v = value.resolve();
       this.defValues[objOrkey] = Length.parse(v) || value;
     }
-    else objForEach(objOrkey, function (key, v) {
+    else objForEach(objOrkey, function (v,key) {
       this.addDefValues(key, v);
     }, this);
     return this;
@@ -1328,8 +1298,6 @@ Scope.prototype = {
         r = [];
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // ts = ts.replace(ps, '');
-           // r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
             r.push(retraceSelector(ts,ps));
           })
         });
@@ -1339,6 +1307,7 @@ Scope.prototype = {
       this.nested.forEach(function (s) {
         s.backtraceSelector(tss);
       });
+
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
@@ -1349,8 +1318,13 @@ Scope.prototype = {
       return childSlt.replace(/\&/g,parentSlt);
     }
     function retraceSelector(childSlt,parentSlt){
-      var reg=new RegExp(parentSlt,'g');
-      return childSlt.replace(reg,'&').replace(/^&\s+/,'');
+      if(childSlt[parentSlt.length]==' ')
+        childSlt=childSlt.substring(parentSlt.length+1);
+      var rs=childSlt.split(parentSlt),str,ors=[];
+      for(var i= 0,len=rs.length;i<len;i++)
+        ors.push((str=rs[i])===''?'&':str);
+      ors[0].replace(/^&\s+/,'');
+      return ors.join('');
     }
 
     function first(parentSelectors) {
@@ -1360,7 +1334,6 @@ Scope.prototype = {
         tss = this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
             r.push(replaceSelector(ts,ps));
           })
         });
@@ -1381,7 +1354,7 @@ Scope.prototype = {
     return this.selectors;
   },
   clone: (function () {
-    function onPair(key, value) {
+    function onPair(value,key) {
       this[key] = value.clone ? value.clone(true) : value;
     }
     return function () {
@@ -1401,7 +1374,7 @@ Scope.prototype = {
   })(),
   reduce: function () {
     var staticRules = this.staticRules, v;
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function (value,key) {
       v = value.value;
       if (v !== undefined) {
         delete this[key];
@@ -1417,7 +1390,7 @@ Scope.prototype = {
   },
   getVar: function (array) {
     array = array || [];
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function ( value,key) {
       value.getVar(array);
     });
     return array;
@@ -1425,102 +1398,12 @@ Scope.prototype = {
   /**
    * @function
    * @param  [object] $vars
-   * @return {array<object>}
+   * @return {Array<{selector:string,rules:Object}>}
+   * TODO:convert <selector,rules,spec>
    */
-   resolve: (function () {
-    var keepEmptyResult = false;
-    Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
-      set: function (v) {
-        keepEmptyResult = !!v;
-      },
-      get: function () {
-        return keepEmptyResult
-      }});
-    function log() {
-      if (ChangeSS.traceLog)
-        console.log.apply(console, arguments);
-    }
-
-    function resolveScope(scope, paramStack, $assign) {
-      var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
-        selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
-      objForEach(scope.dynamicRules, function (key, rule) {
-        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
-          ruleObj[key] = rule.resolve($resolved).toString();
-        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
-      });
-      r = [
-        {rules: ruleObj, selector: selector}
-      ];
-      objForEach(scope.includes, function (key, invokeParam) {
-        var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
-        objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (key, value) {
-          if (invokeParam[key])$param[key] = value;
-        });
-        resolveInclude(mixin, $param, selector).forEach(function (resObj) {
-          if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
-        });
-      });
-      return r.filter(function (pair) {
-        return keepEmptyResult || objNotEmpty(pair.rules);
-      });
-    }
-
-    function mergeResult(a, b) {
-      if (objNotEmpty(b.rules))
-        a.rules = mix(b.rules, a.rules);
-      return a;
-    }
-
-    function resolveInclude(mixObj, $vars, selector) {
-      mixObj.selectors = selector.split(',');
-      mixObj.validateSelector();
-      var r = mixObj.resolve($vars);
-      mixObj.backtraceSelector();
-      return r;
-    }
-    function getChild(parent, child) {
-      if (parent === child || !parent)return 0;
-      return parent.nested[parent.nested.indexOf(child) + 1] || 0;
-    }
-
-    function preVisit(scope, $assign) {
-      var childScope = 0, results = [], scopeStack = [], paramStack = [];
-      do {
-        if (childScope = getChild(scope, childScope)) {
-          scopeStack.push(scope);
-          paramStack.push(assignParam(scope, false, paramStack, $assign));
-          scope = childScope;
-          childScope = 0;
-        }
-        else {
-          results.unshift.apply(results, resolveScope(scope, paramStack, $assign));
-          scope = getChild(scopeStack[scopeStack.length - 1], scope);
-          if (!scope) {
-            childScope = scope = scopeStack.pop();
-            paramStack.pop();
-          }
-        }
-      } while (scope);
-
-      return results;
-    }
-
-    function assignParam(scope, resolve, paramStack, $assign) {
-      var lastAssign = paramStack[paramStack.length - 1] || {},
-        $mix = mix(lastAssign, scope.defValues, $assign);
-      return resolve ? ChangeSS.assign($mix) : $mix;
-    }
-
-    function objNotEmpty(obj) {
-      return obj && Object.getOwnPropertyNames(obj).length > 0;
-    }
-    return function ($vars) {
-      if (!$vars)$vars = {};
-      else if ($vars.$resolved)$vars = mix($vars.$unresolved, $vars.$resolved);
-      return preVisit(this, $vars);
-    }
-  })()
+   resolve:function($vars){
+    return scopeResolveFunc(this,$vars);
+  }
 };
 ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
@@ -1587,6 +1470,139 @@ Style.prototype = (function (scopeProto) {
   };
   return proto;
 })(Scope.prototype);/**
+ * Created by 柏子 on 2015/1/14.
+ */
+var keepEmptyResult = false;
+Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
+  set: function (v) {
+    keepEmptyResult = !!v;
+  },
+  get: function () {
+    return keepEmptyResult
+  }});
+function scopeResolveFunc(scope,$vars) {
+  if (!$vars)$vars = {};
+  else if ($vars.$resolved)
+    $vars = mix($vars.$unresolved, $vars.$resolved);
+  return preVisit(scope, $vars);
+}
+function preVisit(scope, $assign) {
+  var childScope = 0, results = [], scopeStack = [], paramStack = [],spec;
+  do {
+    if (childScope = getChild(scope, childScope)) {
+      scopeStack.push(scope);
+      paramStack.push(assignParam(scope, false, paramStack, $assign));
+      scope = childScope;
+      childScope = 0;
+    }
+    else {
+      spec=scope.spec;
+      results.unshift.apply(results, resolveScope(scope, paramStack, $assign).map(function(result){
+        if(spec) result.spec=spec;
+        return result;
+      }));
+      scope = getChild(scopeStack[scopeStack.length - 1], scope);
+      if (!scope) {
+        childScope = scope = scopeStack.pop();
+        paramStack.pop();
+      }
+    }
+  } while (scope);
+  return results;
+}
+function log() {
+  if (ChangeSS.traceLog)
+    console.log.apply(console, arguments);
+}
+function assign ($param, $known) {
+  var con,$unknown = mix($param);
+  $known = mix($known);
+  do {
+    con = false;
+    objForEach($unknown, function (value,key) {
+      switch (ChangeSS.getType(value)) {
+        case TYPE.KEYWORD:
+        case TYPE.LENGTH:
+          $known[key] = value;
+          delete $unknown[key];
+          break;
+        case TYPE.LIST:
+          $unknown[key] = value = value.resolve($known);
+          if (!value.hasVars) {
+            $known[key] = value.toString();
+            delete  $unknown[key];
+          } else return;
+          break;
+        case TYPE.NONE:
+          throw 'unknown type';
+        default :
+          if (value.canResolve($known))
+            $unknown[key] = value.resolve($known);
+          else return;
+      }
+      con = true;
+    });
+    if (!con)
+      con = Object.getOwnPropertyNames($unknown).some(function (key) {
+        $unknown[key].canResolve($known)
+      });
+  } while (con);
+  return {$resolved: $known, $unresolved: $unknown};
+}
+function resolveScope(scope, paramStack, $assign) {
+  var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
+    selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
+  objForEach(scope.dynamicRules, function ( rule,key) {
+    if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
+      ruleObj[key] = rule.resolve($resolved).toString();
+    else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
+  });
+  r = [
+    {rules: ruleObj, selector: selector}
+  ];
+  objForEach(scope.includes, function ( invokeParam,key) {
+    var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
+    objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
+      if (invokeParam[key])$param[key] = value;
+    });
+    resolveInclude(mixin, $param, selector).forEach(function (resObj) {
+      if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
+    });
+  });
+  return r.filter(function (pair) {
+    return keepEmptyResult || objNotEmpty(pair.rules);
+  });
+}
+
+function mergeResult(a, b) {
+  if (objNotEmpty(b.rules))
+    a.rules = mix(b.rules, a.rules);
+  return a;
+}
+
+function resolveInclude(mixObj, $vars, selector) {
+  mixObj.selectors = selector.split(',');
+  mixObj.validateSelector();
+  var r = mixObj.resolve($vars);
+  mixObj.backtraceSelector();
+  return r;
+}
+function getChild(parent, child) {
+  if (parent === child || !parent)return 0;
+  return parent.nested[parent.nested.indexOf(child) + 1] || 0;
+}
+
+
+
+function assignParam(scope, resolve, paramStack, $assign) {
+  var lastAssign = paramStack[paramStack.length - 1] || {},
+    $mix = mix(lastAssign, scope.defValues, $assign);
+  return resolve ? ChangeSS.assign($mix) : $mix;
+}
+function objNotEmpty(obj) {
+  return obj && Object.getOwnPropertyNames(obj).length > 0;
+}
+/**
  * Created by 柏然 on 2014/11/1.
  */
 function Sheet(name) {
@@ -1637,27 +1653,33 @@ Sheet.prototype = (function (proto) {
     if(r==undefined)container[key]=array;
     else r.push.apply(r,array);
   }
+
+  /**
+   *
+   * @param $vars
+   * @returns Object<>
+   */
   proto.resolve = function ($vars) {
     var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
     this.scopes.forEach(function(scope){
       var spec=scope.spec,key,result;
       if(spec===undefined)
-        addResult(r,'*',scope.resolve($param));
-      else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
-        addResult(r,key+'{*}',scope.resolve($param));
+        addResult(r,'*',scopeResolveFunc(scope,$param));
+      else if(spec instanceof MediaQuery &&typeof (key=spec.resolve($assign.$resolved))=="string")
+        addResult(r,key+'{*}',scopeResolveFunc(scope,$param));
       else if(spec instanceof KeyFrame)
       {
-        result=scope.resolve($param);
+        result=scopeResolveFunc(scope,$param);
         spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
       }
     });
-    return r;
+    return r; //objForEach(r,function(rs){rs.forEach(delSpec)});
   };
   proto.toString =(function(){
     var separator='\n';
     function mapScope(scope){
       var rules = [], brc;
-      objForEach(scope.rules, function (key, value) {rules.push(key + ':' + value + ';');});
+      objForEach(scope.rules, function ( value,key) {rules.push(key + ':' + value + ';');});
       brc=rules.length? '{'+separator+'*'+separator+'}':'{*}';
       return scope.selector+brc.replace('*',rules.join(separator));
     }
@@ -1666,7 +1688,7 @@ Sheet.prototype = (function (proto) {
     }
     return function($vars){
       var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
-      objForEach(groups,function(key,group){
+      objForEach(groups,function(group,key){
         key=key.replace('{*}',keyRep);
         r.push(key.replace('*',mapGroup(group)))
       });
@@ -1743,7 +1765,7 @@ MediaQuery.prototype = {
   },
   reduce: function () {
     this.conditions.forEach(function (con) {
-      objForEach(con, function (key, v) {
+      objForEach(con, function ( v,key) {
         if(v==undefined)con[key]=v;
         else {
           if (v.resolve)v = v.resolve();
@@ -1757,7 +1779,7 @@ MediaQuery.prototype = {
   clone: (function () {
     function cloneObj(obj) {
       var o = {};
-      objForEach(obj, function (key, value) {
+      objForEach(obj, function ( value,key) {
         o[key] = value.clone ? value.clone() : value
       });
       return o;
@@ -1774,7 +1796,7 @@ MediaQuery.prototype = {
     var MEDIA_AND=' and ';
     function resolveMedia(conMap, $known) {
       var r = [];
-      objForEach(conMap, function (key, value) {
+      objForEach(conMap, function ( value,key) {
         if(value==undefined) r.push('('+key+')');
         else{
           if (value.hasVars)value = value.resolve($known);
@@ -1791,7 +1813,6 @@ MediaQuery.prototype = {
         if(m_type)
           return mcon? m_type+MEDIA_AND+mcon:m_type;
         return mcon;
-        //return m_type?   m_type+MEDIA_AND+mcon  : mcon;
       }).join(',');
     }
   })(),
@@ -1807,7 +1828,7 @@ MediaQuery.prototype = {
   getVar: function (array) {
     array = array || [];
     this.conditions.forEach(function (condition) {
-      objForEach(condition, function (key, v) {
+      objForEach(condition, function (v) {
         if (v instanceof Var) List.arrayAdd(array, v);
         else if (v.getVar) v.getVar(array);
       });
@@ -2033,7 +2054,7 @@ ChangeSS.link = (function () {
 
   var validateMixCircle, validateExtCircle, linkOtherSheet;
   linkOtherSheet = (function () {
-    function filterVar(key, value, proName) {
+    function filterVar(value,key, proName) {
       var i, gn = key;
       if ((i = key.indexOf('->')) == -1)
         gn += '->' + this.name;
@@ -2046,7 +2067,7 @@ ChangeSS.link = (function () {
 
     function linkInclude(scope, sheetname) {
       if (!scope.sheetName)debugger;
-      objForEach(scope.includes, function (key, value) {
+      objForEach(scope.includes, function ( value,key) {
         delete this[key];
         this[setGlobalNameIFNot(key, sheetname)] = value;
       }, scope.includes);
@@ -2061,8 +2082,8 @@ ChangeSS.link = (function () {
     function linkOtherSheet(sheet) {
       var sheetName = sheet.name;
       objForEach(sheet.vars, filterVar, sheet, 'vars');
-      objForEach(sheet.mixins, function (key, mixin) {
-        filterVar.apply(sheet, [key, mixin, 'mixins']);
+      objForEach(sheet.mixins, function ( mixin,key) {
+        filterVar.apply(sheet, [ mixin,key, 'mixins']);
         linkInclude(mixin, sheetName);
       });
       sheet.scopes.forEach(function (s) {
@@ -2096,7 +2117,7 @@ ChangeSS.link = (function () {
     }
 
     function collectInclude(scope, graph) {
-      objForEach(scope.includes, function (includeName) {
+      objForEach(scope.includes, function (v,includeName) {
         var mixObj = ChangeSS.get(includeName, 'mixin') || ChangeSS.error.notExist(includeName);
         graph.addEdge(scope, mixObj);
       });
@@ -2111,7 +2132,7 @@ ChangeSS.link = (function () {
         sheet.scopes.forEach(function (s) {
           collectInclude(s, graph);
         });
-        objForEach(sheet.mixins, function (key, mixObj) {
+        objForEach(sheet.mixins, function ( mixObj,key) {
           collectInclude(mixObj, graph);
         });
       });
@@ -2570,7 +2591,7 @@ case 34:return "EOF";
 break;
 }
 },
-rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(:(:|\w+-?(?!\())))*?(?=(\((\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*):)|\{|,)))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
+rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(:(:|\w+-?(?!\())))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,21,22,33,34],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,9,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,11,14,15,16,17,18,21,22,33,34],"inclusive":true}}
 });
 return lexer;

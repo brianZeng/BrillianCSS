@@ -188,7 +188,7 @@ ChangeSS.link = (function () {
 
   var validateMixCircle, validateExtCircle, linkOtherSheet;
   linkOtherSheet = (function () {
-    function filterVar(key, value, proName) {
+    function filterVar(value,key, proName) {
       var i, gn = key;
       if ((i = key.indexOf('->')) == -1)
         gn += '->' + this.name;
@@ -201,7 +201,7 @@ ChangeSS.link = (function () {
 
     function linkInclude(scope, sheetname) {
       if (!scope.sheetName)debugger;
-      objForEach(scope.includes, function (key, value) {
+      objForEach(scope.includes, function ( value,key) {
         delete this[key];
         this[setGlobalNameIFNot(key, sheetname)] = value;
       }, scope.includes);
@@ -216,8 +216,8 @@ ChangeSS.link = (function () {
     function linkOtherSheet(sheet) {
       var sheetName = sheet.name;
       objForEach(sheet.vars, filterVar, sheet, 'vars');
-      objForEach(sheet.mixins, function (key, mixin) {
-        filterVar.apply(sheet, [key, mixin, 'mixins']);
+      objForEach(sheet.mixins, function ( mixin,key) {
+        filterVar.apply(sheet, [ mixin,key, 'mixins']);
         linkInclude(mixin, sheetName);
       });
       sheet.scopes.forEach(function (s) {
@@ -251,7 +251,7 @@ ChangeSS.link = (function () {
     }
 
     function collectInclude(scope, graph) {
-      objForEach(scope.includes, function (includeName) {
+      objForEach(scope.includes, function (v,includeName) {
         var mixObj = ChangeSS.get(includeName, 'mixin') || ChangeSS.error.notExist(includeName);
         graph.addEdge(scope, mixObj);
       });
@@ -266,7 +266,7 @@ ChangeSS.link = (function () {
         sheet.scopes.forEach(function (s) {
           collectInclude(s, graph);
         });
-        objForEach(sheet.mixins, function (key, mixObj) {
+        objForEach(sheet.mixins, function ( mixObj,key) {
           collectInclude(mixObj, graph);
         });
       });

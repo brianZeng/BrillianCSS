@@ -9,7 +9,7 @@ dir={
   bootstrapTestPath:path.normalize('bootstrap_BSS'),
   interpreterPath:path.normalize('src/interpreter.js'),
   testPath:path.normalize('public/stylesheets/test.scss'),
-  srcPath:['ChangeSS','Length','Var','Exp','InlineFunc','List','Scope','Sheet','MediaQuery','Extension'].map(function(file){return path.normalize('src/type/'+file+'.js')})
+  srcPath:['ChangeSS','Length','Var','Exp','InlineFunc','List','Scope','resolver','Sheet','MediaQuery','Extension'].map(function(file){return path.normalize('src/type/'+file+'.js')})
 };
 module.exports=function(req,res,next){
   readBSS().then(function(data){

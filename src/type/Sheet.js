@@ -49,17 +49,23 @@ Sheet.prototype = (function (proto) {
     if(r==undefined)container[key]=array;
     else r.push.apply(r,array);
   }
+
+  /**
+   *
+   * @param $vars
+   * @returns Object<>
+   */
   proto.resolve = function ($vars) {
     var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
     this.scopes.forEach(function(scope){
       var spec=scope.spec,key,result;
       if(spec===undefined)
-        addResult(r,'*',scope.resolve($param));
-      else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
-        addResult(r,key+'{*}',scope.resolve($param));
+        addResult(r,'*',scopeResolveFunc(scope,$param));
+      else if(spec instanceof MediaQuery &&typeof (key=spec.resolve($assign.$resolved))=="string")
+        addResult(r,key+'{*}',scopeResolveFunc(scope,$param));
       else if(spec instanceof KeyFrame)
       {
-        result=scope.resolve($param);
+        result=scopeResolveFunc(scope,$param);
         spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
       }
     });
@@ -69,7 +75,7 @@ Sheet.prototype = (function (proto) {
     var separator='\n';
     function mapScope(scope){
       var rules = [], brc;
-      objForEach(scope.rules, function (key, value) {rules.push(key + ':' + value + ';');});
+      objForEach(scope.rules, function ( value,key) {rules.push(key + ':' + value + ';');});
       brc=rules.length? '{'+separator+'*'+separator+'}':'{*}';
       return scope.selector+brc.replace('*',rules.join(separator));
     }
@@ -78,7 +84,7 @@ Sheet.prototype = (function (proto) {
     }
     return function($vars){
       var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
-      objForEach(groups,function(key,group){
+      objForEach(groups,function(group,key){
         key=key.replace('{*}',keyRep);
         r.push(key.replace('*',mapGroup(group)))
       });

@@ -6,7 +6,7 @@ function InlineFunc(name, paramList) {
   this.name = name;
   this.param = paramList || new List();
 }
-objForEach(Math, function (key, fun, def) {
+objForEach(Math, function ( fun, key,def) {
     if (typeof fun == "function") {
       var convertArg = def.arg[key], convertRes = def.res[key];
       this[key] = function (mathArg) {

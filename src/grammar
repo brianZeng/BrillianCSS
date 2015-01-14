@@ -14,7 +14,8 @@ string          (\"|\')[\s\S]*?(\1)
 sltstart        {nmchar}|[\.#\*\>\+\-\&]|\d+\%
 sltclass        \:(\:|\w+\-?(?!=\())
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
-selector        {sltstart}({sltchar}|{sltclass})*?(?=(\({var}\:)|\{|\,)
+nonslt          (\({s}*{var}{s}*\:)|\{|\,
+selector        {sltstart}({sltchar}|{sltclass})*?(?={nonslt})
 comment         \/\*[\s\S]*?\*\/|"//".*?[\r\n]
 s               [\s\r\n\t\f]
 %s INITIAL EXP EXT

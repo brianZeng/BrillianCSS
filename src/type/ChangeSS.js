@@ -3,6 +3,12 @@
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
+  function main(input, opt) {
+    opt = opt || {keepResults: false};
+    return evalInput(input, opt.keepResults).map(function (sheet) {
+      return sheet.toString();
+    }).join('\n');
+  }
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
@@ -13,31 +19,10 @@ ChangeSS = (function (parser) {
   parser.yy.parseError=parser.parseError=function(errStr,err){
     main.error.parseError(errStr,err);
   };
-  function main(input, opt) {
-    opt = opt || {keepResults: false};
-    return evalInput(input, opt.keepResults).map(function (sheet) {
-      return sheet.toString();
-    }).join('\n');
-  }
+
 
   main.eval = evalInput;
-  function evalInput(input, keep) {
-    if (!keep)clear();
-    var results = List();
-    main.parse(input).forEach(function (sheet) {
-      results.add(merge(sheet));
-    });
-    ChangeSS.link(results);
-    return results;
-  }
-  function clear() {
-    sheetMap = {};
-  }
 
-  function merge(obj) {
-    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
-    else throw 'not implement';
-  }
 
   main.merge = merge;
 
@@ -131,43 +116,28 @@ ChangeSS = (function (parser) {
     throw  Error('unknown type');
   };
   return main;
+  function evalInput(input, keep) {
+    if (!keep)clear();
+    var results = List();
+    main.parse(input).forEach(function (sheet) {
+      results.add(merge(sheet));
+    });
+    ChangeSS.link(results);
+    return results;
+  }
+  function clear() {
+    sheetMap = {};
+  }
+  function merge(obj) {
+    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
+    else throw 'not implement';
+  }
+
+
 })(parser);
 ChangeSS.opt.defaultSheetName = 'default';
-ChangeSS.assign = function ($param, $known) {
-  var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
-  $known = mix($known);
-  do {
-    con = false;
-    objForEach($unknown, function (key, value) {
-      switch (ChangeSS.getType(value)) {
-        case typeEnum.KEYWORD:
-        case typeEnum.LENGTH:
-          $known[key] = value;
-          delete $unknown[key];
-          break;
-        case typeEnum.LIST:
-          $unknown[key] = value = value.resolve($known);
-          if (!value.hasVars) {
-            $known[key] = value.toString();
-            delete  $unknown[key];
-          } else return;
-          break;
-        case typeEnum.NONE:
-          throw 'unknown type';
-        default :
-          if (value.canResolve($known))
-            $unknown[key] = value.resolve($known);
-          else return;
-      }
-      con = true;
-    });
-    if (!con)
-      con = Object.getOwnPropertyNames($unknown).some(function (key) {
-        $unknown[key].canResolve($known)
-      });
-  } while (con);
-  return {$resolved: $known, $unresolved: $unknown};
-};
+ChangeSS.assign = assign;
+
 ChangeSS.traceLog = true;
 function mix() {
   for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
@@ -181,7 +151,7 @@ function objForEach(obj, callback, thisObj, arg) {
   thisObj = thisObj || obj;
   if (typeof obj == "object" && obj)
     for (var i = 0, keys = Object.getOwnPropertyNames(obj), key = keys[0]; key !== undefined; key = keys[++i])
-      callback.apply(thisObj, [key, obj[key], arg]);
+      callback.apply(thisObj, [obj[key],key, arg]);
   return thisObj;
 }
 (function (parser) {
@@ -195,7 +165,7 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
-ChangeSS.TYPE = {
+var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
   VAR: 'var',

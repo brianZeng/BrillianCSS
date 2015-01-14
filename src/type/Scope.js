@@ -32,7 +32,7 @@ Scope.prototype = {
       }
     }
     function rules(ruleObj) {
-      return objForEach(ruleObj, function (key, value) {
+      return objForEach(ruleObj, function (value,key) {
         this.push(key + ':' + value + ';');
       }, []);
     }
@@ -53,7 +53,7 @@ Scope.prototype = {
   },
   get paramString() {
     var r = [];
-    objForEach(this.defValues, function (key, value) {
+    objForEach(this.defValues, function (value,key) {
       r.push(key + ':' + value);
     });
     return r.length ? '(' + r.join(',') + ')' : '';
@@ -96,7 +96,7 @@ Scope.prototype = {
       else if (value.resolve) v = value.resolve();
       this.defValues[objOrkey] = Length.parse(v) || value;
     }
-    else objForEach(objOrkey, function (key, v) {
+    else objForEach(objOrkey, function (v,key) {
       this.addDefValues(key, v);
     }, this);
     return this;
@@ -199,7 +199,7 @@ Scope.prototype = {
     return this.selectors;
   },
   clone: (function () {
-    function onPair(key, value) {
+    function onPair(value,key) {
       this[key] = value.clone ? value.clone(true) : value;
     }
     return function () {
@@ -219,7 +219,7 @@ Scope.prototype = {
   })(),
   reduce: function () {
     var staticRules = this.staticRules, v;
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function (value,key) {
       v = value.value;
       if (v !== undefined) {
         delete this[key];
@@ -235,7 +235,7 @@ Scope.prototype = {
   },
   getVar: function (array) {
     array = array || [];
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function ( value,key) {
       value.getVar(array);
     });
     return array;
@@ -243,102 +243,12 @@ Scope.prototype = {
   /**
    * @function
    * @param  [object] $vars
-   * @return {array<object>}
+   * @return {Array<{selector:string,rules:Object}>}
+   * TODO:convert <selector,rules,spec>
    */
-   resolve: (function () {
-    var keepEmptyResult = false;
-    Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
-      set: function (v) {
-        keepEmptyResult = !!v;
-      },
-      get: function () {
-        return keepEmptyResult
-      }});
-    function log() {
-      if (ChangeSS.traceLog)
-        console.log.apply(console, arguments);
-    }
-
-    function resolveScope(scope, paramStack, $assign) {
-      var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
-        selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
-      objForEach(scope.dynamicRules, function (key, rule) {
-        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
-          ruleObj[key] = rule.resolve($resolved).toString();
-        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
-      });
-      r = [
-        {rules: ruleObj, selector: selector}
-      ];
-      objForEach(scope.includes, function (key, invokeParam) {
-        var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
-        objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (key, value) {
-          if (invokeParam[key])$param[key] = value;
-        });
-        resolveInclude(mixin, $param, selector).forEach(function (resObj) {
-          if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
-        });
-      });
-      return r.filter(function (pair) {
-        return keepEmptyResult || objNotEmpty(pair.rules);
-      });
-    }
-
-    function mergeResult(a, b) {
-      if (objNotEmpty(b.rules))
-        a.rules = mix(b.rules, a.rules);
-      return a;
-    }
-
-    function resolveInclude(mixObj, $vars, selector) {
-      mixObj.selectors = selector.split(',');
-      mixObj.validateSelector();
-      var r = mixObj.resolve($vars);
-      mixObj.backtraceSelector();
-      return r;
-    }
-    function getChild(parent, child) {
-      if (parent === child || !parent)return 0;
-      return parent.nested[parent.nested.indexOf(child) + 1] || 0;
-    }
-
-    function preVisit(scope, $assign) {
-      var childScope = 0, results = [], scopeStack = [], paramStack = [];
-      do {
-        if (childScope = getChild(scope, childScope)) {
-          scopeStack.push(scope);
-          paramStack.push(assignParam(scope, false, paramStack, $assign));
-          scope = childScope;
-          childScope = 0;
-        }
-        else {
-          results.unshift.apply(results, resolveScope(scope, paramStack, $assign));
-          scope = getChild(scopeStack[scopeStack.length - 1], scope);
-          if (!scope) {
-            childScope = scope = scopeStack.pop();
-            paramStack.pop();
-          }
-        }
-      } while (scope);
-
-      return results;
-    }
-
-    function assignParam(scope, resolve, paramStack, $assign) {
-      var lastAssign = paramStack[paramStack.length - 1] || {},
-        $mix = mix(lastAssign, scope.defValues, $assign);
-      return resolve ? ChangeSS.assign($mix) : $mix;
-    }
-
-    function objNotEmpty(obj) {
-      return obj && Object.getOwnPropertyNames(obj).length > 0;
-    }
-    return function ($vars) {
-      if (!$vars)$vars = {};
-      else if ($vars.$resolved)$vars = mix($vars.$unresolved, $vars.$resolved);
-      return preVisit(this, $vars);
-    }
-  })()
+   resolve:function($vars){
+    return scopeResolveFunc(this,$vars);
+  }
 };
 ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
