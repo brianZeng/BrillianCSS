@@ -30,8 +30,7 @@ ChangeSS = (function (parser) {
     name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
     switch (type) {
-      case 'mixin':
-      case 'scope':
+      case 'mixin':case 'scope':case 'media':
         return getter.fromFullName(name, type);
       case 'var':
         return getter.variable(name);
@@ -107,14 +106,7 @@ ChangeSS = (function (parser) {
     else if (something instanceof Var) setter.Var(something, value);
     return this;
   };
-  main.getType = function (side, asNone) {
-    var type;
-    if (!side)return ChangeSS.TYPE.NONE;
-    if (typeof side == "string") return ChangeSS.TYPE.KEYWORD;
-    else if (type = side._type) return type;
-    else if (asNone)return ChangeSS.TYPE.NONE;
-    throw  Error('unknown type');
-  };
+
   return main;
   function evalInput(input, keep) {
     if (!keep)clear();
@@ -173,5 +165,13 @@ var TYPE=ChangeSS.TYPE = {
   FUNC: 'fun',
   KEYWORD: 'keyword',
   LIST: 'list'
+};
+ChangeSS.getType = function (side, asNone) {
+  var type;
+  if (!side)return TYPE.NONE;
+  if (typeof side == "string") return TYPE.KEYWORD;
+  else if (type = side._type) return type;
+  else if (asNone)return TYPE.NONE;
+  throw  Error('unknown type');
 };
 if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;

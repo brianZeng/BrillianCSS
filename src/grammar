@@ -138,7 +138,7 @@ selectors:
       ;
 style:
       selectors scope              {$$=new Style($1,$2);}
-     |m_qlist scope                {$$=$2.asMediaQuery($1.reduce());}
+     |MEDIA var scope              {$$=$3.asMediaQuery(null,$2);}
      |KEYFRAMES SELECTOR scope     {$$=$3.asKeyFrames($1,$2);}
     ;
 m_exp:
@@ -153,10 +153,12 @@ m_query:
 m_qlist:
      MEDIA m_query                    {$$=$2;}
     |m_qlist IDENT  m_query           {$1.merge($3);}
-    |m_qlist TREATAS VAR              {$1.asVar($3);}
     ;
 sheetPart:
      style           {$$={type:'style',value:$1}}
+    |m_qlist scope                {$$={value:$2.asMediaQuery($1.reduce()),type:'style'};}
+    |m_qlist TREATAS VAR scope    {$$={value:$4.asMediaQuery($1.reduce(),$3),type:'style'};}
+    |m_qlist TREATAS VAR ';'      {$$={value:$1.reduce(),type:'media',key:$3};}
     |mixScope        {$1.type='mix';}
     |assignPair      {$1.type='var';}
     |sheetPart ';'

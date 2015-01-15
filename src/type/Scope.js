@@ -114,20 +114,25 @@ Scope.prototype = {
   },
   asContainer:function(){
     this.selectors=[this.selector=''];
-    var nested=this.nested,def=this.defValues;
-    Scope.apply(this);
-    nested.forEach(function(s){s.validateSelector()});
-    this.nested=nested;
-    this.defValues=def;
+    //TODO:&chidselect
+    this.nested.forEach(function(s){
+      s.selectors= s.selectors.map(function(slt){return '&'+slt})
+    });
     return this;
   },
-  asMediaQuery:function(mediaQuery){
-    this.asContainer().spec=mediaQuery;
-    return this;
+  asMediaQuery:function(mediaQuery,varLike){
+    if(mediaQuery){
+      this.spec=mediaQuery;
+      if(varLike)mediaQuery.symbol=varLike;
+    }
+   else if(varLike instanceof Var)
+     this.spec=varLike;
+    return this.asContainer();
   },
   asKeyFrames:function(prefix,name){
+    this.selectors=[this.selector=''];
     this.spec=new KeyFrame(name,prefix);
-    this.resolve=keyFrameResolve;
+    this.staticRules=this.dynamicRules=this.includes={};
     return this.asContainer();
   },
   canResolve: function ($vars) {
@@ -219,6 +224,7 @@ Scope.prototype = {
       });
       r.exts = this.exts.slice();
       r.selectors = this.selectors.slice();
+      if(this.spec)r.spec=this.spec;
       return r;
     }
   })(),
@@ -251,7 +257,7 @@ Scope.prototype = {
    * @return {Array<{selector:string,rules:Object}>}
    * TODO:convert <selector,rules,spec>
    */
-   resolve:function($vars){
+  resolve:function($vars){
     return scopeResolveFunc(this,$vars);
   }
 };

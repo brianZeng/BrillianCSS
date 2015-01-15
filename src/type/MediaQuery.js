@@ -76,9 +76,8 @@ MediaQuery.prototype = {
       });
       return r.join(MEDIA_AND);
     }
-
-    return function ($vars) {
-      var $known =$vars? ChangeSS.assign($vars).$resolved:{}, cons = this.conditions;
+    return function ($known) {
+      var cons = this.conditions;
       return this.groupPrefix+' '+ this.mediaTypes.map(function (m_type, i) {
         var mcon=resolveMedia(cons[i], $known);
         if(m_type)
@@ -105,10 +104,6 @@ MediaQuery.prototype = {
       });
     });
     return array;
-  },
-  asVar:function(symbol){
-    this.symbol=symbol;
-    return this;
   }
 };
 MediaQuery.prototype.resolve = function ($vars) {
@@ -125,10 +120,22 @@ KeyFrame.prototype=(function(){
     if(pre)pre='-'+pre+'-';
     return '@'+pre+'keyframes';
   }
+  function resolveKeyFrame(animationName,prefix){
+    var r;
+    if(prefix===normalizePrefixes[0]){
+      if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
+      else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
+    }
+    else r= [prefix];
+    return r.map(function(pre){return pre+' '+animationName});
+  }
   return {
     toString:function(){
       return this.prefix+' '+this.name;
     },
+    resolve:function(){
+      return resolveKeyFrame(this.name,this.prefix);
+    }/*,
     getAnimations:function(){
       var prefix,name=this.name,r;
       if((prefix=this.prefix)===normalizePrefixes[0]){
@@ -137,6 +144,6 @@ KeyFrame.prototype=(function(){
       }
       else r= [prefix];
       return r.map(function(pre){return pre+' '+name});
-    }
+    }*/
   }
 })();

@@ -3,7 +3,7 @@
  */
 describe('MediaQuery Behaviors', function () {
   var src, scope, sheet, media;
- function StringEqual(str1,str2,ignoreRex){
+ function stringEqual(str1,str2,ignoreRex){
    ignoreRex=ignoreRex||/[^\S]/g;
    expect(str1.replace(ignoreRex,'')).toBe(str2.replace(ignoreRex,''))
  }
@@ -12,7 +12,7 @@ describe('MediaQuery Behaviors', function () {
     expect(str1.replace(ignoreRex,'').indexOf(str2.replace(ignoreRex,''))>-1).toBe(true);
   }
   function getFirstScope(src) {
-    return scope = ChangeSS.parse(src)[0].validate().scopes[0];
+    return scope = (sheet=ChangeSS.parse(src)[0]).validate().scopes[0];
   }
 
   function getFirstSheet(src) {
@@ -53,6 +53,11 @@ describe('MediaQuery Behaviors', function () {
       src='@media screen and (max-width:480px) @treatas $iphone{div{}}';
       getFirstMedia(src);
       expect(media.symbol).toBe('$iphone');
+      expect(sheet.medias.$iphone).toBe(media);
+      src='@media all and (min-width:960px) @treatas $large;';
+      getFirstSheet(src);
+      expect(sheet.medias.$large.toString()).toBe('@media all and (min-width:960px)');
+
     });
     it('scope rules can refer media via var symbol',function(){
       src='div{' +
@@ -60,6 +65,15 @@ describe('MediaQuery Behaviors', function () {
       ' @media $iphone{' +
       '   color:blue;' +
       '}}';
+      getFirstScope(src);
+      expect(scope.nested[0].spec.symbol).toBe(('$iphone'));
+      stringEqual(sheet.toString(),'div{color:red;}');
+      src+='@media screen and (max-width:480px) @treatas $iphone;';
+      getFirstSheet(src);
+      expect(Object.keys(sheet.resolve()).length).toBe(2);
+      var r=sheet.toString();
+      stringContain(r,'@media screen and (max-width:480px){ div{ color:blue;}}');
+      stringContain(r,'div{color:red;}');
     });
   });
   describe('b.MediaQuery object attach to relative styles', function () {
@@ -77,7 +91,7 @@ describe('MediaQuery Behaviors', function () {
       getFirstScope(src);
       expect(scope.nested.length).toBe(2);
     });
-    xit('not support nested mediaQuery', function () {
+    it('not support nested mediaQuery', function () {
       src = 'div{ @media print{ div{} } }';
       expect(function () {
         getFirstScope(src)
@@ -87,6 +101,26 @@ describe('MediaQuery Behaviors', function () {
         getFirstScope(src)
       }).toThrow();
     });
+    it('but support @media $var as nested',function(){
+      src='div{' +
+      '@media $iphone{}' +
+      '@media $ipad{}'+
+      ' p{' +
+      '@media $iphone{}' +
+      '}' +
+      '}';
+      getFirstScope(src);
+      expect(scope.nested.length).toBe(3);
+      expect(scope.nested[2].nested.length).toBe(1);
+    });
+    it('@media $var can also be a scope',function(){
+      src='@media screen and (max-width: 480px) @treatas $iphone;' +
+      '@media $iphone{' +
+      '   div{ color:blue;}}';
+      getFirstScope(src);
+      expect(sheet.medias['$iphone'].toString()).toBe('@media screen and (max-width:480px)');
+      expect(scope.nested[0].selector).toBe('div');
+    })
   });
   describe('c.MediaQuery resolve :', function () {
     it('it support vars', function () {
@@ -101,6 +135,12 @@ describe('MediaQuery Behaviors', function () {
     });
   });
   describe('d.Sheet Contains MediaQuery resolve:',function(){
+    beforeEach(function(){
+      ChangeSS.opt.keepEmptyResult=true;
+    });
+    afterEach(function(){
+      ChangeSS.opt.keepEmptyResult=false;
+    });
     it('separate sheets by MediaQuery',function(){
       var r;
       src='div{} @media screen and (min-width:960px){ p{} }';

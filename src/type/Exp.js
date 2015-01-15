@@ -7,9 +7,7 @@ function Exp(left, optor, right) {
   if (right)this.right = right;
   if (optor) this.optor = optor;
 }
-Exp.prototype = (function () {
-  var TYPE = ChangeSS.TYPE;
-  return {
+Exp.prototype = {
     _type: TYPE.EXP,
     opt: function (opt, exp) {
       var left = this.left;
@@ -158,5 +156,4 @@ Exp.prototype = (function () {
       return left;
     }
   };
-})();
 ChangeSS.Exp = Exp;
