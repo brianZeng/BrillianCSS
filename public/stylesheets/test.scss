@@ -1,8 +1,17 @@
-@media screen and (max-width: 480px) @treatas $iphone;
-@media $iphone{
-div{
-  >p{
-    color:yellow;
+$top-color:red;
+$bottom-color:orange;
+button{
+  background:linear-gradient($top-color 5%,$bottom-color 100%);
+  &:hover{
+    background: gray;
   }
-}
+ }
+div{
+  &:first-child{
+    color: red;
+    left: 0
+  }
+  &:nth-child(2n+3){
+    counter-reset: none;
+  }
 }

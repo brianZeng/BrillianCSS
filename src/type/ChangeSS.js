@@ -17,6 +17,7 @@ ChangeSS = (function (parser) {
     }
   };
   parser.yy.parseError=parser.parseError=function(errStr,err){
+    debugger;
     main.error.parseError(errStr,err);
   };
 
@@ -88,7 +89,8 @@ ChangeSS = (function (parser) {
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
-  main.parse = function (input) {
+  main.parse = parseInput;
+  function parseInput(input) {
     var range, r,i=input.indexOf('@sheetname');
     if(i==-1)
       r=[input];
@@ -99,8 +101,12 @@ ChangeSS = (function (parser) {
         r.push(range);
       sheetSplitReg.exec();
     }
-    return r.map(function(src){return parser.parse(src).validate()});
-  };
+    return r.map(parseSheet);
+    function parseSheet(src){
+      return parser.parse(src).validate()
+    }
+  }
+
   main.add = function (something, value) {
     if (something instanceof Sheet) setter.sheet(something);
     else if (something instanceof Var) setter.Var(something, value);
@@ -111,7 +117,7 @@ ChangeSS = (function (parser) {
   function evalInput(input, keep) {
     if (!keep)clear();
     var results = List();
-    main.parse(input).forEach(function (sheet) {
+    parseInput(input).forEach(function (sheet) {
       results.add(merge(sheet));
     });
     ChangeSS.link(results);

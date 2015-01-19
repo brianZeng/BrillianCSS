@@ -12,7 +12,7 @@ num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{nmstart}(('-'{nmstart})|{nmchar})*
 string          (\"|\')[\s\S]*?(\1)
 sltstart        {nmchar}|[\.#\*\>\+\-\&]|\d+\%
-sltclass        \:(\:|\w+\-?(?!=\())
+sltclass        \:\:|\:(?!=[^\{]*?[\)\;]{s}*[\}\;])
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 nonslt          (\({s}*{var}{s}*\:)|\{|\,
 selector        {sltstart}({sltchar}|{sltclass})*?(?={nonslt})
