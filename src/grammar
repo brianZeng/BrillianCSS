@@ -52,7 +52,8 @@ s               [\s\r\n\t\f]
 <EXP>'-'                           return '-';
 <EXP>'*'                           return '*';
 <EXP>'/'                           return '/';
-<EXP>('#'{hexchar}+)|('!'\w+)      return 'IDENT';
+<EXP>'!'\w+                        return 'IDENT';
+<EXP>'#'{hexchar}+                 return 'COLOR';
 <EXP>("not"|"only"){s}*{Ident}     return 'IDENT';
 <*>{Ident}                         return 'IDENT';
 <*><<EOF>>                         return "EOF";
@@ -90,6 +91,7 @@ property:
       |STRING                     {$$=$1[0]=='@'? $1.substr(2,$1.length-3):$1;}
       |URL
       |IDENT
+      |COLOR                       {$$=new Color($1);}
       ;
 list:
       property         {$$=new List($1);}

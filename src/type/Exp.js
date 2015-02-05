@@ -25,6 +25,7 @@ Exp.prototype = {
       switch (this.type) {
         case TYPE.KEYWORD:
         case TYPE.LENGTH:
+        case TYPE.COLOR:
           return this.left;
         case TYPE.FUNC:
         case TYPE.LIST:

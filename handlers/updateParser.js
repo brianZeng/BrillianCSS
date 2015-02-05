@@ -9,7 +9,8 @@ dir={
   bootstrapTestPath:path.normalize('bootstrap_BSS'),
   interpreterPath:path.normalize('src/interpreter.js'),
   testPath:path.normalize('public/stylesheets/test.scss'),
-  srcPath:['ChangeSS','Length','Var','Exp','InlineFunc','List','Scope','resolver','Sheet','linker','MediaQuery'].map(function(file){return path.normalize('src/type/'+file+'.js')})
+  libDir:path.normalize('style_lib'),
+  srcPath:['ChangeSS','Length','Var','Exp','InlineFunc','Color','List','Scope','resolver','Sheet','linker','MediaQuery'].map(function(file){return path.normalize('src/type/'+file+'.js')})
 };
 module.exports=function(req,res,next){
   readBSS().then(function(data){
@@ -23,6 +24,11 @@ module.exports.readBootstrapTest=function(){
   var names=[];
   return readDirFilesPromise(dir.bootstrapTestPath,names).then(function(contents){
     return contents.map(function(c,i){ return {name:names[i],content:c} })
+  });
+};
+module.exports.readLib=function(){
+  return readDirFilesPromise(dir.libDir).then(function(files){
+    return files.join('');
   });
 };
 module.exports.asyncFS=asyncFS;

@@ -205,11 +205,12 @@ function objForEach(obj, callback, thisObj, arg) {
 /**
  * @enum {string}
  * @name ChangeSS.TYPE
- * @type {{NONE: string, EXP: string, VAR: string, LENGTH: string, FUNC: string, KEYWORD: string, LIST: string}}
+ * @type {{NONE: string, EXP: string, VAR: string, LENGTH: string, FUNC: string, KEYWORD: string, LIST: string,COLOR:string}}
  */
 var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
+  COLOR:'color',
   VAR: 'var',
   LENGTH: 'len',
   FUNC: 'fun',

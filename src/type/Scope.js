@@ -51,6 +51,11 @@ Scope.prototype = {
   },
   setSheetName: function (name) {
     this.sheetName = name;
+    objForEach(this.defValues,function(value,key){
+      if(value instanceof Var&&!value.sheetName){
+        value.sheetName=name;
+      }
+    });
     this.nested.forEach(function (s) {
       s.setSheetName(name)
     });
