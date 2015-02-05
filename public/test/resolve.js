@@ -3,14 +3,14 @@
  */
 describe('scope resolve behaviors', function () {
   function getFirstScope(src) {
-    return ChangeSS.eval(src)[0].scopes[0];
+    return ChangeSS.compile(src)[0].scopes[0];
   }
 
   function getFirstSheet(src) {
-    return ChangeSS.eval(src)[0];
+    return ChangeSS.compile(src)[0];
   }
   function getFirstSheetResolvedObj(source,$vars){
-     sheet=ChangeSS.eval(source||src);
+     sheet=ChangeSS.compile(source||src);
     var r=sheet.resolve($vars),keys=Object.getOwnPropertyNames(r);
     return keys.length? r[keys[0]][0]:undefined;
   }

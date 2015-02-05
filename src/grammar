@@ -52,7 +52,7 @@ s               [\s\r\n\t\f]
 <EXP>'-'                           return '-';
 <EXP>'*'                           return '*';
 <EXP>'/'                           return '/';
-<EXP>'#'{hexchar}+                 return 'IDENT';
+<EXP>('#'{hexchar}+)|('!'\w+)      return 'IDENT';
 <EXP>("not"|"only"){s}*{Ident}     return 'IDENT';
 <*>{Ident}                         return 'IDENT';
 <*><<EOF>>                         return "EOF";

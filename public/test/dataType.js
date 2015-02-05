@@ -5,9 +5,10 @@ describe("Basic Type Behaviors", function () {
   var source = '$len:20px;' +
     '$list:20px solid red;' +
     '$fun:rgb(20,120,20);';
-  var sheet = ChangeSS.eval(source)[0], vars = sheet.vars, len, Fun = ChangeSS.InlineFunc, Var = ChangeSS.Var,
+  var sheet = ChangeSS.compile(source)[0], vars = sheet.vars, len, Fun = ChangeSS.InlineFunc, Var = ChangeSS.Var,
     getType = function (o) {
       return ChangeSS.getType(o);
+
     }, Length = ChangeSS.Length, Exp = ChangeSS.Exp,
     TYPE = ChangeSS.TYPE, List = ChangeSS.List;
   describe('1.Length behaviors', function () {

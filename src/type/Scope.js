@@ -1,6 +1,10 @@
 /**
  * Created by 柏然 on 2014/11/1.
  */
+/**
+ * @namespace ChangeSS.Scope
+ * @constructor
+ */
 function Scope() {
   this.staticRules = {};
   this.dynamicRules = {};
@@ -169,7 +173,7 @@ Scope.prototype = {
       return this.selectors;
     }
     function replaceSelector(childSlt,parentSlt){
-      if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
+      if(childSlt.indexOf('&')==-1) childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
     }
     function retraceSelector(childSlt,parentSlt){
@@ -213,12 +217,11 @@ Scope.prototype = {
       this[key] = value.clone ? value.clone(true) : value;
     }
     return function () {
-      var r = new Scope();
+      var r = new Scope(),self=this;
       r.validateSelector();
-      objForEach(this.staticRules, onPair, r.staticRules);
-      objForEach(this.dynamicRules, onPair, r.dynamicRules);
-      objForEach(this.defValues, onPair, r.defValues);
-      objForEach(this.includes, onPair, r.includes);
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        objForEach(self[key],onPair,r[key]);
+      });
       r.nested = this.nested.map(function (scope) {
         return scope.clone();
       });
@@ -292,11 +295,12 @@ Style.prototype = (function (scopeProto) {
 
   proto.addScope = function (scope) {
     if (scope instanceof Scope) {
-      this.defValues = mix(this.defValues, scope.defValues);
-      this.staticRules = mix(this.staticRules, scope.staticRules);
-      this.dynamicRules = mix(this.dynamicRules, scope.dynamicRules);
-      this.includes = mix(this.includes, scope.includes);
+      var self=this;
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        self[key]=mix(self[key],scope[key]);
+      });
       this.exts.push.apply(this.exts, scope.exts);
+      ['validateSelector','backtraceSelector'].forEach(function(key){self[key]=scope[key]});
       for (var i = 0, ns = scope.nested, children = this.nested, child = ns[0]; child; child = ns[++i])
         children.push(child);
     }

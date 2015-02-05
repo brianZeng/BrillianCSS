@@ -5,7 +5,7 @@ describe('extension behaviors:', function () {
   var src, sheet, scope;
 
   function getFirstValidatedSheet(src) {
-    scope = (sheet = ChangeSS.eval(src)[0]).scopes[0];
+    scope = (sheet = ChangeSS.compile(src)[0]).scopes[0];
     return sheet;
   }
 
@@ -37,7 +37,6 @@ describe('extension behaviors:', function () {
       getFirstValidatedSheet(src);
 
       containAll(ss = getSheetSelectors(sheet), '.base,.super', '.super');
-      debugger;
       expect(ss.length).toBe(2);
     });
     it('b.can handle nested inherits', function () {

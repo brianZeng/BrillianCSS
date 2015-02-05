@@ -2,6 +2,10 @@
  * Created by 柏子 on 2015/1/14.
  */
 var keepEmptyResult = false;
+/**
+ * @name ChangeSS.opt.keepEmptyResult
+ * @type boolean
+ */
 Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
   set: function (v) {
     keepEmptyResult = !!v;
@@ -11,8 +15,9 @@ Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
   }});
 /**
  * @function
- * @param  $vars {Object}
- * @return {Array<{selector:string,rules:Object,spec:Object}>}
+ * @param  {ChangeSS.Scope} scope
+ * @param  {Object} $vars
+ * @return {Array.<{selector:string,rules:Object,spec:Object}>}
  */
 function scopeResolveFunc(scope,$vars) {
   if (!$vars)$vars = {};
@@ -77,6 +82,12 @@ function log() {
   if (ChangeSS.traceLog)
     console.log.apply(console, arguments);
 }
+/**
+ * @name ChangeSS.assign
+ * @param {Object}$param
+ * @param {Object}[$known]
+ * @returns {{$resolved: Object, $unresolved: Object}}
+ */
 function assign ($param, $known) {
   var con,$unknown = mix($param);
   $known = mix($known);
@@ -118,7 +129,7 @@ function assign ($param, $known) {
  * @param paramStack
  * @param $assign
  * @param group
- * @returns Array<{selector:String,rules:Object}>
+ * @returns Array.<ChangeSS.scopeResolveResult>
  */
 function resolveScope(scope, paramStack, $assign,group) {
   var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
@@ -130,6 +141,10 @@ function resolveScope(scope, paramStack, $assign,group) {
     else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
   });
   r = [
+  /**
+   * @name ChangeSS.scopeResolveResult
+   * @type {{rules:Object,selector:String}}
+   */
     {rules: ruleObj, selector: selector}
   ];
   objForEach(scope.includes, function ( invokeParam,key) {

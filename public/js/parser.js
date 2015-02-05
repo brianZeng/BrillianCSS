@@ -394,12 +394,35 @@ function popUntil(lexer,state){
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
-  function main(input, opt) {
-    opt = opt || {keepResults: false};
-    return evalInput(input, opt.keepResults).map(function (sheet) {
+  /**
+   * @name ChangeSS.parseOptions
+   * @type {{lib: Array.<ChangeSS.Sheet>}}
+   */
+  var defOpt={lib:[]};
+
+  /**
+   * @namespace ChangeSS
+   * @global
+   * @param   {string}source
+   * @param   {ChangeSS.parseOptions|Object}[opt]
+   * @returns {string}
+   */
+  function main(source, opt) {
+    return parseAndLink(source,opt||defOpt).map(function (sheet) {
       return sheet.toString();
     }).join('\n');
   }
+  /**
+   * @name ChangeSS.parse
+   * @param {String}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  main.parse=function(source,opt){
+    clear();
+    return parseAndMerge(source,opt);
+  };
+  main.compile=parseAndLink;
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
@@ -408,16 +431,8 @@ ChangeSS = (function (parser) {
     }
   };
   parser.yy.parseError=parser.parseError=function(errStr,err){
-    debugger;
     main.error.parseError(errStr,err);
   };
-
-
-  main.eval = evalInput;
-
-
-  main.merge = merge;
-
   main.get = function (name, type) {
     name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
@@ -432,20 +447,35 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
+  main.add = function (something, value) {
+    if (something instanceof Sheet) setter.sheet(something);
+    else if (something instanceof Var) setter.Var(something, value);
+    return this;
+  };
+  /**
+   * @name ChangeSS.opt
+   * @type {{
+   * addKeyFramesVendorPrefix: boolean,
+   * preferKeyFramesVendorPrefix: boolean,
+   * vendorPrefix:string,
+   * defaultSheetName:string
+   * }}
+   */
   main.opt = {
     addKeyFramesVendorPrefix:true,
-    preferKeyFramesVendorPrefix:true
-  };
-  main.opt.vendorPrefix=(function(){
-    if(typeof window!=="undefined"&&window.getComputedStyle){
-      for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
-        if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+    preferKeyFramesVendorPrefix:true,
+    defaultSheetName:'default',
+    vendorPrefix:(function(){
+      if(typeof window!=="undefined"&&window.getComputedStyle){
+        for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
+          if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+        }
+        if(pre)return pre[1];
+        return styles.OLink? 'o':'';
       }
-      if(pre)return pre[1];
-      return styles.OLink? 'o':'';
-    }
-    return '';
-  })();
+      return '';
+    })()
+  };
   getter = {
     sheet: function (name) {
       name = name || main.opt.defaultSheetName;
@@ -480,38 +510,51 @@ ChangeSS = (function (parser) {
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
-  main.parse = parseInput;
+  return main;
+
   function parseInput(input) {
-    var range, r,i=input.indexOf('@sheetname');
-    if(i==-1)
-      r=[input];
-    else{
-      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
-      r=[];
-      while (range=sheetSplitReg.exec(input)[0])
-        r.push(range);
-      sheetSplitReg.exec();
-    }
-    return r.map(parseSheet);
+    var results=[];
+    if(input instanceof Array)
+      input.forEach(loadFile);
+    else if(typeof input==="string") loadFile(input);
+    return results.map(parseSheet);
     function parseSheet(src){
       return parser.parse(src).validate()
     }
+    function loadFile(input){
+      var range,i=input.indexOf('@sheetname');
+      if(i==-1)
+        results.push(input);
+      else{
+        if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+        while (range=sheetSplitReg.exec(input)[0])
+          results.push(range);
+        sheetSplitReg.exec();
+      }
+      return results;
+    }
   }
 
-  main.add = function (something, value) {
-    if (something instanceof Sheet) setter.sheet(something);
-    else if (something instanceof Var) setter.Var(something, value);
-    return this;
-  };
 
-  return main;
-  function evalInput(input, keep) {
-    if (!keep)clear();
+  function parseAndMerge(source,opt){
     var results = List();
-    parseInput(input).forEach(function (sheet) {
+    parseInput(source).forEach(function (sheet) {
       results.add(merge(sheet));
     });
-    ChangeSS.link(results);
+    return results;
+  }
+  /**
+   * @name ChangeSS.compile
+   * @param {string}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  function parseAndLink(source, opt) {
+    var results,lib;
+    clear();
+    if(opt&&(lib=opt.lib))
+      lib.forEach(function(sheet){merge(sheet.clone());});
+    ChangeSS.link(results=parseAndMerge(source,opt));
     return results;
   }
   function clear() {
@@ -521,12 +564,8 @@ ChangeSS = (function (parser) {
     if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
     else throw 'not implement';
   }
-
-
 })(parser);
-ChangeSS.opt.defaultSheetName = 'default';
 ChangeSS.assign = assign;
-
 ChangeSS.traceLog = true;
 function mix() {
   for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
@@ -554,6 +593,11 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
+/**
+ * @enum {string}
+ * @name ChangeSS.TYPE
+ * @type {{NONE: string, EXP: string, VAR: string, LENGTH: string, FUNC: string, KEYWORD: string, LIST: string}}
+ */
 var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
@@ -563,6 +607,12 @@ var TYPE=ChangeSS.TYPE = {
   KEYWORD: 'keyword',
   LIST: 'list'
 };
+/**
+ * @name ChangeSS.getType
+ * @param {*}side
+ * @param {boolean}[asNone]
+ * @returns {String|Error}
+ */
 ChangeSS.getType = function (side, asNone) {
   var type;
   if (!side)return TYPE.NONE;
@@ -571,7 +621,8 @@ ChangeSS.getType = function (side, asNone) {
   else if (asNone)return TYPE.NONE;
   throw  Error('unknown type');
 };
-if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;
+if(typeof module!=="undefined" && module.exports)
+  module.exports=ChangeSS;
 /**
  * Created by 柏然 on 2014/11/1.
  */
@@ -740,6 +791,7 @@ Var.prototype = (function (TYPE) {
 ChangeSS.Var = Var;/**
  * Created by 柏然 on 2014/11/1.
  */
+//TODO add no default
 function Exp(left, optor, right) {
   if (!(this instanceof Exp))return new Exp(left, optor, right);
   this.left = left;
@@ -1168,6 +1220,10 @@ List.prototype = (function (proto) {
 ChangeSS.List = List;/**
  * Created by 柏然 on 2014/11/1.
  */
+/**
+ * @namespace ChangeSS.Scope
+ * @constructor
+ */
 function Scope() {
   this.staticRules = {};
   this.dynamicRules = {};
@@ -1336,7 +1392,7 @@ Scope.prototype = {
       return this.selectors;
     }
     function replaceSelector(childSlt,parentSlt){
-      if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
+      if(childSlt.indexOf('&')==-1) childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
     }
     function retraceSelector(childSlt,parentSlt){
@@ -1380,12 +1436,11 @@ Scope.prototype = {
       this[key] = value.clone ? value.clone(true) : value;
     }
     return function () {
-      var r = new Scope();
+      var r = new Scope(),self=this;
       r.validateSelector();
-      objForEach(this.staticRules, onPair, r.staticRules);
-      objForEach(this.dynamicRules, onPair, r.dynamicRules);
-      objForEach(this.defValues, onPair, r.defValues);
-      objForEach(this.includes, onPair, r.includes);
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        objForEach(self[key],onPair,r[key]);
+      });
       r.nested = this.nested.map(function (scope) {
         return scope.clone();
       });
@@ -1459,11 +1514,12 @@ Style.prototype = (function (scopeProto) {
 
   proto.addScope = function (scope) {
     if (scope instanceof Scope) {
-      this.defValues = mix(this.defValues, scope.defValues);
-      this.staticRules = mix(this.staticRules, scope.staticRules);
-      this.dynamicRules = mix(this.dynamicRules, scope.dynamicRules);
-      this.includes = mix(this.includes, scope.includes);
+      var self=this;
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        self[key]=mix(self[key],scope[key]);
+      });
       this.exts.push.apply(this.exts, scope.exts);
+      ['validateSelector','backtraceSelector'].forEach(function(key){self[key]=scope[key]});
       for (var i = 0, ns = scope.nested, children = this.nested, child = ns[0]; child; child = ns[++i])
         children.push(child);
     }
@@ -1490,6 +1546,10 @@ Style.prototype = (function (scopeProto) {
  * Created by 柏子 on 2015/1/14.
  */
 var keepEmptyResult = false;
+/**
+ * @name ChangeSS.opt.keepEmptyResult
+ * @type boolean
+ */
 Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
   set: function (v) {
     keepEmptyResult = !!v;
@@ -1499,8 +1559,9 @@ Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
   }});
 /**
  * @function
- * @param  $vars {Object}
- * @return {Array<{selector:string,rules:Object,spec:Object}>}
+ * @param  {ChangeSS.Scope} scope
+ * @param  {Object} $vars
+ * @return {Array.<{selector:string,rules:Object,spec:Object}>}
  */
 function scopeResolveFunc(scope,$vars) {
   if (!$vars)$vars = {};
@@ -1565,6 +1626,12 @@ function log() {
   if (ChangeSS.traceLog)
     console.log.apply(console, arguments);
 }
+/**
+ * @name ChangeSS.assign
+ * @param {Object}$param
+ * @param {Object}[$known]
+ * @returns {{$resolved: Object, $unresolved: Object}}
+ */
 function assign ($param, $known) {
   var con,$unknown = mix($param);
   $known = mix($known);
@@ -1606,7 +1673,7 @@ function assign ($param, $known) {
  * @param paramStack
  * @param $assign
  * @param group
- * @returns Array<{selector:String,rules:Object}>
+ * @returns Array.<ChangeSS.scopeResolveResult>
  */
 function resolveScope(scope, paramStack, $assign,group) {
   var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
@@ -1618,6 +1685,10 @@ function resolveScope(scope, paramStack, $assign,group) {
     else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
   });
   r = [
+  /**
+   * @name ChangeSS.scopeResolveResult
+   * @type {{rules:Object,selector:String}}
+   */
     {rules: ruleObj, selector: selector}
   ];
   objForEach(scope.includes, function ( invokeParam,key) {
@@ -1662,6 +1733,11 @@ function objNotEmpty(obj) {
 }
 /**
  * Created by 柏然 on 2014/11/1.
+ */
+/**
+ * @namespace ChangeSS.Sheet
+ * @param {String}name
+ * @constructor
  */
 function Sheet(name) {
   this.name = name || ChangeSS.opt.defaultSheetName;
@@ -2665,7 +2741,7 @@ case 35:return "EOF";
 break;
 }
 },
-rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@treatas\b)/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(::|:(?![^\{]*?[\)\;]([\s\r\n\t\f])*[\}\;])))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
+rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@treatas\b)/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(::|:(?![^\{]*?[\)\;]([\s\r\n\t\f])*[\}\;])))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:(#([0-9a-fA-F])+)|(!\w+))/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18,19,22,23,34,35],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,8,10,12,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,19,22,23,34,35],"inclusive":true}}
 });
 return lexer;

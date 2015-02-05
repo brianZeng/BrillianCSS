@@ -1,6 +1,11 @@
 /**
  * Created by 柏然 on 2014/11/1.
  */
+/**
+ * @namespace ChangeSS.Sheet
+ * @param {String}name
+ * @constructor
+ */
 function Sheet(name) {
   this.name = name || ChangeSS.opt.defaultSheetName;
   this.scopes = [];

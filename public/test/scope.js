@@ -4,7 +4,7 @@
 
 describe('Scope static behaviors', function () {
   function getFirstScope(src) {
-    return ChangeSS.parse(src)[0].validate().scopes[0];
+    return ChangeSS.parse(src)[0].scopes[0];
   }
 
   function getObjLength(obj) {
@@ -40,7 +40,7 @@ describe('Scope static behaviors', function () {
     });
     src = 'div{' + r.join('') + '}';
     it('scope resolves static rules as they are input', function () {
-      var scope = ChangeSS.eval(src)[0].scopes[0];
+      var scope = ChangeSS.compile(src)[0].scopes[0];
       console.log(scope.resolve());
       expect(scope.staticRules).toEqual(rules);
     });
@@ -83,7 +83,6 @@ describe('Scope static behaviors', function () {
         '}';
       //src='form{ &:hover{}}';
       var scope =getFirstSheet(src).scopes[0];
-      debugger;
       expect(scope.nested.length).toBe(4);
     });
     it('a scope can also nest very deep', function () {
@@ -97,6 +96,7 @@ describe('Scope static behaviors', function () {
       ChangeSS.opt.keepEmptyResult = true;
       var scope = getFirstScope(src), r;
       expect((r = scope.resolve())[0].selector.split(',').length).toBe(2);
+      debugger;
       expect(r[1].selector.split(',').length).toBe(4);
       expect(r[2].selector.split(',').length).toBe(8);
       src = 'ul{&:hover{}}';
@@ -112,7 +112,7 @@ describe('Scope static behaviors', function () {
     var sheets, src;
 
     function getSheets() {
-      return sheets = ChangeSS.eval(src);
+      return sheets = ChangeSS.compile(src);
     }
 
     it('can be separeted by @sheetname,@sheetname must be the first line of the sheet', function () {
@@ -182,7 +182,21 @@ describe('Scope static behaviors', function () {
       expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
     });
   });
-  describe('4.backtrackSelector',function(){
+  describe('4.validate Selector',function(){
+    var src='div{p{.mo &{}}}';
+    var scope=getFirstScope(src),child=scope.nested[0],grandchild=child.nested[0];
+    it('only validate onece',function(){
+      expect(child.selector).toBe('div p');
+      expect(grandchild.selector).toBe('.mo div p');
+      scope.validateSelector();
+      expect(child.selector).toBe('div p');
+      expect(grandchild.selector).toBe('.mo div p');
+    });
+    it('restore selector when backtracked',function(){
+      scope.backtraceSelector();
+      expect(child.selector).toBe('p');
+      expect(grandchild.selector).toBe('.mo &');
+    })
 
   });
 });

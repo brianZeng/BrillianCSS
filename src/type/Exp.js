@@ -1,6 +1,7 @@
 /**
  * Created by 柏然 on 2014/11/1.
  */
+//TODO add no default
 function Exp(left, optor, right) {
   if (!(this instanceof Exp))return new Exp(left, optor, right);
   this.left = left;

@@ -1,7 +1,8 @@
+var fs=require('fs'),path=require('path');
 
 module.exports=function(grunt){
- var interpreter=require('./lib/changess');
- grunt.registerMultiTask('changess','complie Changess Files to css',function(){
+  var interpreter=require('./lib/changess'),libSheets=interpreter.parse(readSrcLib());
+  grunt.registerMultiTask('changess','complie Changess Files to css',function(){
    var opt=this.options({keepEmptyResult:false});
     interpreter.opt.keepEmptyResult=opt.keepEmptyResult;
     this.files.forEach(function(f){
@@ -14,8 +15,14 @@ module.exports=function(grunt){
           contents.push(grunt.file.read(filepath));
         }
       });
-      grunt.file.write(f.dest,interpreter(contents.join('')));
+      grunt.file.write(f.dest,interpreter(contents.join(''),{lib:libSheets}));
       grunt.log.writeln('File ' + f.dest + ' created.');
     });
   });
-}
+  function readSrcLib(){
+    var srcPath='./src',files=fs.readdir(srcPath);
+    return files.map(function(file){
+      return grunt.file.read(path.join(srcPath,file))
+    }).join('');
+  }
+};

@@ -3,12 +3,35 @@
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
-  function main(input, opt) {
-    opt = opt || {keepResults: false};
-    return evalInput(input, opt.keepResults).map(function (sheet) {
+  /**
+   * @name ChangeSS.parseOptions
+   * @type {{lib: Array.<ChangeSS.Sheet>}}
+   */
+  var defOpt={lib:[]};
+
+  /**
+   * @namespace ChangeSS
+   * @global
+   * @param   {string}source
+   * @param   {ChangeSS.parseOptions|Object}[opt]
+   * @returns {string}
+   */
+  function main(source, opt) {
+    return parseAndLink(source,opt||defOpt).map(function (sheet) {
       return sheet.toString();
     }).join('\n');
   }
+  /**
+   * @name ChangeSS.parse
+   * @param {String}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  main.parse=function(source,opt){
+    clear();
+    return parseAndMerge(source,opt);
+  };
+  main.compile=parseAndLink;
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
@@ -17,16 +40,8 @@ ChangeSS = (function (parser) {
     }
   };
   parser.yy.parseError=parser.parseError=function(errStr,err){
-    debugger;
     main.error.parseError(errStr,err);
   };
-
-
-  main.eval = evalInput;
-
-
-  main.merge = merge;
-
   main.get = function (name, type) {
     name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
@@ -41,20 +56,35 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
+  main.add = function (something, value) {
+    if (something instanceof Sheet) setter.sheet(something);
+    else if (something instanceof Var) setter.Var(something, value);
+    return this;
+  };
+  /**
+   * @name ChangeSS.opt
+   * @type {{
+   * addKeyFramesVendorPrefix: boolean,
+   * preferKeyFramesVendorPrefix: boolean,
+   * vendorPrefix:string,
+   * defaultSheetName:string
+   * }}
+   */
   main.opt = {
     addKeyFramesVendorPrefix:true,
-    preferKeyFramesVendorPrefix:true
-  };
-  main.opt.vendorPrefix=(function(){
-    if(typeof window!=="undefined"&&window.getComputedStyle){
-      for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
-        if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+    preferKeyFramesVendorPrefix:true,
+    defaultSheetName:'default',
+    vendorPrefix:(function(){
+      if(typeof window!=="undefined"&&window.getComputedStyle){
+        for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
+          if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+        }
+        if(pre)return pre[1];
+        return styles.OLink? 'o':'';
       }
-      if(pre)return pre[1];
-      return styles.OLink? 'o':'';
-    }
-    return '';
-  })();
+      return '';
+    })()
+  };
   getter = {
     sheet: function (name) {
       name = name || main.opt.defaultSheetName;
@@ -89,38 +119,51 @@ ChangeSS = (function (parser) {
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
-  main.parse = parseInput;
+  return main;
+
   function parseInput(input) {
-    var range, r,i=input.indexOf('@sheetname');
-    if(i==-1)
-      r=[input];
-    else{
-      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
-      r=[];
-      while (range=sheetSplitReg.exec(input)[0])
-        r.push(range);
-      sheetSplitReg.exec();
-    }
-    return r.map(parseSheet);
+    var results=[];
+    if(input instanceof Array)
+      input.forEach(loadFile);
+    else if(typeof input==="string") loadFile(input);
+    return results.map(parseSheet);
     function parseSheet(src){
       return parser.parse(src).validate()
     }
+    function loadFile(input){
+      var range,i=input.indexOf('@sheetname');
+      if(i==-1)
+        results.push(input);
+      else{
+        if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+        while (range=sheetSplitReg.exec(input)[0])
+          results.push(range);
+        sheetSplitReg.exec();
+      }
+      return results;
+    }
   }
 
-  main.add = function (something, value) {
-    if (something instanceof Sheet) setter.sheet(something);
-    else if (something instanceof Var) setter.Var(something, value);
-    return this;
-  };
 
-  return main;
-  function evalInput(input, keep) {
-    if (!keep)clear();
+  function parseAndMerge(source,opt){
     var results = List();
-    parseInput(input).forEach(function (sheet) {
+    parseInput(source).forEach(function (sheet) {
       results.add(merge(sheet));
     });
-    ChangeSS.link(results);
+    return results;
+  }
+  /**
+   * @name ChangeSS.compile
+   * @param {string}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  function parseAndLink(source, opt) {
+    var results,lib;
+    clear();
+    if(opt&&(lib=opt.lib))
+      lib.forEach(function(sheet){merge(sheet.clone());});
+    ChangeSS.link(results=parseAndMerge(source,opt));
     return results;
   }
   function clear() {
@@ -130,12 +173,8 @@ ChangeSS = (function (parser) {
     if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
     else throw 'not implement';
   }
-
-
 })(parser);
-ChangeSS.opt.defaultSheetName = 'default';
 ChangeSS.assign = assign;
-
 ChangeSS.traceLog = true;
 function mix() {
   for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
@@ -163,6 +202,11 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
+/**
+ * @enum {string}
+ * @name ChangeSS.TYPE
+ * @type {{NONE: string, EXP: string, VAR: string, LENGTH: string, FUNC: string, KEYWORD: string, LIST: string}}
+ */
 var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
@@ -172,6 +216,12 @@ var TYPE=ChangeSS.TYPE = {
   KEYWORD: 'keyword',
   LIST: 'list'
 };
+/**
+ * @name ChangeSS.getType
+ * @param {*}side
+ * @param {boolean}[asNone]
+ * @returns {String|Error}
+ */
 ChangeSS.getType = function (side, asNone) {
   var type;
   if (!side)return TYPE.NONE;
@@ -180,4 +230,5 @@ ChangeSS.getType = function (side, asNone) {
   else if (asNone)return TYPE.NONE;
   throw  Error('unknown type');
 };
-if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;
+if(typeof module!=="undefined" && module.exports)
+  module.exports=ChangeSS;

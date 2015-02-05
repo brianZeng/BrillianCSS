@@ -1,17 +1,29 @@
-$top-color:red;
-$bottom-color:orange;
-button{
-  background:linear-gradient($top-color 5%,$bottom-color 100%);
-  &:hover{
-    background: gray;
+$text-red:#c92200;
+$text-blue:#14396a;
+$text-green:#306108;
+.text-red{
+  color:$text-red;
+}
+.text-blue{
+  color:$text-blue;
+}
+.text-green{
+  color:$text-green;
+}
+button.leaf{
+  &.data{
+    background: linear-gradient(#f0c911 5%, #f2ab1e 100% );
+    @extend .text-red;
+    border-color:#e65f44 ;
   }
- }
-div{
-  &:first-child{
-    color: red;
-    left: 0
+  &.control{
+    background:linear-gradient(#77d42a 5%, #5cb811 100% );
+    @extend  .text-green;
+    border-color: #268a16;
   }
-  &:nth-child(2n+3){
-    counter-reset: none;
+  &.remove{
+    background:linear-gradient(#63b8ee 5%, #468ccf 100% );
+    @extend .text-blue;
+    color:#14396a;
   }
 }
