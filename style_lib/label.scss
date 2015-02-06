@@ -1,0 +1,68 @@
+@sheetname labelLib;
+$normal-color:#ccc;
+$danger-color:#d9534f;
+$success-color:#77d42a;
+$warning-color:#f0ad4e;
+$info-color:#5bc0de;
+$primary-color:#337ab7;
+$black-text:#000;
+$white-text:#fff;
+$default-font-size:75%;
+@mixin $label-danger($font-size:$default-font-size){
+  @include $label-theme($background:$danger-color);
+  @include $label-layout($font-size:$font-size);
+}
+@mixin $label-info($font-size:$default-font-size){
+  @include $label-theme($background:$info-color);
+  @include $label-layout($font-size:$font-size);
+}
+@mixin $label-primary($font-size:$default-font-size){
+  @include $label-theme($background:$primary-color);
+  @include $label-layout($font-size:$font-size);
+}
+@mixin $label-warning($font-size:$default-font-size){
+  @include $label-theme($background:$warning-color);
+  @include $label-layout($font-size:$font-size);
+}
+@mixin $label-success($font-size:$default-font-size){
+  @include $label-theme($background:$success-color);
+  @include $label-layout($font-size:$font-size);
+}
+@mixin $label-normal($font-size:$default-font-size){
+  @include $label-theme($background:$normal-color);
+  @include $label-layout($text-color:#000;$font-size:$font-size);
+}
+@mixin $label-theme($background:#999){
+  background:$background;
+&[href] {
+  &:hover,
+  &:focus {
+    background-color: darken($background, 10%);
+  }
+}
+}
+@mixin $label-layout($text-color:$white-text;$font-size:$default-font-size) {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: $font-size;
+  font-weight: bold;
+  line-height: 1;
+  color: $text-color;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+
+  // [converter] extracted a& to a.label
+
+  // Empty labels collapse automatically (not available in IE8)
+  &:empty {
+    display: none;
+  }
+
+  // Quick fix for labels in buttons
+  .btn & {
+    position: relative;
+    top: -1px;
+  }
+}

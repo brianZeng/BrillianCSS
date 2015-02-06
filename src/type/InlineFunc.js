@@ -20,8 +20,13 @@ InlineFunc.prototype = {
     func = InlineFunc.Func[name];
     if (!(v instanceof List))v = new List(v);
     if (func && v.canResolve($vars)){
-      ret=func.apply(ChangeSS, v.filter(filterComma));
-      ret=Length.parse(ret)||ret;
+      try{
+        ret=func.apply(ChangeSS, v.filter(filterComma));
+        ret=Length.parse(ret)||ret;
+      }
+      catch (ex){
+        ret=ex.message;
+      }
       if(ChangeSS.getType(ret,true)==TYPE.NONE){
         log('function:'+name+' return :'+ret+' with arguments:'+ v.join(' '));
         return ret+'';

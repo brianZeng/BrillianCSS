@@ -66,12 +66,14 @@ $theme-color:$primary-color;$text-color:$white-text;){
 $theme-color:#ccc;
 $background:linear-gradient($theme-color 5%,darken($theme-color 10) 100%);
 $border:1px solid $border-color;
-$border-color:desaturate($text-color,10);
-$hover-background:saturate($theme-color,5);
+$border-color:darken($theme-color,30);
+$hover-color:saturate($theme-color,5);
+$hover-background:linear-gradient($hover-color 5%,$hover-color 100%);
 $text-color:#333){
   background:$background;
   border:$border;
   color:$text-color;
+  @include $transition ->prefixLib($value:background ease-in-out 0.5s);
   &:hover{
     background: $hover-background;
   }

@@ -63,15 +63,18 @@ function hsla(h,s,l,a){
 Color.formKeyword=function(key){
   throw Error('do not support');
 };
+var ColorFuncs;
 // from less.js
-objForEach({
+objForEach(ColorFuncs={
   rgba:function(r,g,b,a){
-    if(arguments.length==2){
-      r=Color.parse(r);
-      r.alpha=g;
-      return r;
-    }
+    if(arguments.length==2)
+      return ColorFuncs.alpha(r,g);
     return new Color([r,g,b],a==undefined?1:a);
+  },
+  alpha:function(color,a){
+    color=Color.parse(color);
+    color.alpha=a;
+    return color;
   },
   rgb:function(r,g,b){
     return new Color([r,g,b],1)

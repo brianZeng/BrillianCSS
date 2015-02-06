@@ -44,3 +44,24 @@ button.primary{
     @include $input-normal ->txtInputLib;
   }
 }
+label.normal{
+  @include $label-normal -> labelLib($font-size:100%);
+}
+label.danger{
+  @include $label-danger -> labelLib($font-size:100%);
+}
+label.primary{
+  @include $label-primary -> labelLib($font-size:100%);
+}
+label.success{
+  @include $label-success -> labelLib($font-size:100%);
+}
+label.warning{
+  @include $label-warning -> labelLib($font-size:100%);
+}
+label.info{
+  @include $label-info -> labelLib($font-size:100%);
+}
+label{
+  margin: 10px;
+}
