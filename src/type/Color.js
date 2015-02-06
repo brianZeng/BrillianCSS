@@ -11,6 +11,7 @@ function Color(rgb,a){
 }
 ChangeSS.Color=Color;
 Color.parse=function(hex){
+  if(hex instanceof Color)return hex;
   return (typeof hex=="string"&&hex[0]=='#')? hex2color(hex):undefined;
 };
 function len2num(num,asFloat){
@@ -25,7 +26,8 @@ function clamp(v, min,max) {
 }
 function hex2color(hex){
   var rgb=new Array(3);
-  if(/#[a-f0-9]{6}/.test(hex)){
+  hex=hex.toLowerCase();
+  if(/#[a-f0-9]{6}/i.test(hex)){
     for(var off=0;off<3;off++)
       rgb[off]=parseInt(hex.substr(1+off*2,2),16);
   }
@@ -64,6 +66,11 @@ Color.formKeyword=function(key){
 // from less.js
 objForEach({
   rgba:function(r,g,b,a){
+    if(arguments.length==2){
+      r=Color.parse(r);
+      r.alpha=g;
+      return r;
+    }
     return new Color([r,g,b],a==undefined?1:a);
   },
   rgb:function(r,g,b){
@@ -125,7 +132,7 @@ Color.prototype={
       }).join('');
   },
   toRGBA:function(){
-    return 'rgba('+this.rgb.join(',')+','+this.alpha+')';
+    return 'rgba('+this.rgb.map(Math.round).join(',')+','+this.alpha+')';
   },
   resolve:function(){
     return new Color(this.rgb,this.alpha);

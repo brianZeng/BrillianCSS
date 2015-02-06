@@ -1,0 +1,46 @@
+button{
+  margin: 5px;
+}
+button.normal{
+  @include $button-normal -> btnLib;
+}
+button.success{
+  @include $button-success ->btnLib;
+}
+button.warning{
+  @include $button-warning ->btnLib;
+}
+button.danger{
+   @include $button-danger ->btnLib;
+ }
+button.info{
+  @include $button-info ->btnLib;
+}
+button.primary{
+  @include $button-primary ->btnLib;
+}
+#input-container{
+  span{
+    width: 150px;
+    display: inline-block;
+    margin: 10px;
+  }
+  input.danger{
+    @include $input-danger ->txtInputLib;
+  }
+  input.info{
+    @include $input-info ->txtInputLib;
+  }
+  input.success{
+    @include $input-success ->txtInputLib;
+  }
+  input.warning{
+    @include $input-warning ->txtInputLib;
+  }
+  input.primary{
+    @include $input-primary ->txtInputLib;
+  }
+  input.normal{
+    @include $input-normal ->txtInputLib;
+  }
+}

@@ -167,6 +167,7 @@ sheet:
      SHEET IDENT ';' sheetPart {$$=new Sheet($2).add($4);yy.sheetName=$2;}
     |SHEET IDENT sheetPart {$$=new Sheet($2).add($3);yy.sheetName=$2;}
     |sheetPart             {$$=new Sheet().add($1);yy.sheetName=ChangeSS.opt.defaultSheetName;}
+    |SHEET IDENT ';' "EOF" {return new Sheet($2);}
     |sheet sheetPart       {$1.add($2);}
     |sheet "EOF"           {return $$=$1;}
     ;
