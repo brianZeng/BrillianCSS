@@ -71,9 +71,9 @@ objForEach(ColorFuncs={
       return ColorFuncs.alpha(r,g);
     return new Color([r,g,b],a==undefined?1:a);
   },
-  alpha:function(color,a){
+  transparentize:function(color,a){
     color=Color.parse(color);
-    color.alpha=a;
+    color.alpha=clamp(color.alpha-Length.parse(a).num);
     return color;
   },
   rgb:function(r,g,b){

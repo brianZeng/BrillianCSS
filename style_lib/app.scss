@@ -65,3 +65,28 @@ label.info{
 label{
   margin: 10px;
 }
+#slider-container{
+  input[type='range']{
+    width: 180px;
+    display: inline-block;
+  }
+  input.info{
+    @include $slider-info -> rangeLib;
+  }
+  input.normal{
+    @include $slider-normal -> rangeLib;
+  }
+  input.danger{
+    @include $slider-danger -> rangeLib;
+  }
+  input.success{
+    @include $slider-success -> rangeLib;
+  }
+  input.warning{
+    @include $slider-warning -> rangeLib;
+  }
+  input.primary{
+    @include $slider-primary -> rangeLib;
+  }
+}
+
