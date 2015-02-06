@@ -78,10 +78,16 @@ describe('cross sheet behaviors', function () {
       src='@sheetname lib;$color:#ff0000;' +
       '@mixin $red-gradient($gradient:linear-gradient($color 5%,darken($color,20) 100%);){color:$gradient};' +
       '@sheetname default;p{@include $red-gradient->lib;}';
+      var linear=ChangeSS.parse('$test-gradient:linear-gradient(#f00 5%,darken(#f00,20) 100%);')[0].vars['$test-gradient'];
       var sheets=ChangeSS.compile(src),libSheet=ChangeSS.get('lib'),appSheet=ChangeSS.get('default');
       var mixin=libSheet.mixins['$red-gradient'];
       expect(mixin.defValues['$gradient'].param[0].sheetName).toBe('lib');
-      debugger;
+      expect(appSheet.scopes[0].resolve()[0]).toEqual({
+        selector:'p',
+        rules:{
+          color:linear+''
+        }
+      })
     })
   });
   describe('c.extends style in another sheet', function () {

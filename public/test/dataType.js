@@ -159,6 +159,7 @@ describe("Basic Type Behaviors", function () {
     it('parse hex string',function(){
       var c1=Color([124,22,255]);
       expect(Color.parse(c1.toString())).toEqual(c1);
+      expect(Color('#fb0')).toEqual(Color([255,187,0]));
     });
     it('format to rgba if a!==1',function(){
       var c1=Color([23,44,123],0.5);

@@ -30,7 +30,7 @@ function hex2color(hex){
       rgb[off]=parseInt(hex.substr(1+off*2,2),16);
   }
   else if(/#[a-f0-9]{3}/i.test(hex)){
-    for(var i= 1,char=hex[i];i<4;i++)
+    for(var i= 1,char=hex[i];i<4;char=hex[++i])
       rgb[i-1]=parseInt(char+char,16);
   }
   else throw Error('invalid hex color');
@@ -120,6 +120,7 @@ Color.prototype={
  },
   toHex:function(){
     return '#' + this.rgb.map(function (c) {
+        c=parseInt(c);
         return (c < 16 ? '0' : '') + c.toString(16);
       }).join('');
   },

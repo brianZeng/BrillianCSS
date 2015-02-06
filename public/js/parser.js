@@ -1093,7 +1093,7 @@ function hex2color(hex){
       rgb[off]=parseInt(hex.substr(1+off*2,2),16);
   }
   else if(/#[a-f0-9]{3}/i.test(hex)){
-    for(var i= 1,char=hex[i];i<4;i++)
+    for(var i= 1,char=hex[i];i<4;char=hex[++i])
       rgb[i-1]=parseInt(char+char,16);
   }
   else throw Error('invalid hex color');
@@ -1183,6 +1183,7 @@ Color.prototype={
  },
   toHex:function(){
     return '#' + this.rgb.map(function (c) {
+        c=parseInt(c);
         return (c < 16 ? '0' : '') + c.toString(16);
       }).join('');
   },
@@ -1439,11 +1440,14 @@ Scope.prototype = {
     return (this.symbol || this.selector) + '->' + sheetName;
   },
   setSheetName: function (name) {
-    this.sheetName = name;
-    objForEach(this.defValues,function(value,key){
+    this.sheetName = name;var globalPointer='->'+name;
+    objForEach(this.defValues,function(value){
       if(value instanceof Var&&!value.sheetName){
         value.sheetName=name;
       }
+    });
+    objForEach(this.includes,function(inc){
+      objForEach(inc,function(value,key){inc[key.replace(globalPointer,'')]=value;})
     });
     this.nested.forEach(function (s) {
       s.setSheetName(name)
@@ -1492,8 +1496,7 @@ Scope.prototype = {
     if (typeof objOrkey == "string") {
       if (value instanceof List && value.length == 1)value = value[0];
       else if (value.resolve) v = value.resolve();
-      if((i=objOrkey.indexOf('->'))>-1)objOrkey=objOrkey.substring(0,i).trim();
-      this.defValues[objOrkey] = Length.parse(v) || value;
+      this.defValues[getVarLocalName(objOrkey)] = Length.parse(v) || value;
     }
     else objForEach(objOrkey, function (v,key) {
       this.addDefValues(key, v);
@@ -1659,6 +1662,10 @@ Scope.prototype = {
     return scopeResolveFunc(this,$vars);
   }
 };
+function getVarLocalName(name){
+  var i;
+  return (i=name.indexOf('->'))==-1? name:name.substring(0,i).trim();
+}
 ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
   Scope.apply(this);

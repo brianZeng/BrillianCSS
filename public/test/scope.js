@@ -138,10 +138,11 @@ describe('Scope static behaviors', function () {
         return sheet.get('$color')
       })).toEqual(['red', 'blue']);
     });
-    it('can assign a value or mixin to another sheet var', function () {
+    it('cannot assign a value or mixin to another sheet var', function () {
       src = '@sheetname foo;$color:red;' +
         '@sheetname bar;$color:blue;' +
         '$color->foo:white;';
+      debugger;
       expect(getSheets().length).toBe(2);
       expect(sheets.map(function (sheet) {
         return sheet.get('$color')
