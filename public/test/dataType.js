@@ -4,7 +4,7 @@
 describe("Basic Type Behaviors", function () {
   var source = '$len:20px;' +
     '$list:20px solid red;' +
-    '$fun:rgb(20,120,20);';
+    '$fun:someFun(20,120,20);';
   var sheet = ChangeSS.compile(source)[0], vars = sheet.vars, len, Fun = ChangeSS.InlineFunc, Var = ChangeSS.Var,
     getType = function (o) {
       return ChangeSS.getType(o);
@@ -91,7 +91,7 @@ describe("Basic Type Behaviors", function () {
     });
   });
   describe('4.InlineFunc behaviors', function () {
-    var paramList = List.fromArray(['220', ',', '12', ',', '23']), func = new Fun('rgb', paramList), varFunc = new Fun('abs', new List(new Var('$unknown')));
+    var paramList = List.fromArray(['220', ',', '12', ',', '23']), func = new Fun('someFun', paramList), varFunc = new Fun('abs', new List(new Var('$unknown')));
     it('InlineFunc reduces to itself with paramList resolved', function () {
       expect(typeof vars['$fun']).toBe("string");
       expect(func.reduce().param.length).toBe(1);
@@ -105,9 +105,15 @@ describe("Basic Type Behaviors", function () {
     });
     it('InlineFunc.toString() can be type of TYPE.KEYWORD or TYPE.FUNC', function () {
       expect(new Fun('pow', new List(new Length('3px'), new Length(2))).resolve().toString()).toBe('9px');
-      expect(func.resolve().toString()).toEqual('rgb(220,12,23)');
       expect(varFunc.toString()).toBe('abs($unknown)');
     });
+    it('resolve to color',function(){
+      var colorFunc=new Fun('rgba', List.fromArray([160,16,2,0.5].map(function(n){return new Length(n)})));
+      expect(colorFunc.resolve()).toEqual({alpha:.5,rgb:[160,16,2]});
+      colorFunc=new Fun('rgb', List.fromArray([11,11,11].map(function(n){return new Length(n)})));
+      expect(colorFunc.resolve()).toEqual({alpha:1,rgb:[11,11,11]});
+
+    })
   });
   describe('5.Exp behaviors', function () {
     function expThen(left, optor, right) {
@@ -148,4 +154,16 @@ describe("Basic Type Behaviors", function () {
       expect(expThen(exp, '+', Var('$a')).reduce()).toEqual(expThen(Length('63px'), '+', Var('$a')));
     });
   });
+  describe('6.colorBehavior',function(){
+    var Color=ChangeSS.Color;
+    it('parse hex string',function(){
+      var c1=Color([124,22,255]);
+      expect(Color.parse(c1.toString())).toEqual(c1);
+    });
+    it('format to rgba if a!==1',function(){
+      var c1=Color([23,44,123],0.5);
+      expect(c1.toString()).toBe('rgba(23,44,123,0.5)');
+    })
+  })
+
 });

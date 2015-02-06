@@ -184,6 +184,15 @@ function mix() {
     });
   return o;
 }
+function arrMap(arr,mapFun,thisObj){
+  var func=mapFun;
+  thisObj=thisObj||arr;
+  if(typeof mapFun=="string")func=function(item){return item[mapFun]};
+  else if(typeof mapFun!=="function")throw Error('type of map function invalid');
+  for(var i= 0,len=arr.length,r=new Array(len);i<len;i++)
+    r[i]=func(arr[i],i,thisObj)
+  return r;
+}
 function objForEach(obj, callback, thisObj, arg) {
   thisObj = thisObj || obj;
   if (typeof obj == "object" && obj)

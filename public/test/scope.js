@@ -57,12 +57,16 @@ describe('Scope static behaviors', function () {
     it('a scope can hold default values', function () {
       var src = 'canvas($width:512px*2;$color:rgb(0,123,0);' +
         '       $border:1 solid black;$display:inline-block;$height:$width){}', scope = getFirstScope(src);
-      expect(scope.defValues).toEqual({
+
+      var toEuqalObj={
         "$width": Length('1024px'),
-        "$color": 'rgb(0,123,0)',
+        "$color": ChangeSS.Color([0,123,0]),
         "$border": List(Length(1), 'solid black'),
         "$display": 'inline-block',
-        "$height": Var('$width')
+        "$height": Var('$width',ChangeSS.opt.defaultSheetName)
+      };
+      Object.getOwnPropertyNames(scope.defValues).forEach(function(key){
+        expect(scope.defValues[key]).toEqual(toEuqalObj[key]);
       });
       src = src.replace('{}', '{&:hover($border:2px solid $hoverColor){}}');
       scope = getFirstScope(src).nested[0];
@@ -96,7 +100,6 @@ describe('Scope static behaviors', function () {
       ChangeSS.opt.keepEmptyResult = true;
       var scope = getFirstScope(src), r;
       expect((r = scope.resolve())[0].selector.split(',').length).toBe(2);
-      debugger;
       expect(r[1].selector.split(',').length).toBe(4);
       expect(r[2].selector.split(',').length).toBe(8);
       src = 'ul{&:hover{}}';
@@ -148,8 +151,8 @@ describe('Scope static behaviors', function () {
         '$color->bar:#000;';
       getSheets();
       expect(sheets.map(function (sheet) {
-        return sheet.get('$color')
-      })).toEqual(['red', '#000']);
+        return sheet.get('$color').toString()
+      })).toEqual(['red',ChangeSS.Color('#000')+'']);
       src = '@sheetname bar;' +
         'div{}' +
         '@sheetname foo;' +

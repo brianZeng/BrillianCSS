@@ -90,8 +90,23 @@ describe('scope resolve behaviors', function () {
     });
     it('2.when invoked with param,the default param of the mixobj will be shadowed', function () {
       var src2 = 'div($borderColor:red;$parentMargin:4px){' +
-        '@include $dashedBorder($borderColor:$borderColor;$borderWidth:2px;$margin:$parentMargin/2);}';
-      expect(getFirstSheetResolvedObj(src+src2)).toEqual({selector: 'div', rules: {border: '2px dashed red', background: 'white', margin: '2px'}});
+        '@include $dashedBorder(' +
+        '$borderColor:$borderColor;' +
+        '$borderWidth:2px;$margin:$parentMargin/2);' +
+        '}' +
+        '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:white;' +
+        '$margin:10px;$borderWidth:1px;$borderColor:gray){' +
+        '    border:$border;' +
+        '    background:$background;' +
+        '    margin:$margin;' +
+        '}';
+      var src3='div($borderColor:red;$margin:4px;$background:red){' +
+        '@include $dashedBorder();}';
+      expect(getFirstSheetResolvedObj(src2)).toEqual({selector: 'div',
+        rules: {border: '2px dashed red', background: 'white', margin: '2px'}});
+      expect(getFirstSheetResolvedObj(src+src3)).toEqual({selector: 'div',
+        rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
+
     });
     it('3.when invoked with a undefined param,the mix obj still use its default param', function () {
       var src2 = 'div($borderColor:red;$parentMargin:4px){' +

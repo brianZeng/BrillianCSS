@@ -6,37 +6,7 @@ function InlineFunc(name, paramList) {
   this.name = name;
   this.param = paramList?(paramList instanceof List? paramList:new List(paramList)):new List();
 }
-var userDefinedFunc;
-objForEach(Math, function (fun, key,def) {
-    if (typeof fun == "function") {
-      var convertArg = def.arg[key], convertRes = def.res[key];
-      this[key] = function (mathArg) {
-        var v = Length.parse(fun.apply(Math, mathArg.map(function (len) {
-          return convertArg ? convertArg(len) : len.num;
-        })), mathArg[0].unit);
-        return convertRes ? convertRes(v) : v;
-      }
-    }
-  },userDefinedFunc=InlineFunc.Func = {},
-(function () {
-    var types = [function (len) {
-      return len.convert('rad')
-    },
-      function (len) {
-        len.convert(len.unit = 'deg', 'rad');
-        return len;
-      },
-      function (len) {
-        len.unit = '';
-        return len;
-      }];
-    return {
-      arg: {sin: types[0], cos: types[0], tan: types[0]},
-      res: {asin: types[1], acos: types[1], atan: types[1], sin: types[2], cos: types[2], tan: types[2]}
-    }
-  })());
-
-//TODO:要把color Function 加入
+var userDefinedFunc=InlineFunc.Func = {};
 InlineFunc.prototype = {
   _type: ChangeSS.TYPE.FUNC,
   get hasVars(){
@@ -50,19 +20,17 @@ InlineFunc.prototype = {
     func = InlineFunc.Func[name];
     if (!(v instanceof List))v = new List(v);
     if (func && v.canResolve($vars)){
-      ret=func.apply(ChangeSS, v.filter(filterCommon));
+      ret=func.apply(ChangeSS, v.filter(filterComma));
       ret=Length.parse(ret)||ret;
       if(ChangeSS.getType(ret,true)==TYPE.NONE){
         log('function:'+name+' return :'+ret+' with arguments:'+ v.join(' '));
         return ret+'';
       }
       return ret;
-      function filterCommon(item,i){
-        return i%2==0;
+      function filterComma(item){
+        //fun(a,b)->arguments:[a,',',b] filter comma
+        return item !=','
       }
-      /* return func(v.map(function (p) {
-       return Length.parse(p.resolve ? p.resolve($vars) : p)
-       })).resolve();*/
     }
     ret = new InlineFunc(this.name, v);
     return v.hasVars ? ret : ret.toString();
@@ -86,12 +54,21 @@ InlineFunc.prototype = {
   get paramString() {
     var v = this.param.toString();
     return '(' + v.replace(/\s+\,\s*/g, ',') + ')';
-  },
-  get paramValue() {
-    var v = this.param.value;
-    return v == undefined ? undefined : '(' + v.replace(/\s+/gi, ',') + ')';
   }
 };
+objForEach({
+  'sin,cos,tan':{
+    args:function(args){return args[0].convert('rad')},
+    res:parseFloat
+  },
+  'asin,acos,atan':{
+    res:function(len){
+      len.convert(len.unit = 'deg', 'rad');
+      return len;
+    }
+  }
+},function(opt,keys){keys.split(',').forEach(function(key){defineMathFunc(opt,key)})});
+objForEach(Math,defineMathFunc);
 function defineFunction(name,func){
  if(typeof name=="function"){
    func=name;
@@ -100,5 +77,21 @@ function defineFunction(name,func){
   if(typeof func!=="function"||!name)throw Error('argument not provided');
   return userDefinedFunc[name]=func;
 }
+function defineMathFunc(opt,name){
+  opt=opt||{};
+  var MathFun=Math[name],convertArgs=opt.args||mapArg,convertResult=opt.res||useFirstArgUnit;
+  if(typeof MathFun==="function"&&!userDefinedFunc[name])
+    defineFunction(name,function(){
+      var args=convertArgs(arguments);
+      if(!(args instanceof Array))args=[args];
+      return convertResult(MathFun.apply(Math,args),arguments);
+    });
+  function mapArg(args){
+    return arrMap(args,'num');
+  }
+  function useFirstArgUnit(item,args){return Length.parse(item,args[0].unit||'')}
+}
 ChangeSS.InlineFunc = InlineFunc;
 ChangeSS.define=defineFunction;
+
+

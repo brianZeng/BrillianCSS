@@ -99,10 +99,11 @@ Scope.prototype = {
     return this;
   },
   addDefValues: function (objOrkey, value) {
-    var v;
+    var v,i;
     if (typeof objOrkey == "string") {
       if (value instanceof List && value.length == 1)value = value[0];
       else if (value.resolve) v = value.resolve();
+      if((i=objOrkey.indexOf('->'))>-1)objOrkey=objOrkey.substring(0,i).trim();
       this.defValues[objOrkey] = Length.parse(v) || value;
     }
     else objForEach(objOrkey, function (v,key) {

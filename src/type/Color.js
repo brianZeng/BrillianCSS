@@ -5,13 +5,17 @@ function Color(rgb,a){
   if(!(this instanceof Color))return new Color(rgb,a);
   if(typeof rgb==="string"&& rgb[0]=='#')return hex2color(rgb);
   if(rgb instanceof Array){
-    this.alpha=len2num(a);
+    this.alpha=a==undefined?1:len2num(a,1);
     this.rgb=rgb.slice(0,3).map(len2num);
   }
 }
-function len2num(num){
+ChangeSS.Color=Color;
+Color.parse=function(hex){
+  return (typeof hex=="string"&&hex[0]=='#')? hex2color(hex):undefined;
+};
+function len2num(num,asFloat){
   if(num instanceof Length) return num.unit=='%'? num.num/100:num.num;
-  else if(typeof num!=Number) return parseInt(num);
+  else if(typeof num!=Number) return asFloat? parseFloat(num):parseInt(num);
   return num;
 }
 function clamp(v, min,max) {
@@ -21,14 +25,13 @@ function clamp(v, min,max) {
 }
 function hex2color(hex){
   var rgb=new Array(3);
-  if(/#[a-f0-9]{3}/i.test(hex)){
-    for(var i= 1,char=hex[i];i<4;i++){
-      rgb[i-1]=parseInt(char+char,16)
-    }
-  }
-  else if(/#[a-f0-9]{6}/.test(hex)){
+  if(/#[a-f0-9]{6}/.test(hex)){
     for(var off=0;off<3;off++)
-      rgb[off]=parseInt(hex.substring(1+off*2));
+      rgb[off]=parseInt(hex.substr(1+off*2,2),16);
+  }
+  else if(/#[a-f0-9]{3}/i.test(hex)){
+    for(var i= 1,char=hex[i];i<4;i++)
+      rgb[i-1]=parseInt(char+char,16);
   }
   else throw Error('invalid hex color');
   return new Color(rgb,1);
@@ -127,7 +130,8 @@ Color.prototype={
     return new Color(this.rgb,this.alpha);
   },
   reduce:function(){return this},
-  hasVars:false,
+  get hasVars(){return false},
+  get value(){return this.toString()},
   toString:function(){
     return this.alpha==1?this.toHex():this.toRGBA();
   }

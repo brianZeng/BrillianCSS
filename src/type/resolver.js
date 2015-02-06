@@ -89,7 +89,7 @@ function log() {
  * @returns {{$resolved: Object, $unresolved: Object}}
  */
 function assign ($param, $known) {
-  var con,$unknown = mix($param);
+  var con,$unknown = mix($param),tem;
   $known = mix($known);
   do {
     con = false;
@@ -109,6 +109,11 @@ function assign ($param, $known) {
           break;
         case TYPE.NONE:
           throw 'unknown type';
+       case TYPE.VAR:
+          tem=value.resolve($known);
+          if(!value.equals(tem))$unknown[key]=tem;
+          else return;
+          break;
         default :
           if (value.canResolve($known))
             $unknown[key] = value.resolve($known);

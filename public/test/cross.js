@@ -74,6 +74,15 @@ describe('cross sheet behaviors', function () {
       });
       containAll(selectors, 'div', '.borderBox,div');
     });
+    it('3.scope default value ref local sheet',function(){
+      src='@sheetname lib;$color:#ff0000;' +
+      '@mixin $red-gradient($gradient:linear-gradient($color 5%,darken($color,20) 100%);){color:$gradient};' +
+      '@sheetname default;p{@include $red-gradient->lib;}';
+      var sheets=ChangeSS.compile(src),libSheet=ChangeSS.get('lib'),appSheet=ChangeSS.get('default');
+      var mixin=libSheet.mixins['$red-gradient'];
+      expect(mixin.defValues['$gradient'].param[0].sheetName).toBe('lib');
+      debugger;
+    })
   });
   describe('c.extends style in another sheet', function () {
     it('1.when extends from another sheet', function () {
