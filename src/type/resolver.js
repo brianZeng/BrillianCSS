@@ -138,41 +138,35 @@ function assign ($param, $known) {
  */
 function resolveScope(scope, paramStack, $assign,group) {
   var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
-    selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
-  if(!selector)return [];
-  objForEach(scope.dynamicRules, function ( rule,key) {
-    if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
-      ruleObj[key] = rule.resolve($resolved).toString();
-    else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
-  });
-  r = [
-  /**
-   * @name ChangeSS.scopeResolveResult
-   * @type {{rules:Object,selector:String}}
-   */
-    {rules: ruleObj, selector: selector}
-  ];
-  objForEach(scope.includes, function ( invokeParam,key) {
-    var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
-    objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
-      if (invokeParam[key])$param[key] = value;
+    selector = scope.selectors.join(','), r=[], $resolved = $vars.$resolved;
+  if(selector){
+    objForEach(scope.includes, function (invokeParam,key) {
+      var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
+      objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
+        if (invokeParam[key])$param[key] = value;
+      });
+      r.push.apply(r,resolveInclude(mixin, $param, selector).filter(function(res){
+        return objNotEmpty(res.rules)
+      }));
     });
-    resolveInclude(mixin, $param, selector).forEach(function (resObj) {
-      if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
+    objForEach(scope.dynamicRules, function ( rule,key) {
+      if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
+        ruleObj[key] = rule.resolve($resolved).toString();
+      else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
     });
-  });
+    r.push(
+      /**
+       * @name ChangeSS.scopeResolveResult
+       * @type {{rules:Object,selector:String}}
+       */
+      {rules: ruleObj, selector: selector}
+    )
+  }
   return r.filter(function (pair) {
     if(group) pair.spec=group;
     return keepEmptyResult || objNotEmpty(pair.rules);
   });
 }
-
-function mergeResult(a, b) {
-  if (objNotEmpty(b.rules))
-    a.rules = mix(b.rules, a.rules);
-  return a;
-}
-
 function resolveInclude(mixObj, $vars, selector) {
   mixObj.selectors = selector.split(',');
   mixObj.validateSelector();

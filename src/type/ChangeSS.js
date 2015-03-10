@@ -150,6 +150,9 @@ ChangeSS = (function (parser) {
     parseInput(source).forEach(function (sheet) {
       results.add(merge(sheet));
     });
+    objForEach(sheetMap,function(sheet){
+     results.add(sheet);
+    });
     return results;
   }
   /**
@@ -162,7 +165,7 @@ ChangeSS = (function (parser) {
     var results,lib;
     clear();
     if(opt&&(lib=opt.lib))
-      lib.forEach(function(sheet){merge(sheet.clone());});
+      lib.forEach(function(sheet){merge(sheet.clone().validate());});
     ChangeSS.link(results=parseAndMerge(source,opt));
     return results;
   }

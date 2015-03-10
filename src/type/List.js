@@ -6,7 +6,7 @@ function List() {
   for (var i = 0, len = arguments.length; i < len; i++)
     this.add(arguments[i]);
 }
-List.addOrMerge = (function () {
+/*List.addOrMerge = (function () {
   function merge(oriItem, newItem) {
     return newItem;
   }
@@ -31,7 +31,7 @@ List.addOrMerge = (function () {
     arr.push(obj);
     return arr;
   }
-})();
+})();*/
 List.arrayAdd = function arrayAdd(array, item) {
   var r = true;
   if (item instanceof Array)

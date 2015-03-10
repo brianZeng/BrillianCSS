@@ -5,6 +5,7 @@ function sheetLinkInternal(sheet){
   var mediaMap=sheet.medias,spec,mediaSymbol,sheetName=sheet.name;
   sheet.scopes.forEach(function (scope) {
     scope.validateSelector();
+    scope.setSheetName(sheetName);
     if(spec=setSpecSheetName(scope))
      if(spec instanceof KeyFrame)
         scope.nested=scope.nested.filter(filterKeyFrame);

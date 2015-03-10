@@ -53,7 +53,17 @@ Sheet.prototype = (function (proto) {
     else throw 'unknown type';
     return this;
   };
-
+  proto.clone=function(){
+    var sheet=new Sheet(this.name),self=this,toMap;
+    ['vars','mixins','medias'].forEach(function(mapName){
+      toMap=sheet[mapName];
+      objForEach(self[mapName],function(value,key){
+        toMap[key]=value.clone? value.clone():value;
+      });
+    });
+    sheet.scopes=this.scopes.map(function(scope){return scope.clone()});
+    return sheet;
+  };
   proto.resolve = function ($vars) {
     return sheetResolveFunc(this,$vars);
   };
@@ -84,7 +94,7 @@ Sheet.prototype = (function (proto) {
       if (s.sheetName)sc.setSheetName(s.sheetName);
       return sc;
     }));
-    this.mixins = mix(this.mixins, sheet.mixins);
+    this.mixins =mix(this.mixins, sheet.mixins);
     this.medias=mix(this.medias,sheet.medias);
     return this;
   };

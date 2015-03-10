@@ -58,6 +58,24 @@ describe('scope resolve behaviors', function () {
       src = '$a:$ref;$ref:red;div{color:$a;}';
       expect(getFirstSheetResolvedObj(src).rules).toEqual({color: 'red'});
     });
+    it('4.use nested & scope for hank',function(){
+      src='div{color:red;&{color:rgba(255,0,0,0.8)}}';
+      var res=getFirstSheet(src).resolve()['*'],rules=res.map(function(r){return r.rules});
+      expect(res.length).toBe(2);
+      expect(res.map(function(r){return r.selector})).toEqual(['div','div']);
+      expect(rules).toContain({color:'red'});
+      expect(rules).toContain({color:'rgba(255,0,0,0.8)'});
+    });
+    it('5.mixin nested & scope for hank',function(){
+      src='@mixin $double{ color:red;&{color:rgba(255,0,0,0.8)} } div{@include $double;}';
+      var res=getFirstSheet(src).resolve()['*'].filter(function(r){
+        return Object.getOwnPropertyNames(r.rules).length>0
+      }),rules=res.map(function(r){return r.rules});
+      expect(res.length).toBe(2);
+      expect(res.map(function(r){return r.selector})).toEqual(['div','div']);
+      expect(rules).toContain({color:'red'});
+      expect(rules).toContain({color:'rgba(255,0,0,0.8)'});
+    });
   });
   describe('b.scope resolves with param use its default var values:', function () {
     var r;

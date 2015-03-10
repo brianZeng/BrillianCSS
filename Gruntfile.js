@@ -35,10 +35,14 @@ module.exports=function(grunt){
            })
          },
          program:{
-           src:'public/js/parser.js',
-           dest:'changess-grunt/tasks/lib/changess.js',
+           files:{
+             'public/js/changess.min.js':'bin/changess.min.js',
+             'changess-grunt/tasks/lib/changess.js':'public/js/changess.min.js'
+           },
            options:{
-             stripBanner:true
+             stripBanner:true,process:function(src){
+               return '(function(){*})()'.replace('*',src)
+             }
            }
          }
        },
@@ -59,8 +63,12 @@ module.exports=function(grunt){
              'public/js/jasmine.min.js':['public/js/jasmine.js'],
              'public/js/ChangSS.min.js':['public/js/parser.js']
            }
+         },
+         changess:{
+           files:{
+             'bin/changess.min.js':['public/js/parser.js']
+           }
          }
-
        },
        changess:{
          dev:{
@@ -75,7 +83,7 @@ module.exports=function(grunt){
      }
    );
   grunt.registerTask('default',['concat','watch','uglify']);
-
+  grunt.registerTask('mini program',['uglify:changess','concat:program'])
   grunt.event.on('watch', function(action, filepath, target) {
     grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
   });

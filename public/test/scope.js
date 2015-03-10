@@ -189,10 +189,12 @@ describe('Scope static behaviors', function () {
   describe('4.validate Selector',function(){
     var src='div{p{.mo &{}}}';
     var scope=getFirstScope(src),child=scope.nested[0],grandchild=child.nested[0];
-    it('only validate onece',function(){
+    it('only validate once',function(){
+      expect(scope.selector).toBe('div');
       expect(child.selector).toBe('div p');
       expect(grandchild.selector).toBe('.mo div p');
       scope.validateSelector();
+      expect(scope._parsedSelector).toEqual(['div']);
       expect(child.selector).toBe('div p');
       expect(grandchild.selector).toBe('.mo div p');
     });

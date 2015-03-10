@@ -547,6 +547,9 @@ ChangeSS = (function (parser) {
     parseInput(source).forEach(function (sheet) {
       results.add(merge(sheet));
     });
+    objForEach(sheetMap,function(sheet){
+     results.add(sheet);
+    });
     return results;
   }
   /**
@@ -559,7 +562,7 @@ ChangeSS = (function (parser) {
     var results,lib;
     clear();
     if(opt&&(lib=opt.lib))
-      lib.forEach(function(sheet){merge(sheet.clone());});
+      lib.forEach(function(sheet){merge(sheet.clone().validate());});
     ChangeSS.link(results=parseAndMerge(source,opt));
     return results;
   }
@@ -1225,7 +1228,7 @@ function List() {
   for (var i = 0, len = arguments.length; i < len; i++)
     this.add(arguments[i]);
 }
-List.addOrMerge = (function () {
+/*List.addOrMerge = (function () {
   function merge(oriItem, newItem) {
     return newItem;
   }
@@ -1250,7 +1253,7 @@ List.addOrMerge = (function () {
     arr.push(obj);
     return arr;
   }
-})();
+})();*/
 List.arrayAdd = function arrayAdd(array, item) {
   var r = true;
   if (item instanceof Array)
@@ -1566,23 +1569,9 @@ Scope.prototype = {
       return this.selectors;
     }
 
-    function backtrackSelector(parentSelectors) {
-      var r, tss;
-      if (parentSelectors) {
-        tss = this.selectors;
-        r = [];
-        parentSelectors.forEach(function (ps) {
-          tss.forEach(function (ts) {
-            r.push(retraceSelector(ts,ps));
-          })
-        });
-        tss = this.selectors;
-        this.selectors = r;
-      } else tss = this.selectors;
-      this.nested.forEach(function (s) {
-        s.backtraceSelector(tss);
-      });
-
+    function backtrackSelector() {
+      this.selectors=this._parsedSelector;
+      this.nested.forEach(function (s) {s.backtraceSelector()});
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
@@ -1592,21 +1581,12 @@ Scope.prototype = {
       if(childSlt.indexOf('&')==-1) childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
     }
-    function retraceSelector(childSlt,parentSlt){
-      if(childSlt[parentSlt.length]==' ')
-        childSlt=childSlt.substring(parentSlt.length+1);
-      var rs=childSlt.split(parentSlt),str,ors=[];
-      for(var i= 0,len=rs.length;i<len;i++)
-        ors.push((str=rs[i])===''?'&':str);
-      ors[0].replace(/^&\s+/,'');
-      return ors.join('');
-    }
 
     function first(parentSelectors) {
       var r, tss;
       if (parentSelectors) {
         r = [];
-        tss = this.selectors;
+        tss =this._parsedSelector= this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
             r.push(replaceSelector(ts,ps));
@@ -1614,11 +1594,12 @@ Scope.prototype = {
         });
         this.selectors = r;
       }
-      else r = this.selectors;
+      else
+        r =this._parsedSelector= this.selectors;
       this.nested.forEach(function (scope) {
         scope.validateSelector(r)
       });
-      this._selector = null;
+      this._selector= null;
       this.validateSelector = second;
       this.backtraceSelector = backtrackSelector;
       return r;
@@ -1634,16 +1615,17 @@ Scope.prototype = {
     }
     return function () {
       var r = new Scope(),self=this;
-      r.validateSelector();
+      if(this._parsedSelector)
+        r.validateSelector();
       ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
         objForEach(self[key],onPair,r[key]);
       });
-      r.nested = this.nested.map(function (scope) {
-        return scope.clone();
-      });
+      r.nested = this.nested.map(function (scope) { return scope.clone(); });
       r.exts = this.exts.slice();
-      r.selectors = this.selectors.slice();
+      r.selectors= this.selectors.slice();
       if(this.spec)r.spec=this.spec;
+      r._parsedSelector=this._parsedSelector;
+      r.setSheetName(this.sheetName);
       return r;
     }
   })(),
@@ -1689,9 +1671,9 @@ function Style(selectors, scope) {
   Scope.apply(this);
   if(selectors instanceof MediaQuery){
     this.selector='&';
-
   }
-  else this.selector = selectors;
+  else
+    this.selector= selectors;
   this.addScope(scope || new Scope());
 }
 
@@ -1720,7 +1702,7 @@ Style.prototype = (function (scopeProto) {
         self[key]=mix(self[key],scope[key]);
       });
       this.exts.push.apply(this.exts, scope.exts);
-      ['validateSelector','backtraceSelector'].forEach(function(key){self[key]=scope[key]});
+      ['validateSelector','backtraceSelector','_parsedSelector'].forEach(function(key){self[key]=scope[key]});
       for (var i = 0, ns = scope.nested, children = this.nested, child = ns[0]; child; child = ns[++i])
         children.push(child);
     }
@@ -1883,41 +1865,35 @@ function assign ($param, $known) {
  */
 function resolveScope(scope, paramStack, $assign,group) {
   var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
-    selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
-  if(!selector)return [];
-  objForEach(scope.dynamicRules, function ( rule,key) {
-    if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
-      ruleObj[key] = rule.resolve($resolved).toString();
-    else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
-  });
-  r = [
-  /**
-   * @name ChangeSS.scopeResolveResult
-   * @type {{rules:Object,selector:String}}
-   */
-    {rules: ruleObj, selector: selector}
-  ];
-  objForEach(scope.includes, function ( invokeParam,key) {
-    var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
-    objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
-      if (invokeParam[key])$param[key] = value;
+    selector = scope.selectors.join(','), r=[], $resolved = $vars.$resolved;
+  if(selector){
+    objForEach(scope.includes, function (invokeParam,key) {
+      var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
+      objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
+        if (invokeParam[key])$param[key] = value;
+      });
+      r.push.apply(r,resolveInclude(mixin, $param, selector).filter(function(res){
+        return objNotEmpty(res.rules)
+      }));
     });
-    resolveInclude(mixin, $param, selector).forEach(function (resObj) {
-      if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
+    objForEach(scope.dynamicRules, function ( rule,key) {
+      if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
+        ruleObj[key] = rule.resolve($resolved).toString();
+      else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
     });
-  });
+    r.push(
+      /**
+       * @name ChangeSS.scopeResolveResult
+       * @type {{rules:Object,selector:String}}
+       */
+      {rules: ruleObj, selector: selector}
+    )
+  }
   return r.filter(function (pair) {
     if(group) pair.spec=group;
     return keepEmptyResult || objNotEmpty(pair.rules);
   });
 }
-
-function mergeResult(a, b) {
-  if (objNotEmpty(b.rules))
-    a.rules = mix(b.rules, a.rules);
-  return a;
-}
-
 function resolveInclude(mixObj, $vars, selector) {
   mixObj.selectors = selector.split(',');
   mixObj.validateSelector();
@@ -1992,7 +1968,17 @@ Sheet.prototype = (function (proto) {
     else throw 'unknown type';
     return this;
   };
-
+  proto.clone=function(){
+    var sheet=new Sheet(this.name),self=this,toMap;
+    ['vars','mixins','medias'].forEach(function(mapName){
+      toMap=sheet[mapName];
+      objForEach(self[mapName],function(value,key){
+        toMap[key]=value.clone? value.clone():value;
+      });
+    });
+    sheet.scopes=this.scopes.map(function(scope){return scope.clone()});
+    return sheet;
+  };
   proto.resolve = function ($vars) {
     return sheetResolveFunc(this,$vars);
   };
@@ -2023,7 +2009,7 @@ Sheet.prototype = (function (proto) {
       if (s.sheetName)sc.setSheetName(s.sheetName);
       return sc;
     }));
-    this.mixins = mix(this.mixins, sheet.mixins);
+    this.mixins =mix(this.mixins, sheet.mixins);
     this.medias=mix(this.medias,sheet.medias);
     return this;
   };
@@ -2054,6 +2040,7 @@ function sheetLinkInternal(sheet){
   var mediaMap=sheet.medias,spec,mediaSymbol,sheetName=sheet.name;
   sheet.scopes.forEach(function (scope) {
     scope.validateSelector();
+    scope.setSheetName(sheetName);
     if(spec=setSpecSheetName(scope))
      if(spec instanceof KeyFrame)
         scope.nested=scope.nested.filter(filterKeyFrame);

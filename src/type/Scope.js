@@ -158,23 +158,9 @@ Scope.prototype = {
       return this.selectors;
     }
 
-    function backtrackSelector(parentSelectors) {
-      var r, tss;
-      if (parentSelectors) {
-        tss = this.selectors;
-        r = [];
-        parentSelectors.forEach(function (ps) {
-          tss.forEach(function (ts) {
-            r.push(retraceSelector(ts,ps));
-          })
-        });
-        tss = this.selectors;
-        this.selectors = r;
-      } else tss = this.selectors;
-      this.nested.forEach(function (s) {
-        s.backtraceSelector(tss);
-      });
-
+    function backtrackSelector() {
+      this.selectors=this._parsedSelector;
+      this.nested.forEach(function (s) {s.backtraceSelector()});
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
@@ -184,21 +170,12 @@ Scope.prototype = {
       if(childSlt.indexOf('&')==-1) childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
     }
-    function retraceSelector(childSlt,parentSlt){
-      if(childSlt[parentSlt.length]==' ')
-        childSlt=childSlt.substring(parentSlt.length+1);
-      var rs=childSlt.split(parentSlt),str,ors=[];
-      for(var i= 0,len=rs.length;i<len;i++)
-        ors.push((str=rs[i])===''?'&':str);
-      ors[0].replace(/^&\s+/,'');
-      return ors.join('');
-    }
 
     function first(parentSelectors) {
       var r, tss;
       if (parentSelectors) {
         r = [];
-        tss = this.selectors;
+        tss =this._parsedSelector= this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
             r.push(replaceSelector(ts,ps));
@@ -206,11 +183,12 @@ Scope.prototype = {
         });
         this.selectors = r;
       }
-      else r = this.selectors;
+      else
+        r =this._parsedSelector= this.selectors;
       this.nested.forEach(function (scope) {
         scope.validateSelector(r)
       });
-      this._selector = null;
+      this._selector= null;
       this.validateSelector = second;
       this.backtraceSelector = backtrackSelector;
       return r;
@@ -226,16 +204,17 @@ Scope.prototype = {
     }
     return function () {
       var r = new Scope(),self=this;
-      r.validateSelector();
+      if(this._parsedSelector)
+        r.validateSelector();
       ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
         objForEach(self[key],onPair,r[key]);
       });
-      r.nested = this.nested.map(function (scope) {
-        return scope.clone();
-      });
+      r.nested = this.nested.map(function (scope) { return scope.clone(); });
       r.exts = this.exts.slice();
-      r.selectors = this.selectors.slice();
+      r.selectors= this.selectors.slice();
       if(this.spec)r.spec=this.spec;
+      r._parsedSelector=this._parsedSelector;
+      r.setSheetName(this.sheetName);
       return r;
     }
   })(),
@@ -281,9 +260,9 @@ function Style(selectors, scope) {
   Scope.apply(this);
   if(selectors instanceof MediaQuery){
     this.selector='&';
-
   }
-  else this.selector = selectors;
+  else
+    this.selector= selectors;
   this.addScope(scope || new Scope());
 }
 
@@ -312,7 +291,7 @@ Style.prototype = (function (scopeProto) {
         self[key]=mix(self[key],scope[key]);
       });
       this.exts.push.apply(this.exts, scope.exts);
-      ['validateSelector','backtraceSelector'].forEach(function(key){self[key]=scope[key]});
+      ['validateSelector','backtraceSelector','_parsedSelector'].forEach(function(key){self[key]=scope[key]});
       for (var i = 0, ns = scope.nested, children = this.nested, child = ns[0]; child; child = ns[++i])
         children.push(child);
     }

@@ -28,7 +28,7 @@ app.use('/home',routes);
 
 app.use('/debug',require('./routes/debug.js'));
 app.use('/users', users);
-app.use('/boottest',require('./routes/bootstrap.js'));
+//app.use('/boottest',require('./routes/bootstrap.js'));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');

@@ -1,0 +1,5 @@
+@sheetname textEffectLib;
+@mixin $blur-text($color:#fff;$radius:0.15em){
+  color:transparent;
+  text-shadow: 0 0 $radius 0.1px $color;
+}

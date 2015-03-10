@@ -8,3 +8,8 @@
   -webkit-box-shadow: $value; // iOS <4.3 & Android <4.1
   box-shadow: $value;
 }
+@mixin $transform($value:none){
+  transform: $value;
+  -webkit-transform: $value;
+  -ms-transform: $value;
+}
