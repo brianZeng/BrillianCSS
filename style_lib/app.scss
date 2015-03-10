@@ -1,0 +1,92 @@
+button{
+  margin: 5px;
+}
+button.normal{
+  @include $button-normal -> btnLib;
+}
+button.success{
+  @include $button-success ->btnLib;
+}
+button.warning{
+  @include $button-warning ->btnLib;
+}
+button.danger{
+   @include $button-danger ->btnLib;
+ }
+button.info{
+  @include $button-info ->btnLib;
+}
+button.primary{
+  @include $button-primary ->btnLib;
+}
+#input-container{
+  span{
+    width: 150px;
+    display: inline-block;
+    margin: 10px;
+  }
+  input.danger{
+    @include $input-danger ->txtInputLib;
+  }
+  input.info{
+    @include $input-info ->txtInputLib;
+  }
+  input.success{
+    @include $input-success ->txtInputLib;
+  }
+  input.warning{
+    @include $input-warning ->txtInputLib;
+  }
+  input.primary{
+    @include $input-primary ->txtInputLib;
+  }
+  input.normal{
+    @include $input-normal ->txtInputLib;
+  }
+}
+label.normal{
+  @include $label-normal -> labelLib($font-size:100%);
+}
+label.danger{
+  @include $label-danger -> labelLib($font-size:100%);
+}
+label.primary{
+  @include $label-primary -> labelLib($font-size:100%);
+}
+label.success{
+  @include $label-success -> labelLib($font-size:100%);
+}
+label.warning{
+  @include $label-warning -> labelLib($font-size:100%);
+}
+label.info{
+  @include $label-info -> labelLib($font-size:100%);
+}
+label{
+  margin: 10px;
+}
+#slider-container{
+  input[type='range']{
+    width: 180px;
+    display: inline-block;
+  }
+  input.info{
+    @include $slider-info -> sliderLib;
+  }
+  input.normal{
+    @include $slider-normal -> sliderLib;
+  }
+  input.danger{
+    @include $slider-danger -> sliderLib;
+  }
+  input.success{
+    @include $slider-success -> sliderLib;
+  }
+  input.warning{
+    @include $slider-warning -> sliderLib;
+  }
+  input.primary{
+    @include $slider-primary -> sliderLib;
+  }
+}
+

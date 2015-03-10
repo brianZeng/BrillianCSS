@@ -1,0 +1,10 @@
+@sheetname prefixLib;
+@mixin $transition($value:none){
+  -webkit-transition: $value;
+  -o-transition: $value;
+  transition: $value;
+}
+@mixin $box-shadow($value:none){
+  -webkit-box-shadow: $value; // iOS <4.3 & Android <4.1
+  box-shadow: $value;
+}

@@ -1,0 +1,72 @@
+@sheetname txtInputLib;
+$line-height:1.428571429;
+$padding-vertical:6px;
+$padding-horizontal:12px;
+$line-height-computed:20px;
+$input-bg:#fff;
+$font-size:14px;
+$normal-color:#ccc;
+$danger-color:#d9534f;
+$success-color:#77d42a;
+$warning-color:#f0ad4e;
+$info-color:#5bc0de;
+$primary-color:#337ab7;
+@mixin $input-warning($font-size-in:$font-size;){
+  @include $input-theme($font-size:$font-size-in;$theme-color:$warning-color)
+}
+@mixin $input-success($font-size-in:$font-size;){
+  @include $input-theme($font-size:$font-size-in;$theme-color:$success-color)
+}
+@mixin $input-primary($font-size-in:$font-size;){
+  @include $input-theme($font-size:$font-size-in;$theme-color:$primary-color)
+}
+@mixin $input-danger($font-size-in:$font-size;){
+  @include $input-theme($font-size:$font-size-in;$theme-color:$danger-color)
+}
+@mixin $input-info($font-size-in:$font-size;){
+ @include $input-theme($font-size:$font-size-in;$theme-color:$info-color)
+}
+@mixin $input-normal($font-size:$font-size;){
+  @include $block-input($shadow-color:$info-color;$font-size:$font-size;);
+  border-color:#ccc;
+}
+@mixin $input-theme($font-size:$font-size;$theme-color:$info-color){
+  @include $input-layout($font-size:$font-size;$text-color:darken($theme-color,30))
+  @include $input-shadow($shadow-color:$theme-color;$normal:0 0.5px 1px desaturate($theme-color,20))
+}
+@mixin $block-input($font-size:$font-size;$theme-color:$normal-color;$text-color:#333){
+  @include $input-layout($font-size:$font-size;$text-color:$text-color);
+  @include $input-shadow($shadow-color:$theme-color);
+}
+@mixin $input-layout($display:block;$width:100%;
+$border-color:#ccc;$text-color:#333;
+$border-radius:5px;
+$font-size:14px;
+$height:$font-size*$line-height + ($padding-vertical * 2) + 2;){
+  display: $display;
+  width: $width;
+  -webkit-appearance: none;
+  height: $height;
+  padding: $padding-vertical $padding-horizontal;
+  font-size: $font-size;
+  line-height: $line-height;
+  background-color: $input-bg;
+  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  color:$text-color;
+  &:focus{
+    outline: none;
+  }
+}
+@mixin $input-shadow($shadow-color:#5bc0de;
+$focus:0 0 6px $shadow-color;
+$border-color:rgba(darken($shadow-color,50),0.5);
+$normal:0 1px 1px rgba(0,0,0,0.5)){
+  @include $box-shadow -> prefixLib($value:inset $normal);
+  @include $transition -> prefixLib($value:box-shadow ease-in-out 0.2s);
+  border-color:$border-color;
+  &:focus{
+    @include $box-shadow -> prefixLib($value:inset $normal,$focus);
+  }
+}

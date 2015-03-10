@@ -36,7 +36,7 @@ MediaQuery.prototype = {
   },
   reduce: function () {
     this.conditions.forEach(function (con) {
-      objForEach(con, function (key, v) {
+      objForEach(con, function ( v,key) {
         if(v==undefined)con[key]=v;
         else {
           if (v.resolve)v = v.resolve();
@@ -50,7 +50,7 @@ MediaQuery.prototype = {
   clone: (function () {
     function cloneObj(obj) {
       var o = {};
-      objForEach(obj, function (key, value) {
+      objForEach(obj, function ( value,key) {
         o[key] = value.clone ? value.clone() : value
       });
       return o;
@@ -67,7 +67,7 @@ MediaQuery.prototype = {
     var MEDIA_AND=' and ';
     function resolveMedia(conMap, $known) {
       var r = [];
-      objForEach(conMap, function (key, value) {
+      objForEach(conMap, function ( value,key) {
         if(value==undefined) r.push('('+key+')');
         else{
           if (value.hasVars)value = value.resolve($known);
@@ -76,15 +76,13 @@ MediaQuery.prototype = {
       });
       return r.join(MEDIA_AND);
     }
-
-    return function ($vars) {
-      var $known =$vars? ChangeSS.assign($vars).$resolved:{}, cons = this.conditions;
+    return function ($known) {
+      var cons = this.conditions;
       return this.groupPrefix+' '+ this.mediaTypes.map(function (m_type, i) {
         var mcon=resolveMedia(cons[i], $known);
         if(m_type)
           return mcon? m_type+MEDIA_AND+mcon:m_type;
         return mcon;
-        //return m_type?   m_type+MEDIA_AND+mcon  : mcon;
       }).join(',');
     }
   })(),
@@ -100,7 +98,7 @@ MediaQuery.prototype = {
   getVar: function (array) {
     array = array || [];
     this.conditions.forEach(function (condition) {
-      objForEach(condition, function (key, v) {
+      objForEach(condition, function (v) {
         if (v instanceof Var) List.arrayAdd(array, v);
         else if (v.getVar) v.getVar(array);
       });
@@ -122,10 +120,22 @@ KeyFrame.prototype=(function(){
     if(pre)pre='-'+pre+'-';
     return '@'+pre+'keyframes';
   }
+  function resolveKeyFrame(animationName,prefix){
+    var r;
+    if(prefix===normalizePrefixes[0]){
+      if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
+      else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
+    }
+    else r= [prefix];
+    return r.map(function(pre){return pre+' '+animationName});
+  }
   return {
     toString:function(){
       return this.prefix+' '+this.name;
     },
+    resolve:function(){
+      return resolveKeyFrame(this.name,this.prefix);
+    }/*,
     getAnimations:function(){
       var prefix,name=this.name,r;
       if((prefix=this.prefix)===normalizePrefixes[0]){
@@ -134,6 +144,6 @@ KeyFrame.prototype=(function(){
       }
       else r= [prefix];
       return r.map(function(pre){return pre+' '+name});
-    }
+    }*/
   }
 })();

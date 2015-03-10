@@ -72,12 +72,12 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,14],$V1=[1,13],$V2=[1,11],$V3=[1,10],$V4=[1,4],$V5=[1,8],$V6=[1,4,31,37,44,46,47,49],$V7=[1,17],$V8=[1,4,24,31,37,44,46,47,49],$V9=[1,23],$Va=[1,31],$Vb=[1,29],$Vc=[13,34,39],$Vd=[1,4,7,9,10,11,12,13,14,15,18,19,20,22,24,27,30,31,34,35,37,44,46,47,49],$Ve=[1,38],$Vf=[1,42],$Vg=[1,41],$Vh=[1,4,20,24,27,30,31,35,37,44,46,47,49],$Vi=[13,20,34],$Vj=[1,49],$Vk=[13,20,34,42],$Vl=[1,59],$Vm=[1,62],$Vn=[1,63],$Vo=[1,64],$Vp=[1,56],$Vq=[1,57],$Vr=[1,58],$Vs=[20,27,30,31,35],$Vt=[1,67],$Vu=[20,24,27,30,31,35],$Vv=[20,24,27,30,31,34,35],$Vw=[14,24],$Vx=[1,4,7,10,13,14,15,18,19,20,24,27,30,31,35,37,44,46,47,49],$Vy=[1,80],$Vz=[1,81],$VA=[1,82],$VB=[1,83],$VC=[1,4,7,9,10,11,12,13,14,15,18,19,20,24,27,30,31,35,37,44,46,47,49],$VD=[1,4,7,9,10,13,14,15,18,19,20,24,27,30,31,35,37,44,46,47,49];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,14],$V1=[1,13],$V2=[1,11],$V3=[1,9],$V4=[1,10],$V5=[1,4,31,37,40,41,50],$V6=[1,18],$V7=[1,4,24,31,37,40,41,50],$V8=[1,24],$V9=[1,22],$Va=[1,31],$Vb=[1,29],$Vc=[13,34,39],$Vd=[1,4,7,9,10,11,12,13,14,15,18,19,20,22,24,27,30,31,34,35,37,40,41,50],$Ve=[1,43],$Vf=[1,48],$Vg=[1,46],$Vh=[1,47],$Vi=[1,4,20,24,27,30,31,35,37,40,41,50],$Vj=[13,20,34,47],$Vk=[1,55],$Vl=[13,20,34,44,47],$Vm=[1,65],$Vn=[1,68],$Vo=[1,69],$Vp=[1,70],$Vq=[1,62],$Vr=[1,63],$Vs=[1,64],$Vt=[20,27,30,31,35,40,41],$Vu=[1,77],$Vv=[20,24,27,30,31,35,40,41],$Vw=[20,24,27,30,31,34,35,40,41],$Vx=[14,24],$Vy=[1,4,7,10,13,14,15,18,19,20,24,27,30,31,35,37,40,41,50],$Vz=[1,89],$VA=[1,90],$VB=[1,91],$VC=[1,92],$VD=[1,4,7,9,10,11,12,13,14,15,18,19,20,24,27,30,31,35,37,40,41,50],$VE=[1,4,7,9,10,13,14,15,18,19,20,24,27,30,31,35,37,40,41,50];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"var":3,"VAR":4,"POINTER":5,"exp":6,"NUMBER":7,"inlineFunc":8,"+":9,"-":10,"*":11,"/":12,"(":13,")":14,"FUNCNAME":15,"list":16,"property":17,"STRING":18,"URL":19,"IDENT":20,"assignPair":21,":":22,"assignList":23,";":24,"defParamList":25,"includeCall":26,"INCLUDE":27,"scopeBodyPart":28,"style":29,"EXTENDS":30,"SELECTOR":31,"scopeBody":32,"scope":33,"{":34,"}":35,"mixScope":36,"MIXIN":37,"selectors":38,",":39,"m_exp":40,"m_query":41,"M_ADD":42,"m_qlist":43,"MEDIA":44,"sheetPart":45,"KEYFRAMES":46,"SHEET":47,"sheet":48,"EOF":49,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"VAR",5:"POINTER",7:"NUMBER",9:"+",10:"-",11:"*",12:"/",13:"(",14:")",15:"FUNCNAME",18:"STRING",19:"URL",20:"IDENT",22:":",24:";",27:"INCLUDE",30:"EXTENDS",31:"SELECTOR",34:"{",35:"}",37:"MIXIN",39:",",42:"M_ADD",44:"MEDIA",46:"KEYFRAMES",47:"SHEET",49:"EOF"},
-productions_: [0,[3,2],[3,1],[6,1],[6,1],[6,1],[6,3],[6,3],[6,3],[6,3],[6,2],[6,3],[8,3],[8,4],[17,1],[17,1],[17,1],[17,1],[16,1],[16,2],[21,3],[23,1],[23,3],[23,2],[25,2],[25,3],[26,3],[26,2],[28,3],[28,1],[28,1],[28,2],[28,3],[28,2],[32,1],[32,2],[33,3],[33,4],[33,3],[36,3],[36,4],[38,1],[38,3],[29,2],[29,3],[40,3],[40,5],[41,1],[41,1],[41,3],[43,2],[43,3],[45,1],[45,2],[45,2],[45,1],[45,1],[45,2],[45,2],[48,1],[48,2],[48,2]],
+symbols_: {"error":2,"var":3,"VAR":4,"POINTER":5,"exp":6,"NUMBER":7,"inlineFunc":8,"+":9,"-":10,"*":11,"/":12,"(":13,")":14,"FUNCNAME":15,"list":16,"property":17,"STRING":18,"URL":19,"IDENT":20,"assignPair":21,":":22,"assignList":23,";":24,"defParamList":25,"includeCall":26,"INCLUDE":27,"scopeBodyPart":28,"style":29,"EXTENDS":30,"SELECTOR":31,"scopeBody":32,"scope":33,"{":34,"}":35,"mixScope":36,"MIXIN":37,"selectors":38,",":39,"MEDIA":40,"KEYFRAMES":41,"m_exp":42,"m_query":43,"M_ADD":44,"m_qlist":45,"sheetPart":46,"TREATAS":47,"sheet":48,"SHEET":49,"EOF":50,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"VAR",5:"POINTER",7:"NUMBER",9:"+",10:"-",11:"*",12:"/",13:"(",14:")",15:"FUNCNAME",18:"STRING",19:"URL",20:"IDENT",22:":",24:";",27:"INCLUDE",30:"EXTENDS",31:"SELECTOR",34:"{",35:"}",37:"MIXIN",39:",",40:"MEDIA",41:"KEYFRAMES",44:"M_ADD",47:"TREATAS",49:"SHEET",50:"EOF"},
+productions_: [0,[3,2],[3,1],[6,1],[6,1],[6,1],[6,3],[6,3],[6,3],[6,3],[6,2],[6,3],[8,3],[8,4],[17,1],[17,1],[17,1],[17,1],[16,1],[16,2],[21,3],[23,1],[23,3],[23,2],[25,2],[25,3],[26,3],[26,2],[28,3],[28,1],[28,1],[28,2],[28,3],[28,2],[32,1],[32,2],[33,3],[33,4],[33,3],[33,2],[36,3],[38,1],[38,3],[29,2],[29,3],[29,3],[42,3],[42,5],[43,1],[43,1],[43,3],[45,2],[45,3],[46,1],[46,2],[46,4],[46,4],[46,1],[46,1],[46,2],[48,4],[48,3],[48,1],[48,4],[48,2],[48,2]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -87,7 +87,7 @@ case 1:
 this.$=new Var($$[$0-1],$$[$0]);
 break;
 case 2:
-this.$=new Var($$[$0]);
+this.$=new Var($$[$0],yy.sheetName);
 break;
 case 3:
 this.$=new Exp(new Length($$[$0]));
@@ -116,6 +116,9 @@ break;
 case 15:
 this.$=$$[$0][0]=='@'? $$[$0].substr(2,$$[$0].length-3):$$[$0];
 break;
+case 17:
+this.$=Color.parse($$[$0])||$$[$0];
+break;
 case 18: case 41:
 this.$=new List($$[$0]);
 break;
@@ -126,7 +129,7 @@ case 20:
 this.$={name:$$[$0-2],value:$$[$0].resolve()};
 break;
 case 21:
-this.$={};this.$[$$[$0].name]=$$[$0].value
+this.$={};this.$[$$[$0].name]=$$[$0].value;
 break;
 case 22:
 $$[$0-2][$$[$0].name]=$$[$0].value
@@ -168,68 +171,80 @@ case 38:
 this.$=new Scope().addDefValues($$[$0-2]);
 break;
 case 39:
-this.$={name:$$[$0-1],value:$$[$0]}
+this.$=new Scope()
 break;
 case 40:
-this.$={name:$$[$0-2],value:new Scope()};
+this.$={name:$$[$0-1],value:$$[$0]}
 break;
-case 42: case 49:
+case 42: case 50:
 $$[$0-2].add($$[$0]);
 break;
 case 43:
 this.$=new Style($$[$0-1],$$[$0]);
 break;
 case 44:
-this.$=new Style($$[$0-2]);
+this.$=$$[$0].asMediaQuery(null,$$[$0-1]);
 break;
 case 45:
-this.$={key:$$[$0-1]};
+this.$=$$[$0].asKeyFrames($$[$0-2],$$[$0-1]);
 break;
 case 46:
-this.$={key:$$[$0-3],value:$$[$0-1]};
+this.$={key:$$[$0-1]};
 break;
 case 47:
-this.$=new MediaQuery($$[$0]);
+this.$={key:$$[$0-3],value:$$[$0-1]};
 break;
 case 48:
+this.$=new MediaQuery($$[$0]);
+break;
+case 49:
 this.$=new MediaQuery('',$$[$0]);;
 break;
-case 50:
+case 51:
 this.$=$$[$0];
 break;
-case 51:
+case 52:
 $$[$0-2].merge($$[$0]);
 break;
-case 52:
+case 53:
 this.$={type:'style',value:$$[$0]}
 break;
-case 53:
-this.$={type:'style',value:$$[$0].asKeyFrames($$[$0-1])}
-break;
 case 54:
-this.$={type:'style',value:$$[$0].asMediaQuery($$[$0-1].reduce())}
+this.$={value:$$[$0].asMediaQuery($$[$0-1].reduce()),type:'style'};
 break;
 case 55:
-$$[$0].type='mix';
+this.$={value:$$[$0].asMediaQuery($$[$0-3].reduce(),$$[$0-1]),type:'style'};
 break;
 case 56:
-$$[$0].type='var';
+this.$={value:$$[$0-3].reduce(),type:'media',key:$$[$0-1]};
 break;
 case 57:
-this.$={type:'sheetname',value:$$[$0]};
+$$[$0].type='mix';
 break;
-case 59:
-this.$=new Sheet().add($$[$0]);
+case 58:
+$$[$0].type='var';
 break;
 case 60:
-$$[$0-1].add($$[$0]);
+this.$=new Sheet($$[$0-2]).add($$[$0]);yy.sheetName=$$[$0-2];
 break;
 case 61:
+this.$=new Sheet($$[$0-1]).add($$[$0]);yy.sheetName=$$[$0-1];
+break;
+case 62:
+this.$=new Sheet().add($$[$0]);yy.sheetName=ChangeSS.opt.defaultSheetName;
+break;
+case 63:
+return new Sheet($$[$0-2]);
+break;
+case 64:
+$$[$0-1].add($$[$0]);
+break;
+case 65:
 return this.$=$$[$0-1];
 break;
 }
 },
-table: [{3:12,4:$V0,21:7,29:3,31:$V1,36:6,37:$V2,38:9,43:5,44:$V3,45:2,46:$V4,47:$V5,48:1},{1:[3],3:12,4:$V0,21:7,29:3,31:$V1,36:6,37:$V2,38:9,43:5,44:$V3,45:15,46:$V4,47:$V5,49:[1,16]},o($V6,[2,59],{24:$V7}),o($V8,[2,52]),{29:18,31:$V1,38:9},{13:$V9,20:[1,20],25:22,33:19,34:[1,21]},o($V8,[2,55]),o($V8,[2,56]),{20:[1,24]},{13:$V9,25:22,33:25,34:[1,26],39:[1,27]},{13:$Va,20:$Vb,40:30,41:28},{3:32,4:$V0},{22:[1,33]},o($Vc,[2,41]),o($Vd,[2,2],{5:[1,34]}),o($V6,[2,60],{24:$V7}),o($V6,[2,61]),o($V8,[2,58]),o($V8,[2,53]),o($V8,[2,54]),{13:$Va,20:$Vb,40:30,41:35},{20:$Ve,26:40,27:$Vf,28:37,29:39,30:$Vg,31:$V1,32:36,38:9},{34:[1,43]},{3:12,4:$V0,14:[1,44],21:46,23:45},o($V8,[2,57]),o($Vh,[2,43]),{20:$Ve,26:40,27:$Vf,28:37,29:39,30:$Vg,31:$V1,32:36,35:[1,47],38:9},{31:[1,48]},o($Vi,[2,50],{42:$Vj}),o($Vk,[2,47]),o($Vk,[2,48]),{20:[1,50]},{13:$V9,25:22,33:51,34:[1,52]},{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo,16:53,17:54,18:$Vp,19:$Vq,20:$Vr},o($Vd,[2,1]),o($Vi,[2,51],{42:$Vj}),{20:$Ve,26:40,27:$Vf,28:66,29:39,30:$Vg,31:$V1,35:[1,65],38:9},o($Vs,[2,34],{24:$Vt}),{22:[1,68]},o($Vu,[2,29]),o($Vu,[2,30]),{31:[1,69]},{3:70,4:$V0},{20:$Ve,26:40,27:$Vf,28:37,29:39,30:$Vg,31:$V1,32:71,35:[1,72],38:9},o($Vv,[2,24]),{14:[1,73],24:[1,74]},o($Vw,[2,21]),o($Vh,[2,44]),o($Vc,[2,42]),{13:$Va,40:75},{14:[1,76],22:[1,77]},o($V8,[2,39]),{20:$Ve,26:40,27:$Vf,28:37,29:39,30:$Vg,31:$V1,32:36,35:[1,78],38:9},o([1,14,24,31,37,44,46,47,49],[2,20],{6:55,3:60,8:61,17:79,4:$V0,7:$Vl,10:$Vm,13:$Vn,15:$Vo,18:$Vp,19:$Vq,20:$Vr}),o($Vx,[2,18]),o([1,4,7,13,14,15,18,19,20,24,27,30,31,35,37,44,46,47,49],[2,14],{9:$Vy,10:$Vz,11:$VA,12:$VB}),o($Vx,[2,15]),o($Vx,[2,16]),o($Vx,[2,17]),o($VC,[2,3]),o($VC,[2,4]),o($VC,[2,5]),{3:60,4:$V0,6:84,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},{3:60,4:$V0,6:85,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},{13:[1,86]},o($Vh,[2,36]),o($Vs,[2,35],{24:$Vt}),o($Vu,[2,33]),{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo,16:87,17:54,18:$Vp,19:$Vq,20:$Vr},o($Vu,[2,31],{5:[1,88]}),o($Vu,[2,27],{25:89,13:$V9}),{20:$Ve,26:40,27:$Vf,28:66,29:39,30:$Vg,31:$V1,35:[1,90],38:9},o($Vh,[2,38]),o($Vv,[2,25]),o($Vw,[2,23],{3:12,21:91,4:$V0}),o($Vk,[2,49]),o($Vk,[2,45]),{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo,16:92,17:54,18:$Vp,19:$Vq,20:$Vr},o($V8,[2,40]),o($Vx,[2,19]),{3:60,4:$V0,6:93,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},{3:60,4:$V0,6:94,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},{3:60,4:$V0,6:95,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},{3:60,4:$V0,6:96,7:$Vl,8:61,10:$Vm,13:$Vn,15:$Vo},o($VC,[2,10]),{9:$Vy,10:$Vz,11:$VA,12:$VB,14:[1,97]},{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,14:[1,98],15:$Vo,16:99,17:54,18:$Vp,19:$Vq,20:$Vr},o([24,27,30,31,35],[2,28],{6:55,3:60,8:61,17:79,4:$V0,7:$Vl,10:$Vm,13:$Vn,15:$Vo,18:$Vp,19:$Vq,20:$Vr}),o($Vu,[2,32]),o($Vu,[2,26]),o($Vh,[2,37]),o($Vw,[2,22]),{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,14:[1,100],15:$Vo,17:79,18:$Vp,19:$Vq,20:$Vr},o($VD,[2,6],{11:$VA,12:$VB}),o($VD,[2,7],{11:$VA,12:$VB}),o($VC,[2,8]),o($VC,[2,9]),o($VC,[2,11]),o($VC,[2,12]),{3:60,4:$V0,6:55,7:$Vl,8:61,10:$Vm,13:$Vn,14:[1,101],15:$Vo,17:79,18:$Vp,19:$Vq,20:$Vr},o($Vk,[2,46]),o($VC,[2,13])],
+table: [{3:12,4:$V0,21:7,29:4,31:$V1,36:6,37:$V2,38:8,40:$V3,41:$V4,45:5,46:3,48:1,49:[1,2]},{1:[3],3:12,4:$V0,21:7,29:4,31:$V1,36:6,37:$V2,38:8,40:$V3,41:$V4,45:5,46:15,50:[1,16]},{20:[1,17]},o($V5,[2,62],{24:$V6}),o($V7,[2,53]),{13:$V8,20:[1,21],25:23,33:19,34:$V9,47:[1,20]},o($V7,[2,57]),o($V7,[2,58]),{13:$V8,25:23,33:25,34:$V9,39:[1,26]},{3:27,4:$V0,13:$Va,20:$Vb,42:30,43:28},{31:[1,32]},{3:33,4:$V0},{22:[1,34]},o($Vc,[2,41]),o($Vd,[2,2],{5:[1,35]}),o($V5,[2,64],{24:$V6}),o($V5,[2,65]),{3:12,4:$V0,21:7,24:[1,36],29:4,31:$V1,36:6,37:$V2,38:8,40:$V3,41:$V4,45:5,46:37},o($V7,[2,59]),o($V7,[2,54]),{4:[1,38]},{13:$Va,20:$Vb,42:30,43:39},{20:$Ve,26:45,27:$Vf,28:42,29:44,30:$Vg,31:$V1,32:40,35:[1,41],38:8,40:$Vh,41:$V4},{34:[1,49]},{3:12,4:$V0,14:[1,50],21:52,23:51},o($Vi,[2,43]),{31:[1,53]},{13:$V8,25:23,33:54,34:$V9},o($Vj,[2,51],{44:$Vk}),o($Vl,[2,48]),o($Vl,[2,49]),{20:[1,56]},{13:$V8,25:23,33:57,34:$V9},{13:$V8,25:23,33:58,34:$V9},{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp,16:59,17:60,18:$Vq,19:$Vr,20:$Vs},o($Vd,[2,1]),{3:12,4:$V0,21:7,29:4,31:$V1,36:6,37:$V2,38:8,40:$V3,41:$V4,45:5,46:71,50:[1,72]},o($V5,[2,61],{24:$V6}),{13:$V8,24:[1,74],25:23,33:73,34:$V9},o($Vj,[2,52],{44:$Vk}),{20:$Ve,26:45,27:$Vf,28:76,29:44,30:$Vg,31:$V1,35:[1,75],38:8,40:$Vh,41:$V4},o($Vi,[2,39]),o($Vt,[2,34],{24:$Vu}),{22:[1,78]},o($Vv,[2,29]),o($Vv,[2,30]),{31:[1,79]},{3:27,4:$V0},{3:80,4:$V0},{20:$Ve,26:45,27:$Vf,28:42,29:44,30:$Vg,31:$V1,32:81,35:[1,82],38:8,40:$Vh,41:$V4},o($Vw,[2,24]),{14:[1,83],24:[1,84]},o($Vx,[2,21]),o($Vc,[2,42]),o($Vi,[2,44]),{13:$Va,42:85},{14:[1,86],22:[1,87]},o($Vi,[2,45]),o($V7,[2,40]),o([1,14,24,31,37,40,41,50],[2,20],{6:61,3:66,8:67,17:88,4:$V0,7:$Vm,10:$Vn,13:$Vo,15:$Vp,18:$Vq,19:$Vr,20:$Vs}),o($Vy,[2,18]),o([1,4,7,13,14,15,18,19,20,24,27,30,31,35,37,40,41,50],[2,14],{9:$Vz,10:$VA,11:$VB,12:$VC}),o($Vy,[2,15]),o($Vy,[2,16]),o($Vy,[2,17]),o($VD,[2,3]),o($VD,[2,4]),o($VD,[2,5]),{3:66,4:$V0,6:93,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},{3:66,4:$V0,6:94,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},{13:[1,95]},o($V5,[2,60],{24:$V6}),o($V5,[2,63]),o($V7,[2,55]),o($V7,[2,56]),o($Vi,[2,36]),o($Vt,[2,35],{24:$Vu}),o($Vv,[2,33]),{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp,16:96,17:60,18:$Vq,19:$Vr,20:$Vs},o($Vv,[2,31],{5:[1,97]}),o($Vv,[2,27],{25:98,13:$V8}),{20:$Ve,26:45,27:$Vf,28:76,29:44,30:$Vg,31:$V1,35:[1,99],38:8,40:$Vh,41:$V4},o($Vi,[2,38]),o($Vw,[2,25]),o($Vx,[2,23],{3:12,21:100,4:$V0}),o($Vl,[2,50]),o($Vl,[2,46]),{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp,16:101,17:60,18:$Vq,19:$Vr,20:$Vs},o($Vy,[2,19]),{3:66,4:$V0,6:102,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},{3:66,4:$V0,6:103,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},{3:66,4:$V0,6:104,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},{3:66,4:$V0,6:105,7:$Vm,8:67,10:$Vn,13:$Vo,15:$Vp},o($VD,[2,10]),{9:$Vz,10:$VA,11:$VB,12:$VC,14:[1,106]},{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,14:[1,107],15:$Vp,16:108,17:60,18:$Vq,19:$Vr,20:$Vs},o([24,27,30,31,35,40,41],[2,28],{6:61,3:66,8:67,17:88,4:$V0,7:$Vm,10:$Vn,13:$Vo,15:$Vp,18:$Vq,19:$Vr,20:$Vs}),o($Vv,[2,32]),o($Vv,[2,26]),o($Vi,[2,37]),o($Vx,[2,22]),{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,14:[1,109],15:$Vp,17:88,18:$Vq,19:$Vr,20:$Vs},o($VE,[2,6],{11:$VB,12:$VC}),o($VE,[2,7],{11:$VB,12:$VC}),o($VD,[2,8]),o($VD,[2,9]),o($VD,[2,11]),o($VD,[2,12]),{3:66,4:$V0,6:61,7:$Vm,8:67,10:$Vn,13:$Vo,14:[1,110],15:$Vp,17:88,18:$Vq,19:$Vr,20:$Vs},o($Vl,[2,47]),o($VD,[2,13])],
 defaultActions: {},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
@@ -385,6 +400,35 @@ function popUntil(lexer,state){
  */
 ChangeSS = (function (parser) {
   var sheetMap = {}, getter, setter;
+  /**
+   * @name ChangeSS.parseOptions
+   * @type {{lib: Array.<ChangeSS.Sheet>}}
+   */
+  var defOpt={lib:[]};
+
+  /**
+   * @namespace ChangeSS
+   * @global
+   * @param   {string}source
+   * @param   {ChangeSS.parseOptions|Object}[opt]
+   * @returns {string}
+   */
+  function main(source, opt) {
+    return parseAndLink(source,opt||defOpt).map(function (sheet) {
+      return sheet.toString();
+    }).join('\n');
+  }
+  /**
+   * @name ChangeSS.parse
+   * @param {String}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  main.parse=function(source,opt){
+    clear();
+    return parseAndMerge(source,opt);
+  };
+  main.compile=parseAndLink;
   main.error = {
     notExist: function (name) {
       throw Error('cannot get:' + name);
@@ -395,40 +439,11 @@ ChangeSS = (function (parser) {
   parser.yy.parseError=parser.parseError=function(errStr,err){
     main.error.parseError(errStr,err);
   };
-  function main(input, opt) {
-    opt = opt || {keepResults: false};
-    return evalInput(input, opt.keepResults).map(function (sheet) {
-      return sheet.toString();
-    }).join('\n');
-  }
-
-  main.eval = evalInput;
-  function evalInput(input, keep) {
-    if (!keep)clear();
-    var results = List();
-    main.parse(input).forEach(function (sheet) {
-      results.add(merge(sheet));
-    });
-    ChangeSS.link(results);
-    return results;
-  }
-  function clear() {
-    sheetMap = {};
-  }
-
-  function merge(obj) {
-    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
-    else throw 'not implement';
-  }
-
-  main.merge = merge;
-
   main.get = function (name, type) {
     name = name || main.opt.defaultSheetName;
     type = (type || '').toLowerCase();
     switch (type) {
-      case 'mixin':
-      case 'scope':
+      case 'mixin':case 'scope':case 'media':
         return getter.fromFullName(name, type);
       case 'var':
         return getter.variable(name);
@@ -438,20 +453,35 @@ ChangeSS = (function (parser) {
         return getter.sheet(name);
     }
   };
+  main.add = function (something, value) {
+    if (something instanceof Sheet) setter.sheet(something);
+    else if (something instanceof Var) setter.Var(something, value);
+    return this;
+  };
+  /**
+   * @name ChangeSS.opt
+   * @type {{
+   * addKeyFramesVendorPrefix: boolean,
+   * preferKeyFramesVendorPrefix: boolean,
+   * vendorPrefix:string,
+   * defaultSheetName:string
+   * }}
+   */
   main.opt = {
     addKeyFramesVendorPrefix:true,
-    preferKeyFramesVendorPrefix:true
-  };
-  main.opt.vendorPrefix=(function(){
-    if(typeof window!=="undefined"&&window.getComputedStyle){
-      for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
-        if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+    preferKeyFramesVendorPrefix:true,
+    defaultSheetName:'default',
+    vendorPrefix:(function(){
+      if(typeof window!=="undefined"&&window.getComputedStyle){
+        for(var i= 0,styles=window.getComputedStyle(document.documentElement,''),pre,len=styles.length;i<len;i++){
+          if(pre=styles[i].match(/-(moz|webkit|ms|o)-/))break;
+        }
+        if(pre)return pre[1];
+        return styles.OLink? 'o':'';
       }
-      if(pre)return pre[1];
-      return styles.OLink? 'o':'';
-    }
-    return '';
-  })();
+      return '';
+    })()
+  };
   getter = {
     sheet: function (name) {
       name = name || main.opt.defaultSheetName;
@@ -486,70 +516,62 @@ ChangeSS = (function (parser) {
     }
   };
   var sheetSplitReg= /((\@sheetname)[\s\S]*?(?=\2)|\2[\s\S]*$)/g;
-  main.parse = function (input) {
-    var range, r,i=input.indexOf('@sheetname');
-    if(i==-1)
-      r=[input];
-    else{
-      if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
-      r=[];
-      while (range=sheetSplitReg.exec(input)[0])
-        r.push(range);
-      sheetSplitReg.exec();
-    }
-    return r.map(function(src){return parser.parse(src).validate()});
-  };
-  main.add = function (something, value) {
-    if (something instanceof Sheet) setter.sheet(something);
-    else if (something instanceof Var) setter.Var(something, value);
-    return this;
-  };
-  main.getType = function (side, asNone) {
-    var type;
-    if (!side)return ChangeSS.TYPE.NONE;
-    if (typeof side == "string") return ChangeSS.TYPE.KEYWORD;
-    else if (type = side._type) return type;
-    else if (asNone)return ChangeSS.TYPE.NONE;
-    throw  Error('unknown type');
-  };
   return main;
-})(parser);
-ChangeSS.opt.defaultSheetName = 'default';
-ChangeSS.assign = function ($param, $known) {
-  var con, typeEnum = ChangeSS.TYPE, $unknown = mix($param);
-  $known = mix($known);
-  do {
-    con = false;
-    objForEach($unknown, function (key, value) {
-      switch (ChangeSS.getType(value)) {
-        case typeEnum.KEYWORD:
-        case typeEnum.LENGTH:
-          $known[key] = value;
-          delete $unknown[key];
-          break;
-        case typeEnum.LIST:
-          $unknown[key] = value = value.resolve($known);
-          if (!value.hasVars) {
-            $known[key] = value.toString();
-            delete  $unknown[key];
-          } else return;
-          break;
-        case typeEnum.NONE:
-          throw 'unknown type';
-        default :
-          if (value.canResolve($known))
-            $unknown[key] = value.resolve($known);
-          else return;
+
+  function parseInput(input) {
+    var results=[];
+    if(input instanceof Array)
+      input.forEach(loadFile);
+    else if(typeof input==="string") loadFile(input);
+    return results.map(parseSheet);
+    function parseSheet(src){
+      return parser.parse(src).validate()
+    }
+    function loadFile(input){
+      var range,i=input.indexOf('@sheetname');
+      if(i==-1)
+        results.push(input);
+      else{
+        if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+        while (range=sheetSplitReg.exec(input)[0])
+          results.push(range);
+        sheetSplitReg.exec();
       }
-      con = true;
+      return results;
+    }
+  }
+
+
+  function parseAndMerge(source,opt){
+    var results = List();
+    parseInput(source).forEach(function (sheet) {
+      results.add(merge(sheet));
     });
-    if (!con)
-      con = Object.getOwnPropertyNames($unknown).some(function (key) {
-        $unknown[key].canResolve($known)
-      });
-  } while (con);
-  return {$resolved: $known, $unresolved: $unknown};
-};
+    return results;
+  }
+  /**
+   * @name ChangeSS.compile
+   * @param {string}source
+   * @param {ChangeSS.parseOptions|Object}[opt]
+   * @returns {Array.<ChangeSS.Sheet>}
+   */
+  function parseAndLink(source, opt) {
+    var results,lib;
+    clear();
+    if(opt&&(lib=opt.lib))
+      lib.forEach(function(sheet){merge(sheet.clone());});
+    ChangeSS.link(results=parseAndMerge(source,opt));
+    return results;
+  }
+  function clear() {
+    sheetMap = {};
+  }
+  function merge(obj) {
+    if (obj instanceof Sheet) return getter.sheet(obj.name).merge(obj);
+    else throw 'not implement';
+  }
+})(parser);
+ChangeSS.assign = assign;
 ChangeSS.traceLog = true;
 function mix() {
   for (var i = 0, o = {}, item , len = arguments.length; i < len; i++)
@@ -559,11 +581,20 @@ function mix() {
     });
   return o;
 }
+function arrMap(arr,mapFun,thisObj){
+  var func=mapFun;
+  thisObj=thisObj||arr;
+  if(typeof mapFun=="string")func=function(item){return item[mapFun]};
+  else if(typeof mapFun!=="function")throw Error('type of map function invalid');
+  for(var i= 0,len=arr.length,r=new Array(len);i<len;i++)
+    r[i]=func(arr[i],i,thisObj)
+  return r;
+}
 function objForEach(obj, callback, thisObj, arg) {
   thisObj = thisObj || obj;
   if (typeof obj == "object" && obj)
     for (var i = 0, keys = Object.getOwnPropertyNames(obj), key = keys[0]; key !== undefined; key = keys[++i])
-      callback.apply(thisObj, [key, obj[key], arg]);
+      callback.apply(thisObj, [obj[key],key, arg]);
   return thisObj;
 }
 (function (parser) {
@@ -577,16 +608,37 @@ function objForEach(obj, callback, thisObj, arg) {
     }
   }
 })(parser);
-ChangeSS.TYPE = {
+/**
+ * @enum {string}
+ * @name ChangeSS.TYPE
+ * @type {{NONE: string, EXP: string, VAR: string, LENGTH: string, FUNC: string, KEYWORD: string, LIST: string,COLOR:string}}
+ */
+var TYPE=ChangeSS.TYPE = {
   NONE: 'no',
   EXP: 'exp',
+  COLOR:'color',
   VAR: 'var',
   LENGTH: 'len',
   FUNC: 'fun',
   KEYWORD: 'keyword',
   LIST: 'list'
 };
-if(typeof module!=="undefined" && module.exports) module.exports=ChangeSS;
+/**
+ * @name ChangeSS.getType
+ * @param {*}side
+ * @param {boolean}[asNone]
+ * @returns {String|Error}
+ */
+ChangeSS.getType = function (side, asNone) {
+  var type;
+  if (!side)return TYPE.NONE;
+  if (typeof side == "string") return TYPE.KEYWORD;
+  else if (type = side._type) return type;
+  else if (asNone)return TYPE.NONE;
+  throw  Error('unknown type');
+};
+if(typeof module!=="undefined" && module.exports)
+  module.exports=ChangeSS;
 /**
  * Created by 柏然 on 2014/11/1.
  */
@@ -740,6 +792,9 @@ Var.prototype = (function (TYPE) {
         else value = real;
       return value || this.clone();
     },
+    equals:function(obj){
+      return obj instanceof Var&& obj.symbol===this.symbol&&obj.sheetName==this.sheetName;
+    },
     getVar: function (array) {
       array = array || [];
       List.arrayAdd(array, this.symbol);
@@ -755,15 +810,14 @@ Var.prototype = (function (TYPE) {
 ChangeSS.Var = Var;/**
  * Created by 柏然 on 2014/11/1.
  */
+//TODO add no default
 function Exp(left, optor, right) {
   if (!(this instanceof Exp))return new Exp(left, optor, right);
   this.left = left;
   if (right)this.right = right;
   if (optor) this.optor = optor;
 }
-Exp.prototype = (function () {
-  var TYPE = ChangeSS.TYPE;
-  return {
+Exp.prototype = {
     _type: TYPE.EXP,
     opt: function (opt, exp) {
       var left = this.left;
@@ -780,6 +834,7 @@ Exp.prototype = (function () {
       switch (this.type) {
         case TYPE.KEYWORD:
         case TYPE.LENGTH:
+        case TYPE.COLOR:
           return this.left;
         case TYPE.FUNC:
         case TYPE.LIST:
@@ -912,44 +967,15 @@ Exp.prototype = (function () {
       return left;
     }
   };
-})();
 ChangeSS.Exp = Exp;/**
  * Created by 柏然 on 2014/11/1.
  */
 function InlineFunc(name, paramList) {
   if (!(this instanceof InlineFunc))return new InlineFunc(name, paramList);
   this.name = name;
-  this.param = paramList || new List();
+  this.param = paramList?(paramList instanceof List? paramList:new List(paramList)):new List();
 }
-objForEach(Math, function (key, fun, def) {
-    if (typeof fun == "function") {
-      var convertArg = def.arg[key], convertRes = def.res[key];
-      this[key] = function (mathArg) {
-        var v = Length.parse(fun.apply(Math, mathArg.map(function (len) {
-          return convertArg ? convertArg(len) : len.num;
-        })), mathArg[0].unit);
-        return convertRes ? convertRes(v) : v;
-      }
-    }
-  }, InlineFunc.Func = {},
-(function () {
-    var types = [function (len) {
-      return len.convert('rad')
-    },
-      function (len) {
-        len.convert(len.unit = 'deg', 'rad');
-        return len;
-      },
-      function (len) {
-        len.unit = '';
-        return len;
-      }];
-    return {
-      arg: {sin: types[0], cos: types[0], tan: types[0]},
-      res: {asin: types[1], acos: types[1], atan: types[1], sin: types[2], cos: types[2], tan: types[2]}
-    }
-  })());
-//TODO:要把color Function 加入
+var userDefinedFunc=InlineFunc.Func = {};
 InlineFunc.prototype = {
   _type: ChangeSS.TYPE.FUNC,
   get hasVars(){
@@ -962,10 +988,24 @@ InlineFunc.prototype = {
     var v = this.param.resolve($vars, info), func, name = this.name, ret;
     func = InlineFunc.Func[name];
     if (!(v instanceof List))v = new List(v);
-    if (func && v.canResolve($vars))
-      return func(v.map(function (p) {
-        return Length.parse(p.resolve ? p.resolve($vars) : p)
-      })).resolve();
+    if (func && v.canResolve($vars)){
+      try{
+        ret=func.apply(ChangeSS, v.filter(filterComma));
+        ret=Length.parse(ret)||ret;
+      }
+      catch (ex){
+        ret=ex.message;
+      }
+      if(ChangeSS.getType(ret,true)==TYPE.NONE){
+        log('function:'+name+' return :'+ret+' with arguments:'+ v.join(' '));
+        return ret+'';
+      }
+      return ret;
+      function filterComma(item){
+        //fun(a,b)->arguments:[a,',',b] filter comma
+        return item !=','
+      }
+    }
     ret = new InlineFunc(this.name, v);
     return v.hasVars ? ret : ret.toString();
   },
@@ -988,13 +1028,196 @@ InlineFunc.prototype = {
   get paramString() {
     var v = this.param.toString();
     return '(' + v.replace(/\s+\,\s*/g, ',') + ')';
-  },
-  get paramValue() {
-    var v = this.param.value;
-    return v == undefined ? undefined : '(' + v.replace(/\s+/gi, ',') + ')';
   }
 };
-ChangeSS.InlineFunc = InlineFunc;/**
+objForEach({
+  'sin,cos,tan':{
+    args:function(args){return args[0].convert('rad')},
+    res:parseFloat
+  },
+  'asin,acos,atan':{
+    res:function(len){
+      len.convert(len.unit = 'deg', 'rad');
+      return len;
+    }
+  }
+},function(opt,keys){keys.split(',').forEach(function(key){defineMathFunc(opt,key)})});
+objForEach(Math,defineMathFunc);
+function defineFunction(name,func){
+ if(typeof name=="function"){
+   func=name;
+   name=func.name;
+ }
+  if(typeof func!=="function"||!name)throw Error('argument not provided');
+  return userDefinedFunc[name]=func;
+}
+function defineMathFunc(opt,name){
+  opt=opt||{};
+  var MathFun=Math[name],convertArgs=opt.args||mapArg,convertResult=opt.res||useFirstArgUnit;
+  if(typeof MathFun==="function"&&!userDefinedFunc[name])
+    defineFunction(name,function(){
+      var args=convertArgs(arguments);
+      if(!(args instanceof Array))args=[args];
+      return convertResult(MathFun.apply(Math,args),arguments);
+    });
+  function mapArg(args){
+    return arrMap(args,'num');
+  }
+  function useFirstArgUnit(item,args){return Length.parse(item,args[0].unit||'')}
+}
+ChangeSS.InlineFunc = InlineFunc;
+ChangeSS.define=defineFunction;
+
+
+/**
+ * Created by 柏子 on 2015/2/5.
+ */
+function Color(rgb,a){
+  if(!(this instanceof Color))return new Color(rgb,a);
+  if(typeof rgb==="string"&& rgb[0]=='#')return hex2color(rgb);
+  if(rgb instanceof Array){
+    this.alpha=a==undefined?1:len2num(a,1);
+    this.rgb=rgb.slice(0,3).map(len2num);
+  }
+}
+ChangeSS.Color=Color;
+Color.parse=function(hex){
+  if(hex instanceof Color)return hex;
+  return (typeof hex=="string"&&hex[0]=='#')? hex2color(hex):undefined;
+};
+function len2num(num,asFloat){
+  if(num instanceof Length) return num.unit=='%'? num.num/100:num.num;
+  else if(typeof num!=Number) return asFloat? parseFloat(num):parseInt(num);
+  return num;
+}
+function clamp(v, min,max) {
+  min=min||0;
+  if(max==undefined)max=1;
+  return v<min? min:(v>max? max:v);
+}
+function hex2color(hex){
+  var rgb=new Array(3);
+  hex=hex.toLowerCase();
+  if(/#[a-f0-9]{6}/i.test(hex)){
+    for(var off=0;off<3;off++)
+      rgb[off]=parseInt(hex.substr(1+off*2,2),16);
+  }
+  else if(/#[a-f0-9]{3}/i.test(hex)){
+    for(var i= 1,char=hex[i];i<4;char=hex[++i])
+      rgb[i-1]=parseInt(char+char,16);
+  }
+  else throw Error('invalid hex color');
+  return new Color(rgb,1);
+}
+function hsla(h,s,l,a){
+  if(typeof h=="object"){
+    s= h.s;
+    l= h.l;
+    a= h.alpha;
+    h= h.h;
+  }
+  function hue(h) {
+    h = h < 0 ? h + 1 : (h > 1 ? h - 1 : h);
+    if      (h * 6 < 1) { return m1 + (m2 - m1) * h * 6; }
+    else if (h * 2 < 1) { return m2; }
+    else if (h * 3 < 2) { return m1 + (m2 - m1) * (2 / 3 - h) * 6; }
+    else                { return m1; }
+  }
+  h = (h % 360) / 360;
+  s = clamp(s);
+  l = clamp(l);
+  a = a==undefined? 1:clamp(a);
+  var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
+  var m1 = l * 2 - m2;
+  return new Color([hue(h + 1 / 3) * 255,hue(h)* 255,hue(h - 1 / 3) * 255],a);
+}
+Color.formKeyword=function(key){
+  throw Error('do not support');
+};
+var ColorFuncs;
+// from less.js
+objForEach(ColorFuncs={
+  rgba:function(r,g,b,a){
+    if(arguments.length==2)
+      return ColorFuncs.alpha(r,g);
+    return new Color([r,g,b],a==undefined?1:a);
+  },
+  transparentize:function(color,a){
+    color=Color.parse(color);
+    color.alpha=clamp(color.alpha-Length.parse(a).num);
+    return color;
+  },
+  rgb:function(r,g,b){
+    return new Color([r,g,b],1)
+  },
+  hsl:function(h,s,l){
+    return hsla(h,s,l,1)
+  },
+  hsla:hsla,
+  darken: function (color, amount) {
+    var hsl = color.toHSL();
+    hsl.l = clamp(hsl.l-amount.num/100);
+    return hsla(hsl);
+  },
+  desaturate: function (color, amount) {
+    var hsl = color.toHSL();
+    hsl.s = clamp(hsl.s-amount.num/100);
+    return hsla(hsl);
+  },
+  saturate: function (color, amount) {
+    // filter: saturate(3.2);
+    // should be kept as is, so check for color
+    if(color instanceof Length)return color;
+    var hsl = color.toHSL();
+    hsl.s = clamp(hsl.s+ amount.num/ 100);
+    return hsla(hsl);
+  },
+  lighten: function (color, amount) {
+    var hsl = color.toHSL();
+    hsl.l = clamp(hsl.l+amount.num / 100);
+    return hsla(hsl);
+  }
+},function(func,name){defineFunction(name,func)});
+Color.prototype={
+  _type:TYPE.KEYWORD,
+  toHSL:function(){
+   var r = this.rgb[0] / 255,
+     g = this.rgb[1] / 255,
+     b = this.rgb[2] / 255;
+   var max = Math.max(r, g, b), min = Math.min(r, g, b);
+   var h, s, l = (max + min) / 2, d = max - min;
+   if (max === min) {
+     h = s = 0;
+   } else {
+     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+     switch (max) {
+       case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+       case g: h = (b - r) / d + 2;               break;
+       case b: h = (r - g) / d + 4;               break;
+     }
+     h /= 6;
+   }
+   return { h: h * 360, s: s, l: l, alpha: this.alpha};
+ },
+  toHex:function(){
+    return '#' + this.rgb.map(function (c) {
+        c=parseInt(c);
+        return (c < 16 ? '0' : '') + c.toString(16);
+      }).join('');
+  },
+  toRGBA:function(){
+    return 'rgba('+this.rgb.map(Math.round).join(',')+','+this.alpha+')';
+  },
+  resolve:function(){
+    return new Color(this.rgb,this.alpha);
+  },
+  reduce:function(){return this},
+  get hasVars(){return false},
+  get value(){return this.toString()},
+  toString:function(){
+    return this.alpha==1?this.toHex():this.toRGBA();
+  }
+};/**
  * Created by 柏然 on 2014/11/1.
  */
 function List() {
@@ -1186,6 +1409,10 @@ List.prototype = (function (proto) {
 ChangeSS.List = List;/**
  * Created by 柏然 on 2014/11/1.
  */
+/**
+ * @namespace ChangeSS.Scope
+ * @constructor
+ */
 function Scope() {
   this.staticRules = {};
   this.dynamicRules = {};
@@ -1217,7 +1444,7 @@ Scope.prototype = {
       }
     }
     function rules(ruleObj) {
-      return objForEach(ruleObj, function (key, value) {
+      return objForEach(ruleObj, function (value,key) {
         this.push(key + ':' + value + ';');
       }, []);
     }
@@ -1231,14 +1458,22 @@ Scope.prototype = {
     return (this.symbol || this.selector) + '->' + sheetName;
   },
   setSheetName: function (name) {
-    this.sheetName = name;
+    this.sheetName = name;var globalPointer='->'+name;
+    objForEach(this.defValues,function(value){
+      if(value instanceof Var&&!value.sheetName){
+        value.sheetName=name;
+      }
+    });
+    objForEach(this.includes,function(inc){
+      objForEach(inc,function(value,key){inc[key.replace(globalPointer,'')]=value;})
+    });
     this.nested.forEach(function (s) {
       s.setSheetName(name)
     });
   },
   get paramString() {
     var r = [];
-    objForEach(this.defValues, function (key, value) {
+    objForEach(this.defValues, function (value,key) {
       r.push(key + ':' + value);
     });
     return r.length ? '(' + r.join(',') + ')' : '';
@@ -1275,13 +1510,13 @@ Scope.prototype = {
     return this;
   },
   addDefValues: function (objOrkey, value) {
-    var v;
+    var v,i;
     if (typeof objOrkey == "string") {
       if (value instanceof List && value.length == 1)value = value[0];
       else if (value.resolve) v = value.resolve();
-      this.defValues[objOrkey] = Length.parse(v) || value;
+      this.defValues[getVarLocalName(objOrkey)] = Length.parse(v) || value;
     }
-    else objForEach(objOrkey, function (key, v) {
+    else objForEach(objOrkey, function (v,key) {
       this.addDefValues(key, v);
     }, this);
     return this;
@@ -1298,17 +1533,27 @@ Scope.prototype = {
     return this;
   },
   asContainer:function(){
-    this.selectors=[''];
-    var nested=this.nested,def=this.defValues;
-    Scope.apply(this);
-    nested.forEach(function(s){s.validateSelector()});
-    this.nested=nested;
-    this.defValues=def;
+    this.selectors=[this.selector=''];
+    //TODO:&chidselect
+    this.nested.forEach(function(s){
+      s.selectors= s.selectors.map(function(slt){return '&'+slt})
+    });
     return this;
   },
-  asMediaQuery:function(mediaQuery){
-    this.asContainer().spec=mediaQuery;
-    return this;
+  asMediaQuery:function(mediaQuery,varLike){
+    if(mediaQuery){
+      this.spec=mediaQuery;
+      if(varLike)mediaQuery.symbol=varLike;
+    }
+   else if(varLike instanceof Var)
+     this.spec=varLike;
+    return this.asContainer();
+  },
+  asKeyFrames:function(prefix,name){
+    this.selectors=[this.selector=''];
+    this.spec=new KeyFrame(name,prefix);
+    this.staticRules=this.dynamicRules=this.includes={};
+    return this.asContainer();
   },
   canResolve: function ($vars) {
     $vars = this.mixParam($vars || {});
@@ -1328,8 +1573,6 @@ Scope.prototype = {
         r = [];
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // ts = ts.replace(ps, '');
-           // r.push(ts[0] == ' ' ? ts.substr(1) : '&' + ts);
             r.push(retraceSelector(ts,ps));
           })
         });
@@ -1339,18 +1582,24 @@ Scope.prototype = {
       this.nested.forEach(function (s) {
         s.backtraceSelector(tss);
       });
+
       this._selector = null;
       this.backtraceSelector = second;
       this.validateSelector = first;
       return this.selectors;
     }
     function replaceSelector(childSlt,parentSlt){
-      if(childSlt[0]!=='&') childSlt=parentSlt+' '+childSlt;
+      if(childSlt.indexOf('&')==-1) childSlt=parentSlt+' '+childSlt;
       return childSlt.replace(/\&/g,parentSlt);
     }
     function retraceSelector(childSlt,parentSlt){
-      var reg=new RegExp(parentSlt,'g');
-      return childSlt.replace(reg,'&').replace(/^&\s+/,'');
+      if(childSlt[parentSlt.length]==' ')
+        childSlt=childSlt.substring(parentSlt.length+1);
+      var rs=childSlt.split(parentSlt),str,ors=[];
+      for(var i= 0,len=rs.length;i<len;i++)
+        ors.push((str=rs[i])===''?'&':str);
+      ors[0].replace(/^&\s+/,'');
+      return ors.join('');
     }
 
     function first(parentSelectors) {
@@ -1360,7 +1609,6 @@ Scope.prototype = {
         tss = this.selectors;
         parentSelectors.forEach(function (ps) {
           tss.forEach(function (ts) {
-           // r.push(ts[0] == '&' ? ts.replace('&', ps) : ps + ' ' + ts);
             r.push(replaceSelector(ts,ps));
           })
         });
@@ -1381,27 +1629,27 @@ Scope.prototype = {
     return this.selectors;
   },
   clone: (function () {
-    function onPair(key, value) {
+    function onPair(value,key) {
       this[key] = value.clone ? value.clone(true) : value;
     }
     return function () {
-      var r = new Scope();
+      var r = new Scope(),self=this;
       r.validateSelector();
-      objForEach(this.staticRules, onPair, r.staticRules);
-      objForEach(this.dynamicRules, onPair, r.dynamicRules);
-      objForEach(this.defValues, onPair, r.defValues);
-      objForEach(this.includes, onPair, r.includes);
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        objForEach(self[key],onPair,r[key]);
+      });
       r.nested = this.nested.map(function (scope) {
         return scope.clone();
       });
       r.exts = this.exts.slice();
       r.selectors = this.selectors.slice();
+      if(this.spec)r.spec=this.spec;
       return r;
     }
   })(),
   reduce: function () {
     var staticRules = this.staticRules, v;
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function (value,key) {
       v = value.value;
       if (v !== undefined) {
         delete this[key];
@@ -1417,115 +1665,33 @@ Scope.prototype = {
   },
   getVar: function (array) {
     array = array || [];
-    objForEach(this.dynamicRules, function (key, value) {
+    objForEach(this.dynamicRules, function ( value,key) {
       value.getVar(array);
     });
     return array;
   },
   /**
    * @function
-   * @param  [object] $vars
-   * @return {array<object>}
+   * @param  $vars {Object}
+   * @return {Array<{selector:string,rules:Object}>}
+   * TODO:convert <selector,rules,spec>
    */
-   resolve: (function () {
-    var keepEmptyResult = false;
-    Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
-      set: function (v) {
-        keepEmptyResult = !!v;
-      },
-      get: function () {
-        return keepEmptyResult
-      }});
-    function log() {
-      if (ChangeSS.traceLog)
-        console.log.apply(console, arguments);
-    }
-
-    function resolveScope(scope, paramStack, $assign) {
-      var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
-        selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
-      objForEach(scope.dynamicRules, function (key, rule) {
-        if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
-          ruleObj[key] = rule.resolve($resolved).toString();
-        else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope);
-      });
-      r = [
-        {rules: ruleObj, selector: selector}
-      ];
-      objForEach(scope.includes, function (key, invokeParam) {
-        var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
-        objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (key, value) {
-          if (invokeParam[key])$param[key] = value;
-        });
-        resolveInclude(mixin, $param, selector).forEach(function (resObj) {
-          if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
-        });
-      });
-      return r.filter(function (pair) {
-        return keepEmptyResult || objNotEmpty(pair.rules);
-      });
-    }
-
-    function mergeResult(a, b) {
-      if (objNotEmpty(b.rules))
-        a.rules = mix(b.rules, a.rules);
-      return a;
-    }
-
-    function resolveInclude(mixObj, $vars, selector) {
-      mixObj.selectors = selector.split(',');
-      mixObj.validateSelector();
-      var r = mixObj.resolve($vars);
-      mixObj.backtraceSelector();
-      return r;
-    }
-    function getChild(parent, child) {
-      if (parent === child || !parent)return 0;
-      return parent.nested[parent.nested.indexOf(child) + 1] || 0;
-    }
-
-    function preVisit(scope, $assign) {
-      var childScope = 0, results = [], scopeStack = [], paramStack = [];
-      do {
-        if (childScope = getChild(scope, childScope)) {
-          scopeStack.push(scope);
-          paramStack.push(assignParam(scope, false, paramStack, $assign));
-          scope = childScope;
-          childScope = 0;
-        }
-        else {
-          results.unshift.apply(results, resolveScope(scope, paramStack, $assign));
-          scope = getChild(scopeStack[scopeStack.length - 1], scope);
-          if (!scope) {
-            childScope = scope = scopeStack.pop();
-            paramStack.pop();
-          }
-        }
-      } while (scope);
-
-      return results;
-    }
-
-    function assignParam(scope, resolve, paramStack, $assign) {
-      var lastAssign = paramStack[paramStack.length - 1] || {},
-        $mix = mix(lastAssign, scope.defValues, $assign);
-      return resolve ? ChangeSS.assign($mix) : $mix;
-    }
-
-    function objNotEmpty(obj) {
-      return obj && Object.getOwnPropertyNames(obj).length > 0;
-    }
-    return function ($vars) {
-      if (!$vars)$vars = {};
-      else if ($vars.$resolved)$vars = mix($vars.$unresolved, $vars.$resolved);
-      return preVisit(this, $vars);
-    }
-  })()
+  resolve:function($vars){
+    return scopeResolveFunc(this,$vars);
+  }
 };
+function getVarLocalName(name){
+  var i;
+  return (i=name.indexOf('->'))==-1? name:name.substring(0,i).trim();
+}
 ChangeSS.Scope = Scope;
 function Style(selectors, scope) {
   Scope.apply(this);
-  this.selector = selectors;
+  if(selectors instanceof MediaQuery){
+    this.selector='&';
+
+  }
+  else this.selector = selectors;
   this.addScope(scope || new Scope());
 }
 
@@ -1549,11 +1715,12 @@ Style.prototype = (function (scopeProto) {
 
   proto.addScope = function (scope) {
     if (scope instanceof Scope) {
-      this.defValues = mix(this.defValues, scope.defValues);
-      this.staticRules = mix(this.staticRules, scope.staticRules);
-      this.dynamicRules = mix(this.dynamicRules, scope.dynamicRules);
-      this.includes = mix(this.includes, scope.includes);
+      var self=this;
+      ['staticRules','dynamicRules','defValues','includes'].forEach(function(key){
+        self[key]=mix(self[key],scope[key]);
+      });
       this.exts.push.apply(this.exts, scope.exts);
+      ['validateSelector','backtraceSelector'].forEach(function(key){self[key]=scope[key]});
       for (var i = 0, ns = scope.nested, children = this.nested, child = ns[0]; child; child = ns[++i])
         children.push(child);
     }
@@ -1575,25 +1742,215 @@ Style.prototype = (function (scopeProto) {
     else
       return [];
   };
-
-  function filterKeyFrame(r){return /^(\d+\%|from|to)\s*$/.test(r.selector);}
-  function keyFrameResolve(){
-    return proto.resolve.apply(this,arguments).filter(filterKeyFrame);
-  }
-  proto.asKeyFrames=function(prefix){
-    this.spec=new KeyFrame(this.selector,prefix);
-    this.resolve=keyFrameResolve;
-    return this.asContainer();
-  };
   return proto;
 })(Scope.prototype);/**
+ * Created by 柏子 on 2015/1/14.
+ */
+var keepEmptyResult = false;
+/**
+ * @name ChangeSS.opt.keepEmptyResult
+ * @type boolean
+ */
+Object.defineProperty(ChangeSS.opt, 'keepEmptyResult', {
+  set: function (v) {
+    keepEmptyResult = !!v;
+  },
+  get: function () {
+    return keepEmptyResult
+  }});
+/**
+ * @function
+ * @param  {ChangeSS.Scope} scope
+ * @param  {Object} $vars
+ * @return {Array.<{selector:string,rules:Object,spec:Object}>}
+ */
+function scopeResolveFunc(scope,$vars) {
+  if (!$vars)$vars = {};
+  else if ($vars.$resolved)
+    $vars = mix($vars.$unresolved, $vars.$resolved);
+  return preVisit(scope, $vars);
+  function preVisit(scope, $assign) {
+    var childScope = 0, results = [], scopeStack = [], paramStack = [];
+    do {
+      if (childScope = getChild(scope, childScope)) {
+        scopeStack.push(scope);
+        paramStack.push(assignParam(scope, false, paramStack, $assign));
+        scope = childScope;
+        childScope = 0;
+      }
+      else {
+        results.unshift.apply(results, resolveScope(scope, paramStack, $assign,scope.spec||getSpec(scopeStack)));
+        scope = getChild(scopeStack[scopeStack.length - 1], scope);
+        if (!scope) {
+          childScope = scope = scopeStack.pop();
+          paramStack.pop();
+        }
+      }
+    } while (scope);
+    return results;
+  }
+  function getSpec(stack){
+    for(var i= stack.length- 1,spec,scope=stack[i];i>=0;scope=stack[--i])
+      if(spec=scope.spec)return spec;
+  }
+}
+function sheetResolveFunc(sheet,$vars){
+  var $assign = assign(mix(sheet.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),
+    ret={},spec,groupKey,sheetName=sheet.name;
+  sheet.scopes.forEach(function(scope){
+    scopeResolveFunc(scope,$param).forEach(function(result){
+      spec=result.spec;
+      groupKey='';
+      if(spec===undefined)groupKey='*';
+      else if(spec instanceof Var)
+        spec=(sheetName==spec.sheetName? sheet:ChangeSS.get(spec.sheetName)).medias[spec.symbol];
+      if(spec instanceof MediaQuery&&spec.canResolve($assign.$resolved))
+        groupKey=spec.toString($assign.$resolved)+'{*}';
+      else if(spec instanceof KeyFrame){
+        spec.resolve().forEach(function(key){
+          addResult(ret,key+'{*}',result);
+        });
+      }
+      if(groupKey)addResult(ret,groupKey,result);
+    });
+  });
+  return ret;
+  function addResult(container,key,result){
+    var r=container[key];
+    if(r==undefined)container[key]=[result];
+    else r.push(result);
+  }
+}
+
+
+function log() {
+  if (ChangeSS.traceLog)
+    console.log.apply(console, arguments);
+}
+/**
+ * @name ChangeSS.assign
+ * @param {Object}$param
+ * @param {Object}[$known]
+ * @returns {{$resolved: Object, $unresolved: Object}}
+ */
+function assign ($param, $known) {
+  var con,$unknown = mix($param),tem;
+  $known = mix($known);
+  do {
+    con = false;
+    objForEach($unknown, function (value,key) {
+      switch (ChangeSS.getType(value)) {
+        case TYPE.KEYWORD:
+        case TYPE.LENGTH:
+          $known[key] = value;
+          delete $unknown[key];
+          break;
+        case TYPE.LIST:
+          $unknown[key] = value = value.resolve($known);
+          if (!value.hasVars) {
+            $known[key] = value.toString();
+            delete  $unknown[key];
+          } else return;
+          break;
+        case TYPE.NONE:
+          throw 'unknown type';
+       case TYPE.VAR:
+          tem=value.resolve($known);
+          if(!value.equals(tem))$unknown[key]=tem;
+          else return;
+          break;
+        default :
+          if (value.canResolve($known))
+            $unknown[key] = value.resolve($known);
+          else return;
+      }
+      con = true;
+    });
+    if (!con)
+      con = Object.getOwnPropertyNames($unknown).some(function (key) {
+        $unknown[key].canResolve($known)
+      });
+  } while (con);
+  return {$resolved: $known, $unresolved: $unknown};
+}
+/**
+ *
+ * @param scope
+ * @param paramStack
+ * @param $assign
+ * @param group
+ * @returns Array.<ChangeSS.scopeResolveResult>
+ */
+function resolveScope(scope, paramStack, $assign,group) {
+  var $vars = assignParam(scope, true, paramStack, $assign), ruleObj = mix(scope.staticRules),
+    selector = scope.selectors.join(','), r, $resolved = $vars.$resolved;
+  if(!selector)return [];
+  objForEach(scope.dynamicRules, function ( rule,key) {
+    if (!ruleObj.hasOwnProperty(key) && rule.canResolve($resolved))
+      ruleObj[key] = rule.resolve($resolved).toString();
+    else log('cannot resolve rule ' + key + ':' + rule + ' in:', scope.selector);
+  });
+  r = [
+  /**
+   * @name ChangeSS.scopeResolveResult
+   * @type {{rules:Object,selector:String}}
+   */
+    {rules: ruleObj, selector: selector}
+  ];
+  objForEach(scope.includes, function ( invokeParam,key) {
+    var mixin = ChangeSS.get(key, 'mixin') || ChangeSS.error.notExist(key), $param = {};
+    objForEach(ChangeSS.assign(invokeParam, $resolved).$resolved, function (value,key) {
+      if (invokeParam[key])$param[key] = value;
+    });
+    resolveInclude(mixin, $param, selector).forEach(function (resObj) {
+      if (objNotEmpty(resObj.rules))List.addOrMerge(r, resObj, 'selector', mergeResult);
+    });
+  });
+  return r.filter(function (pair) {
+    if(group) pair.spec=group;
+    return keepEmptyResult || objNotEmpty(pair.rules);
+  });
+}
+
+function mergeResult(a, b) {
+  if (objNotEmpty(b.rules))
+    a.rules = mix(b.rules, a.rules);
+  return a;
+}
+
+function resolveInclude(mixObj, $vars, selector) {
+  mixObj.selectors = selector.split(',');
+  mixObj.validateSelector();
+  var r = mixObj.resolve($vars);
+  mixObj.backtraceSelector();
+  return r;
+}
+function getChild(parent, child) {
+  if (parent === child || !parent)return 0;
+  return parent.nested[parent.nested.indexOf(child) + 1] || 0;
+}
+function assignParam(scope, resolve, paramStack, $assign) {
+  var lastAssign = paramStack[paramStack.length - 1] || {},
+    $mix = mix(lastAssign, scope.defValues, $assign);
+  return resolve ? ChangeSS.assign($mix) : $mix;
+}
+function objNotEmpty(obj) {
+  return obj && Object.getOwnPropertyNames(obj).length > 0;
+}
+/**
  * Created by 柏然 on 2014/11/1.
+ */
+/**
+ * @namespace ChangeSS.Sheet
+ * @param {String}name
+ * @constructor
  */
 function Sheet(name) {
   this.name = name || ChangeSS.opt.defaultSheetName;
   this.scopes = [];
   this.mixins = {};
   this.vars = {};
+  this.medias={};
 }
 Sheet.trim=function(sheetName){
   return sheetName? Scope.trimSelector(sheetName).replace(/(\-\>\s*)/,''):'';
@@ -1627,37 +1984,23 @@ Sheet.prototype = (function (proto) {
       mixObj.setSheetName(this.name);
       this.mixins[$key.toString()] = mixObj;
     }
+    else if(type=='media'){
+      this.medias[sheetPart.value.symbol=sheetPart.key]=sheetPart.value;
+    }
     else if(type=='sheetname')
       this.name=sheetPart.value;
     else throw 'unknown type';
     return this;
   };
-  function addResult(container,key,array){
-    var r=container[key];
-    if(r==undefined)container[key]=array;
-    else r.push.apply(r,array);
-  }
+
   proto.resolve = function ($vars) {
-    var $assign = ChangeSS.assign(mix(this.vars, $vars)), $param = mix($assign.$unresolved, $assign.$resolved),r={};
-    this.scopes.forEach(function(scope){
-      var spec=scope.spec,key,result;
-      if(spec===undefined)
-        addResult(r,'*',scope.resolve($param));
-      else if(spec instanceof MediaQuery&&typeof (key=spec.resolve($assign.$resolved))=="string")
-        addResult(r,key+'{*}',scope.resolve($param));
-      else if(spec instanceof KeyFrame)
-      {
-        result=scope.resolve($param);
-        spec.getAnimations().forEach(function(key){addResult(r,key+'{*}',result);});
-      }
-    });
-    return r;
+    return sheetResolveFunc(this,$vars);
   };
   proto.toString =(function(){
     var separator='\n';
     function mapScope(scope){
       var rules = [], brc;
-      objForEach(scope.rules, function (key, value) {rules.push(key + ':' + value + ';');});
+      objForEach(scope.rules, function ( value,key) {rules.push(key + ':' + value + ';');});
       brc=rules.length? '{'+separator+'*'+separator+'}':'{*}';
       return scope.selector+brc.replace('*',rules.join(separator));
     }
@@ -1666,7 +2009,7 @@ Sheet.prototype = (function (proto) {
     }
     return function($vars){
       var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
-      objForEach(groups,function(key,group){
+      objForEach(groups,function(group,key){
         key=key.replace('{*}',keyRep);
         r.push(key.replace('*',mapGroup(group)))
       });
@@ -1681,13 +2024,11 @@ Sheet.prototype = (function (proto) {
       return sc;
     }));
     this.mixins = mix(this.mixins, sheet.mixins);
+    this.medias=mix(this.medias,sheet.medias);
     return this;
   };
   proto.validate = function () {
-    this.scopes.forEach(function (scope) {
-      scope.validateSelector();
-    });
-    return this;
+   return sheetLinkInternal(this);
   };
   proto.get = function (id, type) {
     if (type == 'scope' || id[0] != '$') {
@@ -1696,7 +2037,8 @@ Sheet.prototype = (function (proto) {
     } else if (type == 'mixin')
       return this.mixins[id];
     else if (type == 'var')return this.vars[id];
-    else return this.mixins[id] || this.vars[id];
+    else if (type=='media')return this.medias[id];
+    else return this.mixins[id] || this.vars[id]||this.medias[id];
   };
   proto.getStyles = function (id) {
     return this.scopes.reduce(function (pre, style) {
@@ -1706,146 +2048,186 @@ Sheet.prototype = (function (proto) {
   };
   return proto;
 })({});/**
- * Created by 柏然 on 2014/11/21.
- */
-function MediaQuery(mType, condition) {
-  if (!(this instanceof MediaQuery))return new MediaQuery(mType, condition);
-  this.mediaTypes = [mType || ''];
-  this.conditions = [
-    {}
-  ];
-  this.groupPrefix='@media';
-  this.add(condition);
-}
-MediaQuery.prototype = {
-  add: function (pair, mediaType) {
-    var i;
-    if (mediaType == undefined) i = 0;
-    else if ((i = this.mediaTypes.indexOf(mediaType)) == -1)return this;
-    if (pair && pair.key)
-      this.conditions[i][pair.key] = pair.value;
-    return this;
-  },
-  merge: function (mq) {
-    this.mediaTypes = this.mediaTypes.concat(mq.mediaTypes);
-    this.conditions = this.conditions.concat(mq.conditions);
-    return this;
-  },
-  apply: function (item) {
-    if (item instanceof Array)
-      item.forEach(function (i) {
-        this.apply(i)
-      }, this);
-    else if (item instanceof Style) {
-      item.media = this;
-    }
-    return this;
-  },
-  reduce: function () {
-    this.conditions.forEach(function (con) {
-      objForEach(con, function (key, v) {
-        if(v==undefined)con[key]=v;
-        else {
-          if (v.resolve)v = v.resolve();
-          con[key] = v.hasVars ? v : v.toString();
-        }
-      });
-    });
-    this.variables = null;
-    return this;
-  },
-  clone: (function () {
-    function cloneObj(obj) {
-      var o = {};
-      objForEach(obj, function (key, value) {
-        o[key] = value.clone ? value.clone() : value
-      });
-      return o;
-    }
-    return function () {
-      var m = new MediaQuery();
-      m.mediaTypes = this.mediaTypes.slice();
-      m.conditions = this.conditions.map(cloneObj);
-      m.groupPrefix=this.groupPrefix;
-      return m;
-    }
-  })(),
-  toString: (function () {
-    var MEDIA_AND=' and ';
-    function resolveMedia(conMap, $known) {
-      var r = [];
-      objForEach(conMap, function (key, value) {
-        if(value==undefined) r.push('('+key+')');
-        else{
-          if (value.hasVars)value = value.resolve($known);
-          r.push('(' + key + ':' + value + ')');
-        }
-      });
-      return r.join(MEDIA_AND);
-    }
-
-    return function ($vars) {
-      var $known =$vars? ChangeSS.assign($vars).$resolved:{}, cons = this.conditions;
-      return this.groupPrefix+' '+ this.mediaTypes.map(function (m_type, i) {
-        var mcon=resolveMedia(cons[i], $known);
-        if(m_type)
-          return mcon? m_type+MEDIA_AND+mcon:m_type;
-        return mcon;
-        //return m_type?   m_type+MEDIA_AND+mcon  : mcon;
-      }).join(',');
-    }
-  })(),
-  canResolve: function ($vars) {
-    return !this.hasVars || this.variables.every(function (v) {
-      return v.canResolve($vars)
-    });
-  },
-  get hasVars() {
-    var vs = this.variables || (this.variables = this.getVar());
-    return vs.length > 0;
-  },
-  getVar: function (array) {
-    array = array || [];
-    this.conditions.forEach(function (condition) {
-      objForEach(condition, function (key, v) {
-        if (v instanceof Var) List.arrayAdd(array, v);
-        else if (v.getVar) v.getVar(array);
-      });
-    });
-    return array;
-  }
-};
-MediaQuery.prototype.resolve = function ($vars) {
-  return this.canResolve($vars) ? this.toString($vars) : this.clone();
-};
-ChangeSS.MediaQuery = MediaQuery;
-function KeyFrame(name,prefix){
-  this.name=name;
-  this.prefix=prefix;
-}
-KeyFrame.prototype=(function(){
-  var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
-  function mapPrefix(pre){
-    if(pre)pre='-'+pre+'-';
-    return '@'+pre+'keyframes';
-  }
-  return {
-    toString:function(){
-      return this.prefix+' '+this.name;
-    },
-    getAnimations:function(){
-      var prefix,name=this.name,r;
-      if((prefix=this.prefix)===normalizePrefixes[0]){
-        if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
-        else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
-      }
-      else r= [prefix];
-      return r.map(function(pre){return pre+' '+name});
-    }
-  }
-})();/**
  * Created by 柏然 on 2014/11/6.
  */
+function sheetLinkInternal(sheet){
+  var mediaMap=sheet.medias,spec,mediaSymbol,sheetName=sheet.name;
+  sheet.scopes.forEach(function (scope) {
+    scope.validateSelector();
+    if(spec=setSpecSheetName(scope))
+     if(spec instanceof KeyFrame)
+        scope.nested=scope.nested.filter(filterKeyFrame);
+     else if(spec instanceof MediaQuery&& (mediaSymbol=spec.symbol))
+       mediaMap[mediaSymbol]=spec;
+  });
+  return sheet;
+  function filterKeyFrame(r){
+    return r.selector&&/^\s*(\d+\%|from|to)\s*$/.test(r.selector);
+  }
+  function setSpecSheetName(scope){
+    var spec=scope.spec;
+    if(spec&&!spec.sheetName)spec.sheetName=sheetName;
+    scope.nested.forEach(setSpecSheetName);
+    return spec;
+  }
+}
+function setGlobalNameIFNot(name, sheetName) {
+  if (name.indexOf('->') > -1)return name;
+  if (!sheetName)Error('sheetName need');
+  return name + '->' + sheetName;
+}
+ChangeSS.link = (function () {
+
+  function reportCircle(graph) {
+    var paths = graph.getPaths(info = []), info;
+    if (info.length) ChangeSS.error.cyclicInherit(info.map(function (scope) {
+      return '[' + (scope.globalName || scope.selector || scope.symbol) + ']';
+    }).join('->'), graph);
+    return paths;
+  }
+
+
+
+  var validateMixCircle, validateExtCircle, linkOtherSheet;
+  linkOtherSheet = (function () {
+    function filterVar(value,key, proName) {
+      var i, gn = key;
+      if ((i = key.indexOf('->')) == -1)
+        gn += '->' + this.name;
+      else {
+        ChangeSS.get(key.substr(i + 2))[proName][key.substr(0, i)] = value;
+        delete this[proName][key];
+      }
+      value.globalName = gn;
+    }
+
+    function linkInclude(scope, sheetname) {
+      if (!scope.sheetName)debugger;
+      objForEach(scope.includes, function ( value,key) {
+        delete this[key];
+        this[setGlobalNameIFNot(key, sheetname)] = value;
+      }, scope.includes);
+      scope.exts = scope.exts.map(function (name) {
+        return setGlobalNameIFNot(name, sheetname);
+      });
+      scope.nested.forEach(function (c) {
+        linkInclude(c, sheetname);
+      });
+    }
+
+    function linkOtherSheet(sheet) {
+      var sheetName = sheet.name;
+      objForEach(sheet.vars, filterVar, sheet, 'vars');
+
+      objForEach(sheet.mixins, function ( mixin,key) {
+        filterVar.apply(sheet, [ mixin,key, 'mixins']);
+        linkInclude(mixin, sheetName);
+      });
+      sheet.scopes.forEach(function (s) {
+        linkInclude(s, sheetName);
+      });
+    }
+
+    return linkOtherSheet;
+  })();
+  validateMixCircle = (function () {
+    function addMixinExts(scope, mixin) {
+      var cs;
+      List.arrayAdd(scope.exts, mixin.exts);
+      mixin.nested.forEach(function (nestin) {
+        cs = new Style(nestin.selectors);
+        scope.addStyle(cs);
+        cs.resolve = resolveToNull;
+        cs.validateSelector(scope.selectors);
+        addMixinExts(cs, nestin);
+      })
+    }
+
+    function resolveToNull() {
+      return [];
+    }
+
+    function injectIncludeExt(path) {
+      for (var i = path.length - 1; i > 0; i--)
+        addMixinExts(path[i - 1], path[i]);
+    }
+
+    function collectInclude(scope, graph) {
+      objForEach(scope.includes, function (v,includeName) {
+        var mixObj = ChangeSS.get(includeName, 'mixin') || ChangeSS.error.notExist(includeName);
+        graph.addEdge(scope, mixObj);
+      });
+      scope.nested.forEach(function (child) {
+        collectInclude(child, graph);
+      });
+      return graph;
+    }
+
+    function validateMixCircle(sheets, graph) {
+      sheets.forEach(function (sheet) {
+        sheet.scopes.forEach(function (s) {
+          collectInclude(s, graph);
+        });
+        objForEach(sheet.mixins, function ( mixObj,key) {
+          collectInclude(mixObj, graph);
+        });
+      });
+      reportCircle(graph).forEach(injectIncludeExt);
+    }
+
+    return validateMixCircle;
+  })();
+  validateExtCircle = (function () {
+    function copyExtToSheet(scope, sheet) {
+      var cscope = scope.clone();
+      sheet.add({value: cscope, type: 'style'});
+      return cscope;
+    }
+
+    function handleExtPath(path) {
+      for (var i = 0, superScope = path[i], baseScope = path[i + 1]; baseScope; superScope = path[++i], baseScope = path[i + 1]) {
+        if (baseScope.sheetName !== superScope.sheetName)
+          baseScope = copyExtToSheet(baseScope, ChangeSS.get(superScope.sheetName));
+        List.arrayAdd(baseScope.selectors, superScope.selector);
+        baseScope._selector = null;
+      }
+      return path;
+    }
+
+    function collectExt(scope, graph) {
+      if (!scope.sheetName)Error('no sheetName');
+      scope.exts.forEach(function (name) {
+       var styles= ChangeSS.get(name, 'styles');
+       styles.length? styles.forEach(function (style) {
+          graph.addEdge(scope, style);
+        }):ChangeSS.error.notExist(name);
+      });
+      scope.nested.forEach(function (s) {
+        collectExt(s, graph);
+      });
+    }
+
+    function validateExtCircle(sheets, graph) {
+      sheets.forEach(function (sheet) {
+        sheet.scopes.forEach(function (s) {
+          collectExt(s, graph);
+        });
+      });
+      reportCircle(graph).forEach(handleExtPath);
+    }
+
+    return validateExtCircle;
+  })();
+  return function (sheets) {
+    var includeGraph, extGraph;
+    includeGraph = new Graph();
+    extGraph = new Graph();
+    sheets.forEach(linkOtherSheet);
+    validateMixCircle(sheets, includeGraph);
+    validateExtCircle(sheets, extGraph);
+    return sheets;
+  }
+})();
 function Graph() {
   if (!(this instanceof Graph))return new Graph();
   this.vertexes = this.createList();
@@ -2013,162 +2395,155 @@ Graph.prototype = {
   }
 };
 ChangeSS.Graph = Graph;
-ChangeSS.link = (function () {
-  ChangeSS.error.cyclicInherit = function (pathInfo, graph) {
-    throw Error('Cyclic inherits detected:' + pathInfo);
-  };
-  function reportCircle(graph) {
-    var paths = graph.getPaths(info = []), info;
-    if (info.length) ChangeSS.error.cyclicInherit(info.map(function (scope) {
-      return '[' + (scope.globalName || scope.selector || scope.symbol) + ']';
-    }).join('->'), graph);
-    return paths;
+ChangeSS.error.cyclicInherit = function (pathInfo, graph) {
+  throw Error('Cyclic inherits detected:' + pathInfo);
+};/**
+ * Created by 柏然 on 2014/11/21.
+ */
+function MediaQuery(mType, condition) {
+  if (!(this instanceof MediaQuery))return new MediaQuery(mType, condition);
+  this.mediaTypes = [mType || ''];
+  this.conditions = [
+    {}
+  ];
+  this.groupPrefix='@media';
+  this.add(condition);
+}
+MediaQuery.prototype = {
+  add: function (pair, mediaType) {
+    var i;
+    if (mediaType == undefined) i = 0;
+    else if ((i = this.mediaTypes.indexOf(mediaType)) == -1)return this;
+    if (pair && pair.key)
+      this.conditions[i][pair.key] = pair.value;
+    return this;
+  },
+  merge: function (mq) {
+    this.mediaTypes = this.mediaTypes.concat(mq.mediaTypes);
+    this.conditions = this.conditions.concat(mq.conditions);
+    return this;
+  },
+  apply: function (item) {
+    if (item instanceof Array)
+      item.forEach(function (i) {
+        this.apply(i)
+      }, this);
+    else if (item instanceof Style) {
+      item.media = this;
+    }
+    return this;
+  },
+  reduce: function () {
+    this.conditions.forEach(function (con) {
+      objForEach(con, function ( v,key) {
+        if(v==undefined)con[key]=v;
+        else {
+          if (v.resolve)v = v.resolve();
+          con[key] = v.hasVars ? v : v.toString();
+        }
+      });
+    });
+    this.variables = null;
+    return this;
+  },
+  clone: (function () {
+    function cloneObj(obj) {
+      var o = {};
+      objForEach(obj, function ( value,key) {
+        o[key] = value.clone ? value.clone() : value
+      });
+      return o;
+    }
+    return function () {
+      var m = new MediaQuery();
+      m.mediaTypes = this.mediaTypes.slice();
+      m.conditions = this.conditions.map(cloneObj);
+      m.groupPrefix=this.groupPrefix;
+      return m;
+    }
+  })(),
+  toString: (function () {
+    var MEDIA_AND=' and ';
+    function resolveMedia(conMap, $known) {
+      var r = [];
+      objForEach(conMap, function ( value,key) {
+        if(value==undefined) r.push('('+key+')');
+        else{
+          if (value.hasVars)value = value.resolve($known);
+          r.push('(' + key + ':' + value + ')');
+        }
+      });
+      return r.join(MEDIA_AND);
+    }
+    return function ($known) {
+      var cons = this.conditions;
+      return this.groupPrefix+' '+ this.mediaTypes.map(function (m_type, i) {
+        var mcon=resolveMedia(cons[i], $known);
+        if(m_type)
+          return mcon? m_type+MEDIA_AND+mcon:m_type;
+        return mcon;
+      }).join(',');
+    }
+  })(),
+  canResolve: function ($vars) {
+    return !this.hasVars || this.variables.every(function (v) {
+      return v.canResolve($vars)
+    });
+  },
+  get hasVars() {
+    var vs = this.variables || (this.variables = this.getVar());
+    return vs.length > 0;
+  },
+  getVar: function (array) {
+    array = array || [];
+    this.conditions.forEach(function (condition) {
+      objForEach(condition, function (v) {
+        if (v instanceof Var) List.arrayAdd(array, v);
+        else if (v.getVar) v.getVar(array);
+      });
+    });
+    return array;
   }
-
-  function setGlobalNameIFNot(name, sheetName) {
-    if (name.indexOf('->') > -1)return name;
-    if (!sheetName)Error('sheetName need');
-    return name + '->' + sheetName;
+};
+MediaQuery.prototype.resolve = function ($vars) {
+  return this.canResolve($vars) ? this.toString($vars) : this.clone();
+};
+ChangeSS.MediaQuery = MediaQuery;
+function KeyFrame(name,prefix){
+  this.name=name;
+  this.prefix=prefix;
+}
+KeyFrame.prototype=(function(){
+  var vendorPrefixes=['o','moz','ms','webkit',''].map(mapPrefix),normalizePrefixes=['@keyframes'];
+  function mapPrefix(pre){
+    if(pre)pre='-'+pre+'-';
+    return '@'+pre+'keyframes';
   }
-
-  var validateMixCircle, validateExtCircle, linkOtherSheet;
-  linkOtherSheet = (function () {
-    function filterVar(key, value, proName) {
-      var i, gn = key;
-      if ((i = key.indexOf('->')) == -1)
-        gn += '->' + this.name;
-      else {
-        ChangeSS.get(key.substr(i + 2))[proName][key.substr(0, i)] = value;
-        delete this[proName][key];
+  function resolveKeyFrame(animationName,prefix){
+    var r;
+    if(prefix===normalizePrefixes[0]){
+      if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
+      else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
+    }
+    else r= [prefix];
+    return r.map(function(pre){return pre+' '+animationName});
+  }
+  return {
+    toString:function(){
+      return this.prefix+' '+this.name;
+    },
+    resolve:function(){
+      return resolveKeyFrame(this.name,this.prefix);
+    }/*,
+    getAnimations:function(){
+      var prefix,name=this.name,r;
+      if((prefix=this.prefix)===normalizePrefixes[0]){
+        if(ChangeSS.opt.addKeyFramesVendorPrefix) r=vendorPrefixes;
+        else r= ChangeSS.opt.preferKeyFramesVendorPrefix? [mapPrefix(ChangeSS.opt.vendorPrefix)]:normalizePrefixes;
       }
-      value.globalName = gn;
-    }
-
-    function linkInclude(scope, sheetname) {
-      if (!scope.sheetName)debugger;
-      objForEach(scope.includes, function (key, value) {
-        delete this[key];
-        this[setGlobalNameIFNot(key, sheetname)] = value;
-      }, scope.includes);
-      scope.exts = scope.exts.map(function (name) {
-        return setGlobalNameIFNot(name, sheetname);
-      });
-      scope.nested.forEach(function (c) {
-        linkInclude(c, sheetname);
-      });
-    }
-
-    function linkOtherSheet(sheet) {
-      var sheetName = sheet.name;
-      objForEach(sheet.vars, filterVar, sheet, 'vars');
-      objForEach(sheet.mixins, function (key, mixin) {
-        filterVar.apply(sheet, [key, mixin, 'mixins']);
-        linkInclude(mixin, sheetName);
-      });
-      sheet.scopes.forEach(function (s) {
-        linkInclude(s, sheetName);
-      });
-
-    }
-
-    return linkOtherSheet;
-  })();
-  validateMixCircle = (function () {
-    function addMixinExts(scope, mixin) {
-      var cs;
-      List.arrayAdd(scope.exts, mixin.exts);
-      mixin.nested.forEach(function (nestin) {
-        cs = new Style(nestin.selectors);
-        scope.addStyle(cs);
-        cs.resolve = resolveToNull;
-        cs.validateSelector(scope.selectors);
-        addMixinExts(cs, nestin);
-      })
-    }
-
-    function resolveToNull() {
-      return [];
-    }
-
-    function injectIncludeExt(path) {
-      for (var i = path.length - 1; i > 0; i--)
-        addMixinExts(path[i - 1], path[i]);
-    }
-
-    function collectInclude(scope, graph) {
-      objForEach(scope.includes, function (includeName) {
-        var mixObj = ChangeSS.get(includeName, 'mixin') || ChangeSS.error.notExist(includeName);
-        graph.addEdge(scope, mixObj);
-      });
-      scope.nested.forEach(function (child) {
-        collectInclude(child, graph);
-      });
-      return graph;
-    }
-
-    function validateMixCircle(sheets, graph) {
-      sheets.forEach(function (sheet) {
-        sheet.scopes.forEach(function (s) {
-          collectInclude(s, graph);
-        });
-        objForEach(sheet.mixins, function (key, mixObj) {
-          collectInclude(mixObj, graph);
-        });
-      });
-      reportCircle(graph).forEach(injectIncludeExt);
-    }
-
-    return validateMixCircle;
-  })();
-  validateExtCircle = (function () {
-    function copyExtToSheet(scope, sheet) {
-      var cscope = scope.clone();
-      sheet.add({value: cscope, type: 'style'});
-      return cscope;
-    }
-
-    function handleExtPath(path) {
-      for (var i = 0, superScope = path[i], baseScope = path[i + 1]; baseScope; superScope = path[++i], baseScope = path[i + 1]) {
-        if (baseScope.sheetName !== superScope.sheetName)
-          baseScope = copyExtToSheet(baseScope, ChangeSS.get(superScope.sheetName));
-        List.arrayAdd(baseScope.selectors, superScope.selector);
-        baseScope._selector = null;
-      }
-      return path;
-    }
-
-    function collectExt(scope, graph) {
-      if (!scope.sheetName)Error('no sheetName');
-      scope.exts.forEach(function (name) {
-       var styles= ChangeSS.get(name, 'styles');
-       styles.length? styles.forEach(function (style) {
-          graph.addEdge(scope, style);
-        }):ChangeSS.error.notExist(name);
-      });
-      scope.nested.forEach(function (s) {
-        collectExt(s, graph);
-      });
-    }
-
-    function validateExtCircle(sheets, graph) {
-      sheets.forEach(function (sheet) {
-        sheet.scopes.forEach(function (s) {
-          collectExt(s, graph);
-        });
-      });
-      reportCircle(graph).forEach(handleExtPath);
-    }
-
-    return validateExtCircle;
-  })();
-  return function (sheets) {
-    var includeGraph, extGraph;
-    includeGraph = new Graph();
-    extGraph = new Graph();
-    sheets.forEach(linkOtherSheet);
-    validateMixCircle(sheets, includeGraph);
-    validateExtCircle(sheets, extGraph);
-    return sheets;
+      else r= [prefix];
+      return r.map(function(pre){return pre+' '+name});
+    }*/
   }
 })();/* generated by jison-lex 0.3.4 */
 var lexer = (function(){
@@ -2500,78 +2875,80 @@ var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* ignore*/;
 break;
-case 1:return 37;
+case 1:return 47;
 break;
-case 2:this.begin("EXP");return 44;
+case 2:return 37;
 break;
-case 3:return 27;
+case 3:this.begin("EXP");return 40;
 break;
-case 4:this.begin("EXP");return 47;
+case 4:return 27;
 break;
-case 5:this.begin('EXT');return 30;
+case 5:this.begin("EXP");return 49;
 break;
-case 6:return 46;
+case 6:this.begin('EXT');return 30;
 break;
-case 7:return 5;
+case 7:return 41;
 break;
-case 8:this.popState();return 31;
+case 8:return 5;
 break;
-case 9:return 4;
+case 9:this.popState();return 31;
 break;
-case 10:return 31;
+case 10:return 4;
 break;
-case 11:/* ignore*/;
+case 11:return 31;
 break;
-case 12:this.begin("EXP");return 22;
+case 12:/* ignore*/;
 break;
-case 13:return 24;
+case 13:this.begin("EXP");return 22;
 break;
-case 14:this.popState();return 34;
+case 14:return 24;
 break;
-case 15:this.popState();return 35;
+case 15:this.popState();return 34;
 break;
-case 16:return 13;
+case 16:this.popState();return 35;
 break;
-case 17:return 14;
+case 17:return 13;
 break;
-case 18:return 22;
+case 18:return 14;
 break;
-case 19:return 20;
+case 19:return 22;
 break;
-case 20:return 42;
+case 20:return 20;
 break;
-case 21:return 39;
+case 21:return 44;
 break;
-case 22:return 7;
+case 22:return 39;
 break;
-case 23:popUntil(this,'INITIAL');return 24;
+case 23:return 7;
 break;
-case 24:return "STRING";
+case 24:popUntil(this,'INITIAL');return 24;
 break;
-case 25:return "URL";
+case 25:return "STRING";
 break;
-case 26:return 15;
+case 26:return "URL";
 break;
-case 27:return 9;
+case 27:return 15;
 break;
-case 28:return 10;
+case 28:return 9;
 break;
-case 29:return 11;
+case 29:return 10;
 break;
-case 30:return 12;
+case 30:return 11;
 break;
-case 31:return 20;
+case 31:return 12;
 break;
 case 32:return 20;
 break;
 case 33:return 20;
 break;
-case 34:return "EOF";
+case 34:return 20;
+break;
+case 35:return "EOF";
 break;
 }
 },
-rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(:(:|\w+-?(?!\())))*?(?=(\((\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*):)|\{|,)))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:#([0-9a-fA-F])+)/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,21,22,33,34],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,9,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,11,14,15,16,17,18,21,22,33,34],"inclusive":true}}
+rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@treatas\b)/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(::|:(?![^\{]*?[\)\;]([\s\r\n\t\f])*[\}\;])))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:(#([0-9a-fA-F])+)|(!\w+))/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18,19,22,23,34,35],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,8,10,12,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,19,22,23,34,35],"inclusive":true}}
 });
 return lexer;
 })();

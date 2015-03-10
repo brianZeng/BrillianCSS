@@ -5,11 +5,11 @@ describe('cross sheet behaviors', function () {
   var src, scope, sheet;
 
   function getFirstScope(src) {
-    return scope = ChangeSS.eval(src)[0].scopes[0];
+    return scope = ChangeSS.parse(src)[0].scopes[0];
   }
 
   function getFirstSheet(src) {
-    return sheet = ChangeSS.eval(src)[0];
+    return sheet = ChangeSS.parse(src)[0];
   }
   function getFirstResolveRulesObj($vars,aSheet){
     aSheet=aSheet||sheet;
@@ -67,13 +67,28 @@ describe('cross sheet behaviors', function () {
         '@sheetname default;' +
         'div{@include $box->inh;font-size:2em;}';
       var selectors;
-       ChangeSS.eval(src);
+       ChangeSS.compile(src);
       sheet = ChangeSS.get('default');
       selectors = sheet.scopes.map(function (s) {
         return s.selector;
       });
       containAll(selectors, 'div', '.borderBox,div');
     });
+    it('3.scope default value ref local sheet',function(){
+      src='@sheetname lib;$color:#ff0000;' +
+      '@mixin $red-gradient($gradient:linear-gradient($color 5%,darken($color,20) 100%);){color:$gradient};' +
+      '@sheetname default;p{@include $red-gradient->lib;}';
+      var linear=ChangeSS.parse('$test-gradient:linear-gradient(#f00 5%,darken(#f00,20) 100%);')[0].vars['$test-gradient'];
+      var sheets=ChangeSS.compile(src),libSheet=ChangeSS.get('lib'),appSheet=ChangeSS.get('default');
+      var mixin=libSheet.mixins['$red-gradient'];
+      expect(mixin.defValues['$gradient'].param[0].sheetName).toBe('lib');
+      expect(appSheet.scopes[0].resolve()[0]).toEqual({
+        selector:'p',
+        rules:{
+          color:linear+''
+        }
+      })
+    })
   });
   describe('c.extends style in another sheet', function () {
     it('1.when extends from another sheet', function () {
@@ -81,7 +96,7 @@ describe('cross sheet behaviors', function () {
         '@sheetname default;' +
         '  div{@extend .base->remote;}';
       var selectors;
-      ChangeSS.eval(src);
+      ChangeSS.compile(src);
       sheet = ChangeSS.get('default');
       selectors = sheet.scopes.map(function (s) {
         return s.selector;

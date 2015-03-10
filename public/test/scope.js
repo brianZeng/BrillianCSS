@@ -4,7 +4,7 @@
 
 describe('Scope static behaviors', function () {
   function getFirstScope(src) {
-    return ChangeSS.parse(src)[0].validate().scopes[0];
+    return ChangeSS.parse(src)[0].scopes[0];
   }
 
   function getObjLength(obj) {
@@ -40,7 +40,7 @@ describe('Scope static behaviors', function () {
     });
     src = 'div{' + r.join('') + '}';
     it('scope resolves static rules as they are input', function () {
-      var scope = ChangeSS.eval(src)[0].scopes[0];
+      var scope = ChangeSS.compile(src)[0].scopes[0];
       console.log(scope.resolve());
       expect(scope.staticRules).toEqual(rules);
     });
@@ -57,12 +57,16 @@ describe('Scope static behaviors', function () {
     it('a scope can hold default values', function () {
       var src = 'canvas($width:512px*2;$color:rgb(0,123,0);' +
         '       $border:1 solid black;$display:inline-block;$height:$width){}', scope = getFirstScope(src);
-      expect(scope.defValues).toEqual({
+
+      var toEuqalObj={
         "$width": Length('1024px'),
-        "$color": 'rgb(0,123,0)',
+        "$color": ChangeSS.Color([0,123,0]),
         "$border": List(Length(1), 'solid black'),
         "$display": 'inline-block',
-        "$height": Var('$width')
+        "$height": Var('$width',ChangeSS.opt.defaultSheetName)
+      };
+      Object.getOwnPropertyNames(scope.defValues).forEach(function(key){
+        expect(scope.defValues[key]).toEqual(toEuqalObj[key]);
       });
       src = src.replace('{}', '{&:hover($border:2px solid $hoverColor){}}');
       scope = getFirstScope(src).nested[0];
@@ -83,7 +87,6 @@ describe('Scope static behaviors', function () {
         '}';
       //src='form{ &:hover{}}';
       var scope =getFirstSheet(src).scopes[0];
-      debugger;
       expect(scope.nested.length).toBe(4);
     });
     it('a scope can also nest very deep', function () {
@@ -112,7 +115,7 @@ describe('Scope static behaviors', function () {
     var sheets, src;
 
     function getSheets() {
-      return sheets = ChangeSS.eval(src);
+      return sheets = ChangeSS.compile(src);
     }
 
     it('can be separeted by @sheetname,@sheetname must be the first line of the sheet', function () {
@@ -135,10 +138,11 @@ describe('Scope static behaviors', function () {
         return sheet.get('$color')
       })).toEqual(['red', 'blue']);
     });
-    it('can assign a value or mixin to another sheet var', function () {
+    it('cannot assign a value or mixin to another sheet var', function () {
       src = '@sheetname foo;$color:red;' +
         '@sheetname bar;$color:blue;' +
         '$color->foo:white;';
+      debugger;
       expect(getSheets().length).toBe(2);
       expect(sheets.map(function (sheet) {
         return sheet.get('$color')
@@ -148,8 +152,8 @@ describe('Scope static behaviors', function () {
         '$color->bar:#000;';
       getSheets();
       expect(sheets.map(function (sheet) {
-        return sheet.get('$color')
-      })).toEqual(['red', '#000']);
+        return sheet.get('$color').toString()
+      })).toEqual(['red',ChangeSS.Color('#000')+'']);
       src = '@sheetname bar;' +
         'div{}' +
         '@sheetname foo;' +
@@ -181,5 +185,22 @@ describe('Scope static behaviors', function () {
       }), 'div', '.auto,div');
       expect(def.scopes[0].includes).toEqual(jasmine.objectContaining({'$dash->lib': {}}))
     });
-  })
+  });
+  describe('4.validate Selector',function(){
+    var src='div{p{.mo &{}}}';
+    var scope=getFirstScope(src),child=scope.nested[0],grandchild=child.nested[0];
+    it('only validate onece',function(){
+      expect(child.selector).toBe('div p');
+      expect(grandchild.selector).toBe('.mo div p');
+      scope.validateSelector();
+      expect(child.selector).toBe('div p');
+      expect(grandchild.selector).toBe('.mo div p');
+    });
+    it('restore selector when backtracked',function(){
+      scope.backtraceSelector();
+      expect(child.selector).toBe('p');
+      expect(grandchild.selector).toBe('.mo &');
+    })
+
+  });
 });

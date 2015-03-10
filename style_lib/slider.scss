@@ -1,0 +1,104 @@
+@sheetname sliderLib;
+$normal-color:#ccc;
+$danger-color:#d9534f;
+$success-color:#77d42a;
+$warning-color:#f0ad4e;
+$info-color:#5bc0de;
+$primary-color:#337ab7;
+$slider-height:15px;
+@mixin $slider-success($height:$slider-height){
+  @include $slider($height:$height;$track-color:$success-color;)
+}
+@mixin $slider-warning($height:$slider-height){
+  @include $slider($height:$height;$track-color:$warning-color;)
+}
+@mixin $slider-danger($height:$slider-height){
+  @include $slider($height:$height;$track-color:$danger-color;)
+}
+@mixin $slider-primary($height:$slider-height){
+ @include $slider($height:$height;$track-color:$primary-color;)
+}
+@mixin $slider-normal($height:$slider-height;){
+  @include $slider($height:$height;$track-color:$normal-color;$thumb-border-color:#777);
+}
+@mixin $slider-info($height:$slider-height;){
+  @include $slider($height:$height);
+}
+@mixin  $slider(
+$width:100%;$display:block;
+$height:$slider-height;
+$track-border: 2px solid transparent;
+$track-color: $info-color;
+$track-radius: $height;
+$track-height: $height/3;
+$thumb-border-color: darken($track-color,5);
+$thumb-color: #fff;
+$background: transparent;
+$thumb-offset: -1px)
+{
+  -webkit-appearance: none;
+  width: $width;
+  outline: none;
+  border: none;
+  border-radius: $height;
+  height: $height;
+  background: $background;
+  display:$display;
+&::-ms-track {
+  @include $track($radius:$track-radius;$color: $track-color;$border: $track-border;$width: $width;$height: $track-height);
+}
+
+&::-moz-range-track {
+  @include $track($radius:$track-radius;$color: $track-color;$border: $track-border;$width: $width;$height: $track-height);
+}
+
+&::-webkit-slider-runnable-track {
+  @include $track($radius:$track-radius;$color: $track-color;$border: $track-border;$width: $width;$height: $track-height);
+}
+
+&::-moz-range-thumb {
+  @include $thumb($color:$thumb-color;$border-color:$thumb-border-color;$height: $height; $offset: $thumb-offset);
+}
+
+&::-ms-thumb {
+  @include $thumb($color:$thumb-color;$border-color:$thumb-border-color;$height: $height; $offset: $thumb-offset);
+
+}
+
+&::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  @include $thumb($color:$thumb-color;$border-color:$thumb-border-color;$height: $height; $offset: $thumb-offset);
+
+}
+}
+@mixin  $track($color:$info-color; $border: none; $radius:100%;$height: 5px)
+{
+  background: $color;
+  border-radius: $radius;
+  box-sizing: content-box;
+  height: $height;
+  width:100%;
+  margin: 5px;
+}
+@mixin $thumb(
+$color: white;$height: 20px;
+$shadow-color:transparentize(darken($border-color,20),0.5);
+$border-color:$info-color;
+$shadow: 0px 0px 6px 2px $shadow-color;
+$border: 1px solid $border-color;
+$offset: -2px)
+{
+  background: $color;
+  width: $height;
+  height: $height;
+  border: $border;
+  border-radius: 100%;
+  position: relative;
+  cursor: pointer;
+  top: -$height/4+$offset;
+  z-index: 1;
+  box-sizing: border-box;
+&:active,&:hover  {
+  box-shadow: $shadow;
+}
+}

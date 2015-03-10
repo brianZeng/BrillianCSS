@@ -3,15 +3,26 @@
  */
 describe('scope resolve behaviors', function () {
   function getFirstScope(src) {
-    return ChangeSS.eval(src)[0].scopes[0];
+    return ChangeSS.compile(src)[0].scopes[0];
   }
 
   function getFirstSheet(src) {
-    return ChangeSS.eval(src)[0];
+    return ChangeSS.compile(src)[0];
   }
-
+  function getFirstSheetResolvedObj(source,$vars){
+     sheet=ChangeSS.compile(source||src);
+    var r=sheet.resolve($vars),keys=Object.getOwnPropertyNames(r);
+    return keys.length? r[keys[0]][0]:undefined;
+  }
+  beforeEach(function(){
+    ChangeSS.opt.keepEmptyResult=true;
+  });
+  afterEach(function(){
+    ChangeSS.opt.keepEmptyResult=false;
+  });
   var src = 'canvas($height:$width*2;$width:512px){}', scope, sheet;
   describe('a.scope resolves without param use its default var values:', function () {
+
     it('1.vars are lazy eval.if no var provided,ignore the dynamic rule and log in console   ', function () {
       scope = getFirstScope(src.replace('{}', '{width:$width;height:$height;}'));
       expect(scope.resolve()[0].rules).toEqual({width: ('512px'), height: ('1024px')});
@@ -45,21 +56,21 @@ describe('scope resolve behaviors', function () {
     });
     it('3.a var can ref to another ref in any sheet', function () {
       src = '$a:$ref;$ref:red;div{color:$a;}';
-      sheet = getFirstSheet(src);
-      expect(sheet.resolve()[0].rules).toEqual({color: 'red'});
+      expect(getFirstSheetResolvedObj(src).rules).toEqual({color: 'red'});
     });
   });
   describe('b.scope resolves with param use its default var values:', function () {
+    var r;
     it('1.vars belong to a sheet have higher priority over scope vars in this sheet', function () {
       src = 'canvas($height:$width*2;$width:512px){}';
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;};$width:21px;'));
-      expect(sheet.resolve()[0].rules).toEqual({width: ('21px'), height: ('42px')});
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;}$height:21px;'));
-      expect(sheet.resolve()[0].rules).toEqual({width: ('512px'), height: ('21px')});
+      r=getFirstSheetResolvedObj(src.replace('{}', '{width:$width;height:$height;};$width:21px;'));
+      expect(r.rules).toEqual({width: ('21px'), height: ('42px')});
+      r=getFirstSheetResolvedObj(src.replace('{}', '{width:$width;height:$height;}$height:21px;'));
+      expect(r.rules).toEqual({width: ('512px'), height: ('21px')});
     });
     it('2.if assign values when invoke resolve($assign);$assign has highest priority', function () {
-      sheet = getFirstSheet(src.replace('{}', '{width:$width;height:$height;}$width:21px;'));
-      expect(sheet.resolve({'$width': Length(101)})[0].rules).toEqual({width: ('101'), height: ('202')});
+      r=getFirstSheetResolvedObj(src.replace('{}', '{width:$width;height:$height;}$width:21px;'),{$width:Length(101)});
+      expect(r.rules).toEqual({width: ('101'), height: ('202')});
     });
   });
   describe('c.include a mixin scope(mixObj)', function () {
@@ -75,34 +86,47 @@ describe('scope resolve behaviors', function () {
       var src2 = 'div($margin:20px){' +
         '@include $dashedBorder();' +
         '}';
-
-      sheet = getFirstSheet(src + src2);
-      expect(sheet.resolve()).toContain({selector: 'div', rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
+      expect(getFirstSheetResolvedObj(src+src2)).toEqual({selector: 'div', rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
     });
     it('2.when invoked with param,the default param of the mixobj will be shadowed', function () {
       var src2 = 'div($borderColor:red;$parentMargin:4px){' +
-        '@include $dashedBorder($borderColor:$borderColor;$borderWidth:2px;$margin:$parentMargin/2);}';
-      sheet = getFirstSheet(src + src2);
-      expect(sheet.resolve()).toContain({selector: 'div', rules: {border: '2px dashed red', background: 'white', margin: '2px'}});
+        '@include $dashedBorder(' +
+        '$borderColor:$borderColor;' +
+        '$borderWidth:2px;$margin:$parentMargin/2);' +
+        '}' +
+        '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:white;' +
+        '$margin:10px;$borderWidth:1px;$borderColor:gray){' +
+        '    border:$border;' +
+        '    background:$background;' +
+        '    margin:$margin;' +
+        '}';
+      var src3='div($borderColor:red;$margin:4px;$background:red){' +
+        '@include $dashedBorder();}';
+      expect(getFirstSheetResolvedObj(src2)).toEqual({selector: 'div',
+        rules: {border: '2px dashed red', background: 'white', margin: '2px'}});
+      expect(getFirstSheetResolvedObj(src+src3)).toEqual({selector: 'div',
+        rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
+
     });
     it('3.when invoked with a undefined param,the mix obj still use its default param', function () {
       var src2 = 'div($borderColor:red;$parentMargin:4px){' +
         '@include $dashedBorder($background:$undefined);}';
-      sheet = getFirstSheet(src + src2);
-      expect(sheet.resolve()[0].rules).toEqual(jasmine.objectContaining({background: 'white'}));
+      expect(getFirstSheetResolvedObj(src+src2).rules).toEqual(jasmine.objectContaining({background: 'white'}));
     });
     it('4.include support extend', function () {
       src = '@mixin $foo{ @extend .bar; } .bar{} div{@include $foo();}';
-      sheet = getFirstSheet(src);
-      expect(sheet.resolve()[0].selector).toBe('.bar,div');
+      expect(getFirstSheetResolvedObj(src).selector).toBe('.bar,div');
     });
     it('5.include support nested', function () {
       src = '@mixin $nest{ &:hover{color:red;} p{color:gray;}} div{@include $nest;}';
       sheet = getFirstSheet(src);
-      var results;
-      expect((results = sheet.resolve().map(function (r) {
-        return r.selector;
-      })).length).toBe(3);
+      var results=[];
+      sheet.resolve()['*'].forEach(function(pair){
+        var selector=pair.selector;
+        if(results.indexOf(selector)==-1)results.push(selector);
+      });
+    //  results = sheet.resolve()['*'].reduce(function (r) {return r.selector;});
+      expect(results.length).toBe(3);
       expect(results).toContain('div');
       expect(results).toContain('div:hover');
       expect(results).toContain('div p');

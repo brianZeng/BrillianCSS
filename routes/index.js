@@ -24,6 +24,10 @@ router.get('/test',function(req,res){
     res.render('test',{files:files||[]});
   });
 });
-
+router.get('/lib',function(req,res){
+  require('../handlers/updateParser.js').readLib().then(function(source){
+    res.render('lib',{source:source});
+  })
+});
 
 module.exports = router;

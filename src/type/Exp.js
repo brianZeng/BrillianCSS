@@ -1,15 +1,14 @@
 /**
  * Created by 柏然 on 2014/11/1.
  */
+//TODO add no default
 function Exp(left, optor, right) {
   if (!(this instanceof Exp))return new Exp(left, optor, right);
   this.left = left;
   if (right)this.right = right;
   if (optor) this.optor = optor;
 }
-Exp.prototype = (function () {
-  var TYPE = ChangeSS.TYPE;
-  return {
+Exp.prototype = {
     _type: TYPE.EXP,
     opt: function (opt, exp) {
       var left = this.left;
@@ -26,6 +25,7 @@ Exp.prototype = (function () {
       switch (this.type) {
         case TYPE.KEYWORD:
         case TYPE.LENGTH:
+        case TYPE.COLOR:
           return this.left;
         case TYPE.FUNC:
         case TYPE.LIST:
@@ -158,5 +158,4 @@ Exp.prototype = (function () {
       return left;
     }
   };
-})();
 ChangeSS.Exp = Exp;

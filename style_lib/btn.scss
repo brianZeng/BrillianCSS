@@ -1,0 +1,80 @@
+@sheetname btnLib;
+$normal-color:#ccc;
+$danger-color:#d9534f;
+$success-color:#77d42a;
+$warning-color:#f0ad4e;
+$info-color:#5bc0de;
+$primary-color:#337ab7;
+$default-width:100px;
+$default-height:35px;
+$default-radius:5px;
+$white-text:#fff;
+@mixin $button-normal($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$normal-color;$text-color:#333){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($text-color:$text-color);
+}
+@mixin $button-success($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$success-color;$text-color:$white-text;){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($theme-color:$theme-color;$text-color:$text-color);
+}
+@mixin $button-warning($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$warning-color;$text-color:$white-text;){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($theme-color:$theme-color;$text-color:$text-color);
+}
+@mixin $button-danger($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$danger-color;$text-color:$white-text;){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($theme-color:$theme-color;$text-color:$text-color);
+}
+@mixin $button-info($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$info-color;$text-color:$white-text;){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($theme-color:$theme-color;$text-color:$text-color);
+}
+@mixin $button-primary($width:$default-width;$height:$default-height;$radius:$default-radius;
+$theme-color:$primary-color;$text-color:$white-text;){
+  @include $button-layout($width:$width;$height:$height;$radius:$radius);
+  @include $button-theme($theme-color:$theme-color;$text-color:$text-color);
+}
+
+@mixin $button-layout{
+  height:$height;
+  width:$width;
+  font-size:$height/2;
+  text-decoration:none;
+  text-align:center;
+  border-radius:$radius;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  text-indent:0;
+  -webkit-appearance: none;
+  outline: none;
+  &:active,&.active{
+    position: relative;
+    top: 1px;
+  }
+  &:disabled,&.disabled{
+    box-shadow:none;
+    cursor: inherit;
+  }
+}
+@mixin $button-theme(
+$theme-color:#ccc;
+$background:linear-gradient($theme-color 5%,darken($theme-color 10) 100%);
+$border:1px solid $border-color;
+$border-color:darken($theme-color,30);
+$hover-color:saturate($theme-color,5);
+$hover-background:linear-gradient($hover-color 5%,$hover-color 100%);
+$text-color:#333){
+  background:$background;
+  border:$border;
+  color:$text-color;
+  @include $transition ->prefixLib($value:background ease-in-out 0.5s);
+  &:hover{
+    background: $hover-background;
+  }
+}

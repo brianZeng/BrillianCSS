@@ -52,6 +52,9 @@ Var.prototype = (function (TYPE) {
         else value = real;
       return value || this.clone();
     },
+    equals:function(obj){
+      return obj instanceof Var&& obj.symbol===this.symbol&&obj.sheetName==this.sheetName;
+    },
     getVar: function (array) {
       array = array || [];
       List.arrayAdd(array, this.symbol);
