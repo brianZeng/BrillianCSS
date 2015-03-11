@@ -3,6 +3,11 @@
  */
 
 describe('Scope static behaviors', function () {
+  var color=function(c){
+    if(c instanceof ChangeSS.Color){
+      return ChangeSS.Color(c.rgb, c.alpha)
+    }return ChangeSS.Color(c)
+  };
   function getFirstScope(src) {
     return ChangeSS.parse(src)[0].scopes[0];
   }
@@ -31,8 +36,8 @@ describe('Scope static behaviors', function () {
   describe('1.scope components:', function () {
     var rules = {
       padding: '10px',
-      background: 'red',
-      border: '1px dashed orange',
+      background: '#ff0000',
+      border: '1px dashed #ffa500',
       transform: 'rotate(30deg)'
     }, r = [], src;
     objForEach(rules, function (key, value) {
@@ -56,12 +61,12 @@ describe('Scope static behaviors', function () {
     });
     it('a scope can hold default values', function () {
       var src = 'canvas($width:512px*2;$color:rgb(0,123,0);' +
-        '       $border:1 solid black;$display:inline-block;$height:$width){}', scope = getFirstScope(src);
+        '       $border:1 solid color;$display:inline-block;$height:$width){}', scope = getFirstScope(src);
 
       var toEuqalObj={
         "$width": Length('1024px'),
         "$color": ChangeSS.Color([0,123,0]),
-        "$border": List(Length(1), 'solid black'),
+        "$border": List(Length(1), 'solid color'),
         "$display": 'inline-block',
         "$height": Var('$width',ChangeSS.opt.defaultSheetName)
       };
@@ -135,31 +140,30 @@ describe('Scope static behaviors', function () {
         return sheet.name
       })).toEqual(['default', 'bar']);
       expect(sheets.map(function (sheet) {
-        return sheet.get('$color')
-      })).toEqual(['red', 'blue']);
+        return color(sheet.get('$color'))
+      })).toEqual([color('red'), color('blue')]);
     });
     it('cannot assign a value or mixin to another sheet var', function () {
       src = '@sheetname foo;$color:red;' +
         '@sheetname bar;$color:blue;' +
         '$color->foo:white;';
-      debugger;
       expect(getSheets().length).toBe(2);
       expect(sheets.map(function (sheet) {
-        return sheet.get('$color')
-      })).toEqual(['white', 'blue']);
+        return color(sheet.get('$color'))
+      })).toEqual([color('white'), color('blue')]);
       src = '@sheetname foo;$color:red;' +
         '@sheetname bar;$color:blue;' +
         '$color->bar:#000;';
       getSheets();
       expect(sheets.map(function (sheet) {
-        return sheet.get('$color').toString()
-      })).toEqual(['red',ChangeSS.Color('#000')+'']);
+        return color(sheet.get('$color'))
+      })).toEqual([color('red'),color('#000')]);
       src = '@sheetname bar;' +
         'div{}' +
         '@sheetname foo;' +
         '@mixin $error -> bar ($a:red){width:20px;}';
       expect(getSheets()[0].get('$error', 'mixin').staticRules).toEqual({width: '20px'});
-      expect(getSheets()[0].get('$error', 'mixin').defValues).toEqual({'$a': 'red'});
+      expect(getSheets()[0].get('$error', 'mixin').defValues).toEqual({'$a': color('red')});
     });
     it('cannot assign a scope to another sheet,because ....', function () {
       src = '@sheetname bar;' +

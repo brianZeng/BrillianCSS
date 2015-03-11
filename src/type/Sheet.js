@@ -68,7 +68,7 @@ Sheet.prototype = (function (proto) {
     return sheetResolveFunc(this,$vars);
   };
   proto.toString =(function(){
-    var separator='\n';
+    var separator='\n',groups, r,keyRep;
     function mapScope(scope){
       var rules = [], brc;
       objForEach(scope.rules, function ( value,key) {rules.push(key + ':' + value + ';');});
@@ -79,7 +79,10 @@ Sheet.prototype = (function (proto) {
       return group.map(mapScope).join(separator);
     }
     return function($vars){
-      var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
+      separator=ChangeSS.opt.lineSeparator;
+      groups=this.resolve($vars);
+      r=[];
+      keyRep='{'+separator+'*'+separator+'}';
       objForEach(groups,function(group,key){
         key=key.replace('{*}',keyRep);
         r.push(key.replace('*',mapGroup(group)))

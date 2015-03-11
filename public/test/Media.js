@@ -2,7 +2,7 @@
  * Created by 柏然 on 2014/11/23.
  */
 describe('MediaQuery Behaviors', function () {
-  var src, scope, sheet, media;
+  var src, scope, sheet, media,color=ChangeSS.Color;
  function stringEqual(str1,str2,ignoreRex){
    ignoreRex=ignoreRex||/[^\S]/g;
    expect(str1.replace(ignoreRex,'')).toBe(str2.replace(ignoreRex,''))
@@ -43,10 +43,10 @@ describe('MediaQuery Behaviors', function () {
     it('support query with defValue',function(){
       src='@media screen ($color:red){ div{} }';
       getFirstMedia(src);
-      expect(scope.defValues).toEqual({$color:'red'});
+      expect(scope.defValues).toEqual({$color:color('red')});
       src='@media screen and (max-weight:3kg) ($color:red){ div{} }';
       getFirstMedia(src);
-      expect(scope.defValues).toEqual({$color:'red'});
+      expect(scope.defValues).toEqual({$color:color('red')});
       expect(scope.spec.toString()).toEqual('@media screen and (max-weight:3kg)');
     });
     it('media condition can be treated as var using @treatas',function(){
@@ -67,13 +67,13 @@ describe('MediaQuery Behaviors', function () {
       '}}';
       getFirstScope(src);
       expect(scope.nested[0].spec.symbol).toBe(('$iphone'));
-      stringEqual(sheet.toString(),'div{color:red;}');
+      stringEqual(sheet.toString(),'div{color:#;}'.replace('#',color('red')+''));
       src+='@media screen and (max-width:480px) @treatas $iphone;';
       getFirstSheet(src);
       expect(Object.keys(sheet.resolve()).length).toBe(2);
       var r=sheet.toString();
-      stringContain(r,'@media screen and (max-width:480px){ div{ color:blue;}}');
-      stringContain(r,'div{color:red;}');
+      stringContain(r,'@media screen and (max-width:480px){ div{ color:#;}}'.replace('#',color('blue')));
+      stringContain(r,'div{color:#;}'.replace('#',color('blue')));
     });
   });
   describe('b.MediaQuery object attach to relative styles', function () {

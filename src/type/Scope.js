@@ -29,19 +29,17 @@ function Scope() {
 Scope.prototype = {
   selectors: [''],
   toString: (function () {
-    function mapResult(separator) {
-      separator = separator || window ? '\n' : '';
-      return function (r) {
-        return r.selector + '{' + separator + rules(r).join(separator) + '}';
-      }
-    }
+    var separator;
     function rules(ruleObj) {
       return objForEach(ruleObj, function (value,key) {
         this.push(key + ':' + value + ';');
       }, []);
     }
-    return function ($vars, separator) {
-      return this.resolve($vars).map(mapResult(separator));
+    return function ($vars) {
+      separator=ChangeSS.opt.lineSeparator;
+      return this.resolve($vars).map(function (r) {
+        return r.selector + '{' + separator + rules(r).join(separator) + '}';
+      });
     }
   })(),
   get globalName() {

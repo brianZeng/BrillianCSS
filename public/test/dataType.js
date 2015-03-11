@@ -81,13 +81,13 @@ describe("Basic Type Behaviors", function () {
       expect(l.resolve()).not.toBe(l);
     });
     it('when resolve 2 nearby strings, they will be connected to 1 string', function () {
-      var l = new ChangeSS.List(len, 'solid', 'red');
-      expect(vars['$list'].length).toBe(2);
+      var l = new ChangeSS.List(len, 'solid', 'somecolor');
+      expect(vars['$list'].length).toBe(3);
       expect(l.resolve().length).toBe(2);
-      expect(l.resolve()).toEqual(new ChangeSS.List(len.resolve(), 'solid red'));
+      expect(l.resolve()).toEqual(new ChangeSS.List(len.resolve(), 'solid somecolor'));
       expect(new ChangeSS.List('a', 'b c').resolve()).toBe('a b c');
       l.unshift('a', 'b c');
-      expect(l.resolve()).toEqual(new ChangeSS.List('a b c', len.resolve(), 'solid red'));
+      expect(l.resolve()).toEqual(new ChangeSS.List('a b c', len.resolve(), 'solid somecolor'));
     });
   });
   describe('4.InlineFunc behaviors', function () {

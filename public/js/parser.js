@@ -414,7 +414,9 @@ ChangeSS = (function (parser) {
    * @returns {string}
    */
   function main(source, opt) {
-    return parseAndLink(source,opt||defOpt).map(function (sheet) {
+    opt=opt||defOpt;
+    changeLineSeparator(opt.compress);
+    return parseAndLink(source,opt).map(function (sheet) {
       return sheet.toString();
     }).join('\n');
   }
@@ -436,6 +438,13 @@ ChangeSS = (function (parser) {
        throw Error(msg);
     }
   };
+  function changeLineSeparator(compress){
+    var s;
+    if(compress !== undefined)s=compress?'':'\n';
+    else if(typeof window==="object") s='\n';
+    else s='';
+    return ChangeSS.opt.lineSeparator=s;
+  }
   parser.yy.parseError=parser.parseError=function(errStr,err){
     main.error.parseError(errStr,err);
   };
@@ -461,6 +470,7 @@ ChangeSS = (function (parser) {
   /**
    * @name ChangeSS.opt
    * @type {{
+   * lineSeparator:string,
    * addKeyFramesVendorPrefix: boolean,
    * preferKeyFramesVendorPrefix: boolean,
    * vendorPrefix:string,
@@ -468,6 +478,7 @@ ChangeSS = (function (parser) {
    * }}
    */
   main.opt = {
+    lineSeparator:'\n',
     addKeyFramesVendorPrefix:true,
     preferKeyFramesVendorPrefix:true,
     defaultSheetName:'default',
@@ -522,22 +533,24 @@ ChangeSS = (function (parser) {
     var results=[];
     if(input instanceof Array)
       input.forEach(loadFile);
-    else if(typeof input==="string") loadFile(input);
+    else if(typeof input==="string")
+      loadFile(input);
     return results.map(parseSheet);
     function parseSheet(src){
       return parser.parse(src).validate()
     }
     function loadFile(input){
-      var range,i=input.indexOf('@sheetname');
-      if(i==-1)
-        results.push(input);
-      else{
-        if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
-        while (range=sheetSplitReg.exec(input)[0])
-          results.push(range);
-        sheetSplitReg.exec();
+      var range,i;
+      if(input){
+        if((i=input.indexOf('@sheetname'))==-1)
+          results.push(input);
+        else{
+          if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+          while (range=sheetSplitReg.exec(input)[0])
+            results.push(range);
+          sheetSplitReg.exec();
+        }
       }
-      return results;
     }
   }
 
@@ -1077,16 +1090,22 @@ ChangeSS.define=defineFunction;
  */
 function Color(rgb,a){
   if(!(this instanceof Color))return new Color(rgb,a);
-  if(typeof rgb==="string"&& rgb[0]=='#')return hex2color(rgb);
+  if(typeof rgb==="string")
+    return rgb[0]=='#'? hex2color(rgb):key2Color(rgb);
   if(rgb instanceof Array){
     this.alpha=a==undefined?1:len2num(a,1);
     this.rgb=rgb.slice(0,3).map(len2num);
   }
 }
 ChangeSS.Color=Color;
-Color.parse=function(hex){
-  if(hex instanceof Color)return hex;
-  return (typeof hex=="string"&&hex[0]=='#')? hex2color(hex):undefined;
+Color.parse=function(color){
+  if(color instanceof Color)return color;
+  try{
+    return new Color(color);
+  }
+  catch (e){
+   //return undefined
+  }
 };
 function len2num(num,asFloat){
   if(num instanceof Length) return num.unit=='%'? num.num/100:num.num;
@@ -1097,6 +1116,11 @@ function clamp(v, min,max) {
   min=min||0;
   if(max==undefined)max=1;
   return v<min? min:(v>max? max:v);
+}
+function key2Color(key){
+  var rgb=Color.keywords[key.toLowerCase()];
+  if(rgb)return new Color(rgb,1);
+  throw Error('invalid color name');
 }
 function hex2color(hex){
   var rgb=new Array(3);
@@ -1220,7 +1244,15 @@ Color.prototype={
   toString:function(){
     return this.alpha==1?this.toHex():this.toRGBA();
   }
-};/**
+};
+Color.keywords=(function(input){
+  var map={},i;
+  input.split(';').forEach(function(colorPair){
+    i=colorPair.indexOf(':');
+    map[colorPair.substr(0,i)]=colorPair.slice(i+1).split(',')
+  });
+  return map;
+}('aliceblue:240,248,255;antiquewhite:250,235,215;aqua:0,255,255;aquamarine:127,255,212;azure:240,255,255;beige:245,245,220;bisque:255,228,196;black:0,0,0;blanchedalmond:255,235,205;blue:0,0,255;blueviolet:138,43,226;brown:165,42,42;burlywood:222,184,135;cadetblue:95,158,160;chartreuse:127,255,0;chocolate:210,105,30;coral:255,127,80;cornflowerblue:100,149,237;cornsilk:255,248,220;crimson:220,20,60;cyan:0,255,255;darkblue:0,0,139;darkcyan:0,139,139;darkgoldenrod:184,134,11;darkgray:169,169,169;darkgreen:0,100,0;darkgrey:169,169,169;darkkhaki:189,183,107;darkmagenta:139,0,139;darkolivegreen:85,107,47;darkorange:255,140,0;darkorchid:153,50,204;darkred:139,0,0;darksalmon:233,150,122;darkseagreen:143,188,143;darkslateblue:72,61,139;darkslategray:47,79,79;darkslategrey:47,79,79;darkturquoise:0,206,209;darkviolet:148,0,211;deeppink:255,20,147;deepskyblue:0,191,255;dimgray:105,105,105;dimgrey:105,105,105;dodgerblue:30,144,255;firebrick:178,34,34;floralwhite:255,250,240;forestgreen:34,139,34;fuchsia:255,0,255;gainsboro:220,220,220;ghostwhite:248,248,255;gold:255,215,0;goldenrod:218,165,32;gray:128,128,128;green:0,128,0;greenyellow:173,255,47;grey:128,128,128;honeydew:240,255,240;hotpink:255,105,180;indianred:205,92,92;indigo:75,0,130;ivory:255,255,240;khaki:240,230,140;lavender:230,230,250;lavenderblush:255,240,245;lawngreen:124,252,0;lemonchiffon:255,250,205;lightblue:173,216,230;lightcoral:240,128,128;lightcyan:224,255,255;lightgoldenrodyellow:250,250,210;lightgray:211,211,211;lightgreen:144,238,144;lightgrey:211,211,211;lightpink:255,182,193;lightsalmon:255,160,122;lightseagreen:32,178,170;lightskyblue:135,206,250;lightslategray:119,136,153;lightslategrey:119,136,153;lightsteelblue:176,196,222;lightyellow:255,255,224;lime:0,255,0;limegreen:50,205,50;linen:250,240,230;magenta:255,0,255;maroon:128,0,0;mediumaquamarine:102,205,170;mediumblue:0,0,205;mediumorchid:186,85,211;mediumpurple:147,112,219;mediumseagreen:60,179,113;mediumslateblue:123,104,238;mediumspringgreen:0,250,154;mediumturquoise:72,209,204;mediumvioletred:199,21,133;midnightblue:25,25,112;mintcream:245,255,250;mistyrose:255,228,225;moccasin:255,228,181;navajowhite:255,222,173;navy:0,0,128;oldlace:253,245,230;olive:128,128,0;olivedrab:107,142,35;orange:255,165,0;orangered:255,69,0;orchid:218,112,214;palegoldenrod:238,232,170;palegreen:152,251,152;paleturquoise:175,238,238;palevioletred:219,112,147;papayawhip:255,239,213;peachpuff:255,218,185;peru:205,133,63;pink:255,192,203;plum:221,160,221;powderblue:176,224,230;purple:128,0,128;red:255,0,0;rosybrown:188,143,143;royalblue:65,105,225;saddlebrown:139,69,19;salmon:250,128,114;sandybrown:244,164,96;seagreen:46,139,87;seashell:255,245,238;sienna:160,82,45;silver:192,192,192;skyblue:135,206,235;slateblue:106,90,205;slategray:112,128,144;slategrey:112,128,144;snow:255,250,250;springgreen:0,255,127;steelblue:70,130,180;tan:210,180,140;teal:0,128,128;thistle:216,191,216;tomato:255,99,71;turquoise:64,224,208;violet:238,130,238;wheat:245,222,179;white:255,255,255;whitesmoke:245,245,245;yellow:255,255,0;yellowgreen:154,205,50;rebeccapurple:102,51,153'));/**
  * Created by 柏然 on 2014/11/1.
  */
 function List() {
@@ -1440,19 +1472,17 @@ function Scope() {
 Scope.prototype = {
   selectors: [''],
   toString: (function () {
-    function mapResult(separator) {
-      separator = separator || window ? '\n' : '';
-      return function (r) {
-        return r.selector + '{' + separator + rules(r).join(separator) + '}';
-      }
-    }
+    var separator;
     function rules(ruleObj) {
       return objForEach(ruleObj, function (value,key) {
         this.push(key + ':' + value + ';');
       }, []);
     }
-    return function ($vars, separator) {
-      return this.resolve($vars).map(mapResult(separator));
+    return function ($vars) {
+      separator=ChangeSS.opt.lineSeparator;
+      return this.resolve($vars).map(function (r) {
+        return r.selector + '{' + separator + rules(r).join(separator) + '}';
+      });
     }
   })(),
   get globalName() {
@@ -1983,7 +2013,7 @@ Sheet.prototype = (function (proto) {
     return sheetResolveFunc(this,$vars);
   };
   proto.toString =(function(){
-    var separator='\n';
+    var separator='\n',groups, r,keyRep;
     function mapScope(scope){
       var rules = [], brc;
       objForEach(scope.rules, function ( value,key) {rules.push(key + ':' + value + ';');});
@@ -1994,7 +2024,10 @@ Sheet.prototype = (function (proto) {
       return group.map(mapScope).join(separator);
     }
     return function($vars){
-      var groups=this.resolve($vars),r=[],keyRep='{'+separator+'*'+separator+'}';
+      separator=ChangeSS.opt.lineSeparator;
+      groups=this.resolve($vars);
+      r=[];
+      keyRep='{'+separator+'*'+separator+'}';
       objForEach(groups,function(group,key){
         key=key.replace('{*}',keyRep);
         r.push(key.replace('*',mapGroup(group)))
@@ -2934,7 +2967,7 @@ case 35:return "EOF";
 break;
 }
 },
-rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@treatas\b)/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(::|:(?![^\{]*?[\)\;]([\s\r\n\t\f])*[\}\;])))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:(#([0-9a-fA-F])+)|(!\w+))/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
+rules: [/^(?:(\/\*[\s\S]*?\*\/|\/\/.*?[\r\n]))/,/^(?:@treatas\b)/,/^(?:@mixin\b)/,/^(?:@media\b)/,/^(?:@include\b)/,/^(?:@sheetname\b)/,/^(?:@extend\b)/,/^(?:@(-(webkit|moz|ms|o)-)?keyframes\b)/,/^(?:->([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&\[]|\d+%)(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&\[]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])*?(?=[\;\}\{]))/,/^(?:(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))/,/^(?:(((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&\[]|\d+%)((((([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9])|[\.#\*\>\+\-\&\[]|\d+%)|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f])|(::|:(?![^\{]*?[\)\;]([\s\r\n\t\f])*[\}\;])))*?(?=((\(([\s\r\n\t\f])*(\$([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))((-([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377])))|(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)([\s\r\n\t\f])*:)|\{|,))))/,/^(?:([\s\r\n\t\f]))/,/^(?::)/,/^(?:;+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?::)/,/^(?:,)/,/^(?:and\b)/,/^(?:,)/,/^(?:((\d+(\.\d+)?)|(\.\d+))(%|\w+\b)?)/,/^(?:;+)/,/^(?:@?("|')[\s\S]*?(\1))/,/^(?:(url\(.*?\)|url\((("|')[\s\S]*?(\1))\)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*))(?=\())/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:(#([0-9a-fA-F])+)|(!\w+))/,/^(?:(not|only)([\s\r\n\t\f])*(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))(-?(([_a-zA-Z]|([\200-\377])|((\\{h}{1,6}(\r\n|[ \t\r\n\f])?)|\\[ -~\200-\377]))|[0-9]))*)))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18,19,22,23,34,35],"inclusive":true},"EXP":{"rules":[0,1,2,3,4,5,6,7,8,10,12,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35],"inclusive":true},"EXT":{"rules":[0,1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,19,22,23,34,35],"inclusive":true}}
 });
 return lexer;

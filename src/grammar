@@ -11,7 +11,7 @@ Ident           "-"?{key}
 num             (\d+(\.\d+)?)|(\.\d+)
 var             "$"{nmstart}(('-'{nmstart})|{nmchar})*
 string          (\"|\')[\s\S]*?(\1)
-sltstart        {nmchar}|[\.#\*\>\+\-\&]|\d+\%
+sltstart        {nmchar}|[\.#\*\>\+\-\&\[]|\d+\%
 sltclass        \:\:|\:(?!=[^\{]*?[\)\;]{s}*[\}\;])
 sltchar         {sltstart}|[\s>\+\~@\^\$\|\=\[\]\'\"\(\)\r\n\t\f]
 nonslt          (\({s}*{var}{s}*\:)|\{|\,

@@ -11,26 +11,7 @@
     var Fun=ChangeSS.InlineFunc,Var=ChangeSS.Var, TYPE=ChangeSS.TYPE,List=ChangeSS.List,
             getType=function(o){return ChangeSS.getType(o);},Length=ChangeSS.Length,Exp=ChangeSS.Exp;
     describe('unknown bugs',function(){
-        it('support & scope for hank',function(){
-            var src='@mixin $a{' +
-                    'color:red;' +
-                    '&{ color:rgba(255,0,0,0.5) }' +
-                    '} div{@include $a;}' ;
-            var r=ChangeSS(src);
-            expect(r).toContain('color:red');
-            expect(r).toContain('color:rgba(255,0,0,0.5)');
-        });
-        it('mixObj not work',function(){
-            var src='@sheetname textEffectLib;@mixin $blur-text($shadow-color:#fff;$radius:0.15em){' +
-                    'color:transparent;text-shadow: 0 0 $radius $shadow-color;& {' +
-                    'text-shadow: 0 0 $radius 0.1px $shadow-color;}}';
-            var sheet=ChangeSS.compile(src);
-            debugger;
-            var r=ChangeSS('.blur{@include $blur-text -> textEffectLib;}',{lib:sheet }).trim();
-            console.log(r);
-            expect(r.indexOf('.blur')).toBe(0);
-            expect(r.lastIndexOf('.blur')).not.toBe(0);
-        })
+
     });
 </script>
 

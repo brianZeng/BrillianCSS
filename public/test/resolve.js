@@ -37,13 +37,13 @@ describe('scope resolve behaviors', function () {
       scope = getFirstScope(src.replace('{}', '{ a{width:$width;height:$height;}}'));
       expect(scope.resolve()[1].rules).toEqual({width: ('512px'), height: ('1024px')});
       src = '.parent($height:$width*2;$width:512px;$border:1px solid $borderColor){' +
-        '    .child($width:5px;$borderColor:red){' +
+        '    .child($width:5px;$borderColor:#ff0000){' +
         '      width:$width;' +
         '      height:$height;' +
         '      border:$border;' +
         '}}';
       scope = getFirstScope(src);
-      expect(scope.resolve()[1].rules).toEqual({width: ('5px'), height: ('10px'), border: '1px solid red'});
+      expect(scope.resolve()[1].rules).toEqual({width: ('5px'), height: ('10px'), border: '1px solid #ff0000'});
       src = 'canvas($height:$width*2;$width:512px){}';
       scope = getFirstScope(src.replace('{}', '{ a($height:100px){width:$width;height:$height;}}'));
       expect(scope.resolve()[1].rules).toEqual({width: ('512px'), height: ('100px')});
@@ -55,25 +55,25 @@ describe('scope resolve behaviors', function () {
       expect(scope.resolve()[1].rules).toEqual({ height: ('256px')});
     });
     it('3.a var can ref to another ref in any sheet', function () {
-      src = '$a:$ref;$ref:red;div{color:$a;}';
-      expect(getFirstSheetResolvedObj(src).rules).toEqual({color: 'red'});
+      src = '$a:$ref;$ref:#ff0000;div{color:$a;}';
+      expect(getFirstSheetResolvedObj(src).rules).toEqual({color: '#ff0000'});
     });
     it('4.use nested & scope for hank',function(){
-      src='div{color:red;&{color:rgba(255,0,0,0.8)}}';
+      src='div{color:#ff0000;&{color:rgba(255,0,0,0.8)}}';
       var res=getFirstSheet(src).resolve()['*'],rules=res.map(function(r){return r.rules});
       expect(res.length).toBe(2);
       expect(res.map(function(r){return r.selector})).toEqual(['div','div']);
-      expect(rules).toContain({color:'red'});
+      expect(rules).toContain({color:'#ff0000'});
       expect(rules).toContain({color:'rgba(255,0,0,0.8)'});
     });
     it('5.mixin nested & scope for hank',function(){
-      src='@mixin $double{ color:red;&{color:rgba(255,0,0,0.8)} } div{@include $double;}';
+      src='@mixin $double{ color:#ff0000;&{color:rgba(255,0,0,0.8)} } div{@include $double;}';
       var res=getFirstSheet(src).resolve()['*'].filter(function(r){
         return Object.getOwnPropertyNames(r.rules).length>0
       }),rules=res.map(function(r){return r.rules});
       expect(res.length).toBe(2);
       expect(res.map(function(r){return r.selector})).toEqual(['div','div']);
-      expect(rules).toContain({color:'red'});
+      expect(rules).toContain({color:'#ff0000'});
       expect(rules).toContain({color:'rgba(255,0,0,0.8)'});
     });
   });
@@ -93,8 +93,8 @@ describe('scope resolve behaviors', function () {
   });
   describe('c.include a mixin scope(mixObj)', function () {
     beforeEach(function () {
-      src = '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:white;' +
-        '$margin:10px;$borderWidth:1px;$borderColor:gray){' +
+      src = '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:#ffffff;' +
+        '$margin:10px;$borderWidth:1px;$borderColor:#808080){' +
         '    border:$border;' +
         '    background:$background;' +
         '    margin:$margin;' +
@@ -104,39 +104,39 @@ describe('scope resolve behaviors', function () {
       var src2 = 'div($margin:20px){' +
         '@include $dashedBorder();' +
         '}';
-      expect(getFirstSheetResolvedObj(src+src2)).toEqual({selector: 'div', rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
+      expect(getFirstSheetResolvedObj(src+src2)).toEqual({selector: 'div', rules: {border: '1px dashed #808080', background: '#ffffff', margin: '10px'}});
     });
     it('2.when invoked with param,the default param of the mixobj will be shadowed', function () {
-      var src2 = 'div($borderColor:red;$parentMargin:4px){' +
+      var src2 = 'div($borderColor:#ff0000;$parentMargin:4px){' +
         '@include $dashedBorder(' +
         '$borderColor:$borderColor;' +
         '$borderWidth:2px;$margin:$parentMargin/2);' +
         '}' +
-        '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:white;' +
-        '$margin:10px;$borderWidth:1px;$borderColor:gray){' +
+        '@mixin $dashedBorder($border:$borderWidth dashed $borderColor;$background:#ffffff;' +
+        '$margin:10px;$borderWidth:1px;$borderColor:#808080){' +
         '    border:$border;' +
         '    background:$background;' +
         '    margin:$margin;' +
         '}';
-      var src3='div($borderColor:red;$margin:4px;$background:red){' +
+      var src3='div($borderColor:#ff0000;$margin:4px;$background:#ff0000){' +
         '@include $dashedBorder();}';
       expect(getFirstSheetResolvedObj(src2)).toEqual({selector: 'div',
-        rules: {border: '2px dashed red', background: 'white', margin: '2px'}});
+        rules: {border: '2px dashed #ff0000', background: '#ffffff', margin: '2px'}});
       expect(getFirstSheetResolvedObj(src+src3)).toEqual({selector: 'div',
-        rules: {border: '1px dashed gray', background: 'white', margin: '10px'}});
+        rules: {border: '1px dashed #808080', background: '#ffffff', margin: '10px'}});
 
     });
     it('3.when invoked with a undefined param,the mix obj still use its default param', function () {
-      var src2 = 'div($borderColor:red;$parentMargin:4px){' +
+      var src2 = 'div($borderColor:#ff0000;$parentMargin:4px){' +
         '@include $dashedBorder($background:$undefined);}';
-      expect(getFirstSheetResolvedObj(src+src2).rules).toEqual(jasmine.objectContaining({background: 'white'}));
+      expect(getFirstSheetResolvedObj(src+src2).rules).toEqual(jasmine.objectContaining({background: '#ffffff'}));
     });
     it('4.include support extend', function () {
       src = '@mixin $foo{ @extend .bar; } .bar{} div{@include $foo();}';
       expect(getFirstSheetResolvedObj(src).selector).toBe('.bar,div');
     });
     it('5.include support nested', function () {
-      src = '@mixin $nest{ &:hover{color:red;} p{color:gray;}} div{@include $nest;}';
+      src = '@mixin $nest{ &:hover{color:#ff0000;} p{color:#808080;}} div{@include $nest;}';
       sheet = getFirstSheet(src);
       var results=[];
       sheet.resolve()['*'].forEach(function(pair){

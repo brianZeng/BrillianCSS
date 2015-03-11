@@ -2,8 +2,10 @@
  * Created by 柏然 on 2014/11/10.
  */
 describe('cross sheet behaviors', function () {
-  var src, scope, sheet;
-
+  var src, scope, sheet,color=function(c,str){
+    var color=ChangeSS.Color(c);
+    return str? color+'':color;
+  };
   function getFirstScope(src) {
     return scope = ChangeSS.parse(src)[0].scopes[0];
   }
@@ -31,7 +33,7 @@ describe('cross sheet behaviors', function () {
         '  $jock:$trouble->remote;';
       getFirstSheet(src);
       sheet = ChangeSS.get('default');
-      expect(ChangeSS.assign(sheet.vars).$resolved).toEqual({$a: 'blue', $b: 'blue', $jock: 'blue'});
+      expect(ChangeSS.assign(sheet.vars).$resolved).toEqual({$a:color('blue') , $b: color('blue'), $jock: color('blue')});
     });
     it('2.the resolve($param) can be a bridge to another var', function () {
       src = '@sheetname remote;' +
@@ -41,7 +43,8 @@ describe('cross sheet behaviors', function () {
       getFirstSheet(src);
       sheet = ChangeSS.get('default');
       expect(getFirstResolveRulesObj({$bridge: ChangeSS.Var('$ref', 'remote')}).rules)
-        .toEqual({color: 'red'});
+        .toEqual({color: color('red',1)});
+
       expect(getFirstResolveRulesObj()).toBeUndefined();
     });
   });
@@ -88,6 +91,16 @@ describe('cross sheet behaviors', function () {
           color:linear+''
         }
       })
+    });
+    it('4.support lib param',function(){
+      var src='@sheetname textEffectLib;@mixin $blur-text($shadow-color:#fff;$radius:0.15em){' +
+        'color:transparent;text-shadow: 0 0 $radius $shadow-color;& {' +
+        'text-shadow: 0 0 $radius 0.1px $shadow-color;}}';
+      var sheet=ChangeSS.compile(src);
+      var r=ChangeSS('.blur{@include $blur-text -> textEffectLib;}',{lib:sheet }).trim();
+      console.log(r);
+      expect(r.indexOf('.blur')).toBe(0);
+      expect(r.lastIndexOf('.blur')).not.toBe(0);
     })
   });
   describe('c.extends style in another sheet', function () {

@@ -4,4 +4,5 @@ public/codemirror/*
 bootstrap/*
 bootstrap_BSS
 public/stylesheets
+ignore
 .idea

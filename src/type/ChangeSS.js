@@ -17,7 +17,9 @@ ChangeSS = (function (parser) {
    * @returns {string}
    */
   function main(source, opt) {
-    return parseAndLink(source,opt||defOpt).map(function (sheet) {
+    opt=opt||defOpt;
+    changeLineSeparator(opt.compress);
+    return parseAndLink(source,opt).map(function (sheet) {
       return sheet.toString();
     }).join('\n');
   }
@@ -39,6 +41,13 @@ ChangeSS = (function (parser) {
        throw Error(msg);
     }
   };
+  function changeLineSeparator(compress){
+    var s;
+    if(compress !== undefined)s=compress?'':'\n';
+    else if(typeof window==="object") s='\n';
+    else s='';
+    return ChangeSS.opt.lineSeparator=s;
+  }
   parser.yy.parseError=parser.parseError=function(errStr,err){
     main.error.parseError(errStr,err);
   };
@@ -64,6 +73,7 @@ ChangeSS = (function (parser) {
   /**
    * @name ChangeSS.opt
    * @type {{
+   * lineSeparator:string,
    * addKeyFramesVendorPrefix: boolean,
    * preferKeyFramesVendorPrefix: boolean,
    * vendorPrefix:string,
@@ -71,6 +81,7 @@ ChangeSS = (function (parser) {
    * }}
    */
   main.opt = {
+    lineSeparator:'\n',
     addKeyFramesVendorPrefix:true,
     preferKeyFramesVendorPrefix:true,
     defaultSheetName:'default',
@@ -125,22 +136,24 @@ ChangeSS = (function (parser) {
     var results=[];
     if(input instanceof Array)
       input.forEach(loadFile);
-    else if(typeof input==="string") loadFile(input);
+    else if(typeof input==="string")
+      loadFile(input);
     return results.map(parseSheet);
     function parseSheet(src){
       return parser.parse(src).validate()
     }
     function loadFile(input){
-      var range,i=input.indexOf('@sheetname');
-      if(i==-1)
-        results.push(input);
-      else{
-        if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
-        while (range=sheetSplitReg.exec(input)[0])
-          results.push(range);
-        sheetSplitReg.exec();
+      var range,i;
+      if(input){
+        if((i=input.indexOf('@sheetname'))==-1)
+          results.push(input);
+        else{
+          if(i!==0)input='@sheetname '+main.opt.defaultSheetName+';'+input;
+          while (range=sheetSplitReg.exec(input)[0])
+            results.push(range);
+          sheetSplitReg.exec();
+        }
       }
-      return results;
     }
   }
 
@@ -245,3 +258,5 @@ ChangeSS.getType = function (side, asNone) {
 };
 if(typeof module!=="undefined" && module.exports)
   module.exports=ChangeSS;
+else if(typeof self!=="undefined")
+  self.ChangeSS=ChangeSS;
