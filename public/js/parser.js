@@ -655,6 +655,8 @@ ChangeSS.getType = function (side, asNone) {
 };
 if(typeof module!=="undefined" && module.exports)
   module.exports=ChangeSS;
+else if(typeof self!=="undefined")
+  self.ChangeSS=ChangeSS;
 /**
  * Created by 柏然 on 2014/11/1.
  */
@@ -1098,7 +1100,8 @@ function Color(rgb,a){
   }
 }
 ChangeSS.Color=Color;
-Color.parse=function(color){
+Color.parse=parseColor;
+function parseColor(color){
   if(color instanceof Color)return color;
   try{
     return new Color(color);
@@ -1106,7 +1109,7 @@ Color.parse=function(color){
   catch (e){
    //return undefined
   }
-};
+}
 function len2num(num,asFloat){
   if(num instanceof Length) return num.unit=='%'? num.num/100:num.num;
   else if(typeof num!=Number) return asFloat? parseFloat(num):parseInt(num);
@@ -1164,13 +1167,18 @@ Color.formKeyword=function(key){
 var ColorFuncs;
 // from less.js
 objForEach(ColorFuncs={
+  alpha:function(color,alpha){
+    color=parseColor(color);
+    color.alpha=clamp(alpha);
+    return color;
+  },
   rgba:function(r,g,b,a){
     if(arguments.length==2)
       return ColorFuncs.alpha(r,g);
     return new Color([r,g,b],a==undefined?1:a);
   },
   transparentize:function(color,a){
-    color=Color.parse(color);
+    color=parseColor(color);
     color.alpha=clamp(color.alpha-Length.parse(a).num);
     return color;
   },
